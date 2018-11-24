@@ -1,0 +1,15 @@
+[ignore]
+<PROJECT_ROOT>/dist/
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+module.use_strict=true
+include_warnings=true
+module.name_mapper='^@dagrejs/graphlib$' -> '<PROJECT_ROOT>/flow/graphlib'
+
+[strict]

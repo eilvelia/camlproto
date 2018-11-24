@@ -1,0 +1,6 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "@bannerets/eslint-config-flow"
+  ]
+}

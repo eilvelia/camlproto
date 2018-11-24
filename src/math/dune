@@ -1,0 +1,4 @@
+(library
+  (name math)
+  (libraries base platform TLGen)
+)

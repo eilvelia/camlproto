@@ -1,0 +1,14 @@
+(library
+  (name mtproto_transport)
+  (libraries base cstruct logger platform math lwt lwt.unix js_of_ocaml mtproto_misc)
+  (js_of_ocaml (javascript_files
+    js_tcp_full.js
+    js_websocket.js))
+  (preprocess (pps lwt_ppx js_of_ocaml-ppx))
+)
+
+(rule
+  (targets mtproto_transport.ml)
+  (deps   (:first-dep mtproto_transport.cppo.ml))
+  (action (run %{bin:cppo} %{first-dep} -D "%{profile} 1" -o %{targets}))
+)

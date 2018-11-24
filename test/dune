@@ -1,0 +1,4 @@
+(test
+  (name test)
+  (libraries ounit cstruct math TL TLGen mtproto)
+)

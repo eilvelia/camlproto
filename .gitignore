@@ -2,4 +2,9 @@ _build/
 .merlin
 *.native
 *.byte
+*.install
 *.bak
+node_modules/
+/package-lock.json
+/*.txt
+/*_test/

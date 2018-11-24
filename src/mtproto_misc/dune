@@ -1,0 +1,4 @@
+(library
+  (name mtproto_misc)
+  (libraries base cstruct)
+)

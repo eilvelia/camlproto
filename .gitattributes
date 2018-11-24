@@ -1,0 +1,4 @@
+*.flow linguist-language=JavaScript
+codegen/flow/*.js linguist-detectable=false
+codegen/flow-typed/*.js linguist-detectable=false
+src/platform/leemon.js linguist-detectable=false

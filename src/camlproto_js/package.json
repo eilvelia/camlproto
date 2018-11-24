@@ -1,0 +1,19 @@
+{
+  "name": "camlproto",
+  "version": "0.0.0",
+  "description": "Reserved package.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bannerets <save14@protonmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bannerets/camlproto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Bannerets/camlproto/issues"
+  },
+  "homepage": "https://github.com/Bannerets/camlproto#readme"
+}
