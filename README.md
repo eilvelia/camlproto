@@ -59,7 +59,7 @@ wip
 
 | TL                       | OCaml            | JavaScript       |
 |--------------------------|------------------|------------------|
-| Conditional definitions  | `'a option`      | `A | undefined`  |
+| Conditional definitions  | `'a option`      | `A OR undefined` |
 
 ## Transport components
 
