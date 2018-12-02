@@ -2,7 +2,7 @@ open! Base
 
 type t = Buffer.t
 
-(* TODO: Use Cstruct.t instead of Buffer.t *)
+(* TODO: Use extensible Cstruct.t instead of Buffer.t *)
 
 let create (): t = Buffer.create 128
 

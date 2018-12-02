@@ -2,5 +2,5 @@
   (name camlproto)
   ;(public_name camlproto)
   (synopsis "Telegram MTProto client implementation")
-  (libraries base mtproto mtproto_transport telegram TL TLGen)
+  (libraries base mtproto mtproto_transport math telegram TL TLGen)
 )

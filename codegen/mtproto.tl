@@ -70,6 +70,8 @@ msg_resend_req#7d861a08 msg_ids:Vector<long> = MsgResendReq;
 
 //rpc_result#f35c6d01 req_msg_id:long result:Object = RpcResult; // parsed manually
 
+//rpc_result#f35c6d01 {X:Type} req_msg_id:long result:X = RpcResult;
+
 rpc_error#2144ca19 error_code:int error_message:string = RpcError;
 
 rpc_answer_unknown#5e2ad36e = RpcDropAnswer;

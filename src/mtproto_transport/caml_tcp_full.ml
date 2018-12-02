@@ -18,7 +18,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
     Lwt.return { input; output; seq_no = 0l }
 
   let send t packet =
-    Caml.print_endline ("tcp full send; seq_no: " ^ Int32.to_string t.seq_no);
+    Caml.Printf.printf "tcp_full send [seq_no %ld]\n" t.seq_no;
     (* Cstruct.hexdump packet; *)
 
     let len = 4 * 3 + Cstruct.len packet in
@@ -41,16 +41,21 @@ module TransportTcpFull: Types.MTProtoTransport = struct
 
   let receive t =
     let%lwt len_int32 = Lwt_io.LE.read_int32 t.input in
-    Caml.print_endline ("tcp_full received len: " ^ Int32.to_string len_int32);
+    Caml.Printf.printf "tcp_full received [len %ld]\n" len_int32;
     let len = Int.of_int32_exn len_int32 in
     let%lwt seq_no = Lwt_io.LE.read_int32 t.input in
 
-    let%lwt body_str = Lwt_io.read ~count:(len - 12) t.input in
-    let body = Cstruct.of_string body_str in
+    let given_body_len = len - 12 in
+    let body_bytes = Bytes.create given_body_len in
+    let%lwt () = Lwt_io.read_into_exactly t.input body_bytes 0 given_body_len in
+    let body = Cstruct.of_bytes body_bytes in
     let body_len = Cstruct.len body in
 
-    if body_len < (len - 12) then
-      raise @@ Error (Printf.sprintf "Invalid len: %d" (Cstruct.len body));
+    (* if body_len < given_body_len then begin
+      Cstruct.hexdump body;
+      raise @@ Error (Printf.sprintf
+        "Invalid len: actual %d | given %d" body_len given_body_len)
+    end; *)
 
     let checksum_bytes = Cstruct.create_unsafe (8 + body_len) in
     Cstruct.LE.set_uint32 checksum_bytes 0 len_int32;
@@ -65,7 +70,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
 
     if Int32.(seq_no + 1l <> t.seq_no) then
       raise @@ Error (Printf.sprintf
-        "Incorrect sequence number: %ld | %ld" seq_no t.seq_no);
+        "Incorrect sequence number: cl %ld | sv %ld" t.seq_no seq_no);
 
     Lwt.return body
 end

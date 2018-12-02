@@ -67,3 +67,5 @@ let read_tl_bytes t =
   out_cs
 
 let read_tl_string t = read_tl_bytes t |> Cstruct.to_string
+
+let to_cstruct t = Cstruct.shift t.cs t.offset

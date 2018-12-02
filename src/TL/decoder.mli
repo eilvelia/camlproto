@@ -26,3 +26,5 @@ val read_int256: t -> Cstruct.t
 val read_tl_bytes: t -> Cstruct.t
 
 val read_tl_string: t -> string
+
+val to_cstruct: t -> Cstruct.t

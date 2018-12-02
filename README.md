@@ -17,9 +17,15 @@ let main () =
   let module MTP = MakeMTProtoV2Client(TransportTcpFull) in
   let%lwt t = MTP.create () in
   let%lwt () = MTP.do_authentication t in
-  let%lwt () = MTP.send_encrypted_obj t (module TLG.C_ping) { ping_id = 2L } in
-  let%lwt data = MTP.receive_encrypted t in
-  Cstruct.hexdump data;
+  let send_pings () =
+    let%lwt (C_pong a) = MTP.invoke t (module TLG.C_ping) { ping_id = 1L } in
+    Printf.printf "<-- Pong 1 [ping_id %Ld]\n" a.ping_id;
+    let%lwt () = Lwt_unix.sleep 1. in
+    let%lwt (C_pong b) = MTP.invoke t (module TLG.C_ping) { ping_id = 2L } in
+    Printf.printf "<-- Pong 2 [ping_id %Ld]\n" b.ping_id;
+    Lwt.return_unit
+  in
+  let%lwt () = Lwt.join [send_pings (); MTP.recv_loop t] in
   Lwt.return ()
 
 let () = Lwt_main.run (main ())
@@ -67,6 +73,8 @@ wip
 
 - tcp_full (ocaml)
 
+- tcp_abridged (ocaml)
+
 ### In progress
 
 - tcp_full (node.js)
@@ -74,8 +82,6 @@ wip
 ### Unimplemented
 
 - websocket secure (browser)
-
-- tcp_abridged
 
 - tcp_intermediate
 
@@ -96,7 +102,8 @@ Codegen:
 ```sh
 cd codegen
 npm install
-npm run codegen:caml:mtproto
+npm run build
+npm run codegen
 cd ..
 ```
 

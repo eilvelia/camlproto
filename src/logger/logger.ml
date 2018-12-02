@@ -16,9 +16,6 @@ let create (name: string): logger = log name *)
 
 let dump name cs =
   Caml.Printf.printf "%s [%d]:" name (Cstruct.len cs);
-  Cstruct.hexdump cs;
-  Caml.print_newline ()
+  Cstruct.hexdump cs
 
-let dump_t name cs =
-  dump name cs;
-  cs
+let dump_t name cs = dump name cs; cs

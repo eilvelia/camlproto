@@ -14,7 +14,10 @@
     "prepare": "npm run clean && npm run build",
     "prepack": "npm test",
     "start": "npm run build && node dist",
-    "codegen:caml:mtproto": "node dist mtproto.tl > ../src/TLGen/mtproto.ml"
+    "codegen:caml:mtproto": "node dist mtproto.tl > ../src/TLGen/mtproto.ml",
+    "codegen:caml:telegram": "node dist l82_e.tl > ../src/TLGen/telegram.ml",
+    "codegen:caml": "npm run codegen:caml:mtproto && npm run codegen:caml:telegram",
+    "codegen": "npm run codegen:caml"
   },
   "dependencies": {
     "@dagrejs/graphlib": "^2.1.4",

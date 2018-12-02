@@ -55,6 +55,8 @@ let authenticate
   let pq = Cstruct.BE.get_uint64 res_pq.pq 0 in
   let (p, q) = Math.Factorization.pq_prime pq in
 
+  Caml.print_endline @@ Printf.sprintf "pq %Ld %LX" pq pq;
+
   let p_bytes = Cstruct.create_unsafe 4 in
   Cstruct.BE.set_uint32 p_bytes 0 (Int32.of_int64_exn p);
   let q_bytes = Cstruct.create_unsafe 4 in
@@ -199,8 +201,11 @@ let authenticate
         let new_nonce_hash = Crypto.SHA1.digest new_nonce_hash in
         let new_nonce_hash = Cstruct.sub new_nonce_hash 4 16 in
 
-        if Cstruct.equal new_nonce_hash dh_gen.new_nonce_hash1 |> not then
-          raise @@ AuthenticationError "end: Invalid new_nonce_hash";
+        if Cstruct.equal new_nonce_hash dh_gen.new_nonce_hash1 |> not then begin
+          Logger.dump "client new_nonce_hash" new_nonce_hash;
+          Logger.dump "server new_nonce_hash" dh_gen.new_nonce_hash1;
+          raise @@ AuthenticationError "end: Invalid new_nonce_hash"
+        end;
 
         let server_salt = Int64.(
           (Cstruct.LE.get_uint64 new_nonce 0)
