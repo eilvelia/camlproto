@@ -25,7 +25,7 @@ let main () =
     Printf.printf "<-- Pong 2 [ping_id %Ld]\n" b.ping_id;
     Lwt.return_unit
   in
-  let%lwt () = Lwt.join [send_pings (); MTP.recv_loop t] in
+  let%lwt () = Lwt.pick [send_pings (); MTP.recv_loop t] in
   Lwt.return ()
 
 let () = Lwt_main.run (main ())
