@@ -79,16 +79,17 @@ var js_secure_rand = _isNode() ? _js_secure_rand_node : _js_secure_rand_browser
 function arrayBufferFromHex (hexString) {
   var len = hexString.length
   var start = 0
-  var bytes = new Uint8Array(len + len % 2)
+  var bytes = new Uint8Array((len + len % 2) / 2)
 
   if (len % 2 === 1) {
-    bytes.push(parseInt(hexString.charAt(0), 16))
+    bytes[0] = parseInt(hexString.charAt(0), 16)
     start++
   }
 
   var i = start
-  for (; i < len; i += 2) {
-    bytes.push(parseInt(hexString.substr(i, 2), 16))
+  var bytei = start
+  for (; i < len; i += 2, bytei++) {
+    bytes[bytei] = parseInt(hexString.substr(i, 2), 16)
   }
 
   return bytes
@@ -105,9 +106,13 @@ function arrayBufferToHex (buf) {
 }
 
 function bigInt2ArrayBuffer (bigint) {
+  // try {
   // console.log('!!! bigInt2ArrayBuffer - start')
   var str = bigInt2str(bigint, 16)
-  return bytesFromHex(str)
+  var out = arrayBufferFromHex(str)
+  // console.log('!!! bigInt2ArrayBuffer - end')
+  return out
+  // } catch (e) { console.error(e); throw e }
 }
 
 function arrayBuffer2bigInt (buf) {
