@@ -1,7 +1,7 @@
 (library
   (name mtproto_transport)
   (libraries base cstruct logger platform math lwt js_of_ocaml mtproto_misc)
-  (modules (:standard \ caml_tcp_full))
+  (modules (:standard \ caml_tcp_full caml_tcp_abridged))
   (js_of_ocaml (javascript_files
     js_tcp_full.js
     js_websocket.js))

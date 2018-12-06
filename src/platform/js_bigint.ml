@@ -32,6 +32,8 @@ let camlBigarray2bigInt
 let bigint_zero: bigint = Js.Unsafe.variable "leemon_zero"
 let bigint_one: bigint = Js.Unsafe.variable "one"
 
+(* TODO: Some bigint functions don't seem to work *)
+
 module Bigint = struct
   type t = bigint
   exception Overflow (* not used *)

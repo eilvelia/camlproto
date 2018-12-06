@@ -72,12 +72,31 @@ function _eq (arr1, arr2) {
   return arr1.length === arr2.length
 }
 
+function _read (stream, n) {
+  var buf = stream.read(n)
+
+  if (buf) return Promise.resolve(buf)
+
+  return new Promise(function (resolve, reject) {
+    stream.once('readable', function () {
+      var buf1 = stream.read(n)
+      if (buf1) return resolve(buf1)
+      console.error('js tcp full: End Of File')
+      reject(new Error('End Of File'))
+    })
+  })
+}
+
+function _nodeBufferToArrayBuffer (data) {
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+}
+
 // TCP Full for Node.js.
 
 var js_tcp_full = {
   create: function (address, port, cb) {
     var socket = _net.createConnection(port, address, function () {
-      console.log('js_tcp_full connected') // TODO:
+      console.log('js_tcp_full connected')
       cb({ socket: socket, seqNo: 0 })
     })
   },
@@ -98,50 +117,59 @@ var js_tcp_full = {
     var forChecksum = bufUint8.slice(0, len - 4)
     var checksum = js_crc32(forChecksum)
     bufUint8.set(checksum, len - 4)
-    console.log('socket.write')
+
+    console.log('socket.write', bufUint8.length)
     t.socket.write(bufUint8, function () {
       console.log('js send: socket.write callback')
       t.seqNo++
       cb()
-    }) } catch (e) { console.error(e)}
-  }, // TODO: buffer
-  receive: function (t, cb) { // TODO:
-    try { console.log('receive', 'seqNo:', t.seqNo)
-    t.socket.once('data', function (data) {
-      console.log('received data', data.length)
-      var arrBuf =
-        data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
-      // var lenSeqArr = new Uint32Array(arrBuf.slice(0, 8))
-      var lenSeqArr = new Uint32Array(data.slice(0, 8))
-      var len = lenSeqArr[0]
-      var seqNo = lenSeqArr[1]
-      console.log('len', len, 'seqNo', seqNo)
-      if (data.length < len) {
-        console.error('Invalid data length')
-        throw new Error('TCP Full: Invalid len ' + data.length)
-      }
+    })
+    } catch (e) { console.error(e); throw e }
+  },
+  receive: function (t, cb) {
+    console.log('receive start', 'cl_seqNo:', t.seqNo)
 
-      var body = new Uint8Array(arrBuf, 8, len - 12)
+    _read(t.socket, 8).then(function (lenSeq) {
+    console.log('received lenSeq', lenSeq.length)
 
-      // TODO: checksum check doesn't work ._.
+    var lenSeqArr = new Uint32Array(_nodeBufferToArrayBuffer(lenSeq))
+    var len = lenSeqArr[0]
+    var seqNo = lenSeqArr[1]
 
-      // // console.log(new Uint8Array(data))
-      // var forChecksum = data.slice(0, len - 12)
-      // console.log('ch len', forChecksum.length)
-      // var calcChecksum = js_crc32(forChecksum)
-      // var givenChecksum = new Uint8Array(data.slice(len - 12, len - 8))
-      // if (!_eq(calcChecksum, givenChecksum)) {
-      //   console.error('Invalid checksum', calcChecksum, givenChecksum)
-      //   throw new Error('TCP Full: Invalid checksum')
-      // }
+    var bodyLen = len - 12
 
-      if (seqNo + 1 !== t.seqNo) {
-        console.error('Incorrect sequence number', seqNo, t.seqNo)
-        throw new Error('TCP Full: Incorrect sequence number')
-      }
+    console.log('received', 'len', len, 'sv_seqNo', seqNo)
 
-      // console.log(data.length, body.length)
-      cb(body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength))
-    }) } catch (e) { console.error(e) }
+    return _read(t.socket, bodyLen).then(function (body) {
+    console.log('received body', body.length)
+
+    if (body.length < bodyLen) {
+      console.error('Invalid body length')
+      throw new Error('TCP Full: Invalid len ' + body.length)
+    }
+
+    return _read(t.socket, 4).then(function (givenChecksum) {
+    console.log('received checksum', givenChecksum)
+
+    var givenChecksumArr = new Uint8Array(givenChecksum)
+
+    var forChecksum = Buffer.concat([lenSeq, body])
+    console.log('forChecksum len', forChecksum.length)
+    var calcChecksumArr = js_crc32(forChecksum)
+
+    if (!_eq(calcChecksumArr, givenChecksumArr)) {
+      console.error('Invalid checksum', calcChecksumArr, givenChecksumArr)
+      throw new Error('TCP Full: Invalid checksum')
+    }
+
+    if (seqNo + 1 !== t.seqNo) {
+      console.error('Incorrect sequence number', 'cl', t.seqNo, 'sv', seqNo)
+      throw new Error('TCP Full: Incorrect sequence number')
+    }
+
+    cb(_nodeBufferToArrayBuffer(body))
+    })
+    })
+    })//.catch(function (e) {}) // TODO:
   }
 }

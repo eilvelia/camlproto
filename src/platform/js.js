@@ -38,7 +38,7 @@ var _js_sha256_browser = { // TODO:
 var _js_aes_node = {
   ecbCreateKey: function (key) { return key },
   ecbEncrypt: function (key, buf) {
-    var cipherName = key.data.length === 256 ? 'aes-256-ecb' : 'aes-128-ecb'
+    var cipherName = key.data.length === 32 ? 'aes-256-ecb' : 'aes-128-ecb'
     var cipher = _crypto.createCipheriv(cipherName, key.data, '')
     cipher.setAutoPadding(false)
     var output = cipher.update(buf.data)
@@ -46,7 +46,7 @@ var _js_aes_node = {
     return output.buffer
   },
   ecbDecrypt: function (key, buf) {
-    var decipherName = key.data.length === 256 ? 'aes-256-ecb' : 'aes-128-ecb'
+    var decipherName = key.data.length === 32 ? 'aes-256-ecb' : 'aes-128-ecb'
     var decipher = _crypto.createDecipheriv(decipherName, key.data, '')
     decipher.setAutoPadding(false)
     var output = decipher.update(buf.data)
