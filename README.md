@@ -71,13 +71,13 @@ wip
 
 ### Implemented
 
-- tcp_full (ocaml)
+- tcp_full (ocaml, node.js)
 
 - tcp_abridged (ocaml)
 
 ### In progress
 
-- tcp_full (node.js)
+- tcp_abridged (node.js)
 
 ### Unimplemented
 
