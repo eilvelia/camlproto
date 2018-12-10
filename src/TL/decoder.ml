@@ -18,9 +18,9 @@ let read_int64_le t =
   out
 
 let read_float t =
-  let out = Cstruct.LE.get_uint64 t.cs t.offset in
+  let out = Cstruct.LE.get_uint64 t.cs t.offset |> Int64.float_of_bits in
   t.offset <- t.offset + 8;
-  Int64.float_of_bits out
+  out
 
 let read_byte t = (* as int *)
   let out = Cstruct.get_uint8 t.cs t.offset in
@@ -50,7 +50,7 @@ let read_3_bytes_as_int t =
 
 let read_tl_bytes t =
   let len = ref (read_byte t) in
-  let bytes_read = ref 0 in
+  let bytes_read = ref !len in
 
   if !len <= 253 then
     bytes_read := !bytes_read + 1
