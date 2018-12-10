@@ -4,6 +4,8 @@ open TL
 open TL.Builtin
 open TLGen.MTProto
 
+module Gzip = Platform.PlatformGzip
+
 module C_rpc_result = struct
   type t = {
     req_msg_id: int64;
@@ -18,13 +20,62 @@ module C_rpc_result = struct
     { req_msg_id; data }
 end
 
+let gzip_packed_magic_le = Cstruct.of_hex "a1 cf 72 30"
+let rpc_error_magic_le = Cstruct.of_hex "19 ca 44 21"
+
+module C_gzip_packed = struct
+  type t = {
+    packed_data: Cstruct.t
+  }
+
+  (* let magic = 0x3072cfa1l *)
+
+  let decode dec =
+    let packed_data = TLBytes.decode dec in
+    { packed_data }
+
+  let decode_boxed dec =
+    Decoder.skip_len dec 4;
+    decode dec
+end
+
+let decode_gzip_packed (decoder: Decoder.t) =
+  (C_gzip_packed.decode_boxed decoder).packed_data
+    |> Gzip.decompress
+    |> Logger.dump_t "gzip decompressed"
+
+(* let decode_obj_or_gzip_packed (decode: Decoder.t -> 'a) (data: Cstruct.t): 'a =
+  let newdata = if Cstruct.equal (Cstruct.sub data 0 4) gzip_packed_magic_le
+    then decode_gzip_packed (Decoder.of_cstruct data)
+    else data
+  in
+  decode (Decoder.of_cstruct newdata) *)
+
+let rec decode_result
+  (decode: Decoder.t -> 'a) (data: Cstruct.t)
+  : ('a, C_rpc_error.t) Result.t
+=
+  let decoder = Decoder.of_cstruct data in
+  let magic = Cstruct.sub data 0 4 in
+  match magic with
+  | x when Cstruct.equal x gzip_packed_magic_le ->
+    decode_result decode (decode_gzip_packed decoder)
+  | x when Cstruct.equal x rpc_error_magic_le ->
+    let (C_rpc_error err) = RpcError.decode decoder in
+    Error err
+  | _ ->
+    Ok (decode decoder)
+
+(* let _ = decode_result C_req_pq.decode (
+  Cstruct.of_hex "19 ca 44 21  00 11 22 33  01 60 00 00") *)
+
 module MTPObject = struct
   exception NotFound of int32 (* magic *)
 
   type t =
     | RpcResult of C_rpc_result.t
     | MessageContainer of msg_container
-    (* | GzipPacked *) (* TODO: *)
+    (* | GzipPacked *)
     | Pong of C_pong.t
     | BadServerSalt of C_bad_server_salt.t
     | BadMsgNotification of C_bad_msg_notification.t

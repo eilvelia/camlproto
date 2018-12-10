@@ -91,7 +91,9 @@ new_session_created#9ec20908 first_msg_id:long unique_id:long server_salt:long =
 //message msg_id:long seqno:int bytes:int body:Object = Message; // parsed manually
 //msg_container#73f1f8dc messages:vector<message> = MessageContainer; // parsed manually
 //msg_copy#e06046b2 orig_message:Message = MessageCopy; // parsed manually, not used - use msg_container
-//gzip_packed#3072cfa1 packed_data:string = Object; // parsed manually
+
+// //gzip_packed#3072cfa1 packed_data:string = Object; // parsed manually
+//gzip_packed#3072cfa1 packed_data:bytes = Object; // parsed manually
 
 http_wait#9299359f max_delay:int wait_after:int max_wait:int = HttpWait;
 

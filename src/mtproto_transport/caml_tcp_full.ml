@@ -48,7 +48,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
     let given_body_len = len - 12 in
     let body_bytes = Bytes.create given_body_len in
     let%lwt () = Lwt_io.read_into_exactly t.input body_bytes 0 given_body_len in
-    let body = Cstruct.of_bytes body_bytes in
+    let body = Cstruct.of_bytes body_bytes in (* TODO: inefficient *)
     let body_len = Cstruct.len body in
 
     (* if body_len < given_body_len then begin
@@ -68,9 +68,9 @@ module TransportTcpFull: Types.MTProtoTransport = struct
     if Int32.(calc_checksum <> given_checksum) then
       raise @@ Error "checksums are not equal";
 
-    if Int32.(seq_no + 1l <> t.seq_no) then
+    (* if Int32.(seq_no + 1l <> t.seq_no) then
       raise @@ Error (Printf.sprintf
-        "Incorrect sequence number: cl %ld | sv %ld" t.seq_no seq_no);
+        "Incorrect sequence number: cl %ld | sv %ld" t.seq_no seq_no); *)
 
     Lwt.return body
 end

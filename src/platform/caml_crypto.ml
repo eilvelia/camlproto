@@ -1,6 +1,6 @@
 open! Base
 
-module CamlCrypto: Types.PLATFORM_CRYPTO = struct
+module Crypto: Types.PLATFORM_CRYPTO = struct
   module SHA1 = Nocrypto.Hash.SHA1
   module SHA256 = Nocrypto.Hash.SHA256
   module AES = struct

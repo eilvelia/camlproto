@@ -1,6 +1,6 @@
 open! Base
 
-module type HashFn = sig
+module type HASH_FN = sig
   type t
   val init: unit -> t
   val feed: t -> Cstruct.t -> unit
@@ -16,8 +16,8 @@ module type AES = sig
 end
 
 module type PLATFORM_CRYPTO = sig
-  module SHA1: HashFn
-  module SHA256: HashFn
+  module SHA1: HASH_FN
+  module SHA256: HASH_FN
   module AES: AES
 end
 
@@ -58,4 +58,10 @@ module type PLATFORM_BIGINT = sig
   val of_cstruct_be: Cstruct.t -> t
   (* val into_cstruct_be: t -> Cstruct.t -> unit *)
   val to_cstruct_be: t -> Cstruct.t
+end
+
+module type GZIP = sig
+  exception Error of string
+  (* val compress: Cstruct.t -> Cstruct.t *)
+  val decompress: Cstruct.t -> Cstruct.t
 end

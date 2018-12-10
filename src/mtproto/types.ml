@@ -1,4 +1,5 @@
 open! Base
+open Math
 
 module type MTProtoStorage = sig (* TODO: currently not used *)
   type t
@@ -27,12 +28,22 @@ end
 
 module type MTProtoClient = sig
   open TL.Types
+
   type t
+
   exception MTPError of string
-  val create: unit -> t Lwt.t
-  val reset_state: t -> unit
+
+  exception RpcError of int * string
+  (** [RpcError (error_code, error_message)] *)
+
   include MTProtoPlainSender with type t := t
+
+  val create: ?rsa:Crypto.Rsa.RsaManager.t -> unit -> t Lwt.t
+
+  val reset_state: t -> unit
+
   val do_authentication: t -> unit Lwt.t
+
   val send_encrypted_obj
     : t
     -> ?msg_id:int64
@@ -40,7 +51,9 @@ module type MTProtoClient = sig
     -> (module TLFunc with type t = 'a)
     -> 'a
     -> unit Lwt.t
+
   val recv_loop: t -> unit Lwt.t
+
   val invoke
     : t
     -> ?content_related:bool

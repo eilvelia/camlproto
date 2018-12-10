@@ -5,7 +5,7 @@ type pub = {
   e: Cstruct.t; (* 65537 *)
 }
 
-module RSA = struct
+module RsaKey = struct
   type t = { n: Bigint.t; e: Bigint.t }
   let create (key: pub) =
     (* Caml.print_endline "rsa create key"; *)
@@ -30,7 +30,7 @@ let default_keys: pub list = [
 
 module RsaManager = struct
   type fingerprint = int64
-  type key = { key: RSA.t; fingerprint: fingerprint }
+  type key = { key: RsaKey.t; fingerprint: fingerprint }
   type t = key list
 
   exception FingerprintsNotFound of fingerprint list
@@ -45,7 +45,7 @@ module RsaManager = struct
     Cstruct.LE.get_uint64 cs 12
 
   let create_with_pub_keys (l: pub list) = List.map l ~f:(fun k -> {
-    key = RSA.create k;
+    key = RsaKey.create k;
     fingerprint = calc_fingerprint k;
   })
 
@@ -65,5 +65,5 @@ module RsaManager = struct
     | Some x -> x
     | None -> raise @@ FingerprintsNotFound fingers
 
-  let encrypt ~key:{ key; _ } data = RSA.encrypt ~key data
+  let encrypt ~key:{ key; _ } data = RsaKey.encrypt ~key data
 end

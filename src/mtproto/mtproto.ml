@@ -7,6 +7,7 @@ open Misc
 module TLG = TLGen.MTProto
 module Crypto = Math.Crypto
 module Bigint = Math.Bigint
+module RsaManager = Crypto.Rsa.RsaManager
 
 module Types = Types
 
@@ -14,8 +15,6 @@ module Types = Types
 (* module MTProtoV1Client = struct end *)
 module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   open TL.Types
-
-  module RsaManager = Crypto.Rsa.RsaManager
 
   type request = Request
     : 'a Lwt.u * (module TLFunc with type ResultM.t = 'a)
@@ -44,11 +43,13 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   (* TODO: use sum types instead of strings *)
   exception MTPError of string
 
-  let create () = (* TODO: RsaManager.t as argument; (ip, port) argument *)
+  exception RpcError of int * string
+
+  let create ?(rsa = RsaManager.default) () = (* TODO: (ip, port) as argument *)
     let%lwt transport = T.create ("149.154.167.51", "443") in
     Lwt.return {
       transport;
-      rsa = RsaManager.default; (* TODO: *)
+      rsa;
       time_offset = 0L;
       auth_key_tuple = None;
       server_salt = 0L;
@@ -279,7 +280,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
 
   let send_encrypted_obj
     t
-    ?(msg_id = gen_msg_id t) ?(content_related=false)
+    ?(msg_id = gen_msg_id t) ?(content_related = false)
     (type a) (module O : TLFunc with type t = a) (o: a)
   =
     let data_encoder = TL.Encoder.encode O.encode_boxed o in
@@ -291,7 +292,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   let handle_pong t (pong: TLG.C_pong.t) =
     Caml.print_endline @@ Printf.sprintf
       "Pong [msg_id %Ld] [ping_id %Ld]" pong.msg_id pong.ping_id;
-    match Hashtbl.find t.request_map pong.msg_id with
+    match Hashtbl.find_and_remove t.request_map pong.msg_id with
     | Some (Request (resolver, _)) ->
       let pong = TLG.Pong.(C_pong pong) in
       (* TODO: May cause segmentation fault
@@ -308,14 +309,24 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   let handle_rpc_result t (res: C_rpc_result.t) =
     Caml.print_endline @@ Printf.sprintf
       "rpc_result [req_msg_id %Ld]" res.req_msg_id;
-    match Hashtbl.find t.request_map res.req_msg_id with
-    | Some (Request (resolver, (module M))) ->
-      let obj = M.ResultM.decode (TL.Decoder.of_cstruct res.data) in
-      Lwt.wakeup_later resolver obj
+    match Hashtbl.find_and_remove t.request_map res.req_msg_id with
+    | Some (Request (rs, (module M))) ->
+      begin match decode_result M.ResultM.decode res.data with
+        | Ok x -> Lwt.wakeup_later rs x
+        | Error x ->
+          Caml.print_endline @@ Printf.sprintf
+            "rpc_error [error_code %d] [%s]" x.error_code x.error_message;
+          Lwt.wakeup_later_exn rs (RpcError (x.error_code, x.error_message))
+      end
     | None -> Caml.print_endline "!!! not found"
 
-  let handle_msgs_ack _t _x =
-    Caml.print_endline "msgs_ack not supported"
+  let handle_msgs_ack _t (x: TLG.C_msgs_ack.t) =
+    let (C_vector msg_ids) = x.msg_ids in
+    Caml.print_endline @@ Printf.sprintf
+      "msgs_ack [msg_ids len: %d]" (List.length msg_ids)
+    (* List.iter msg_ids ~f:(fun msg_id ->
+      Hashtbl.remove t.request_map msg_id
+    ) *)
 
   let rec handle_container t (cont: MTPObject.msg_container) =
     Caml.print_endline @@ Printf.sprintf
@@ -334,6 +345,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     | _ -> Caml.print_endline "not_supported"
 
   let rec recv_loop t =
+    (* Caml.print_endline "recv_loop start"; *)
     let%lwt data = receive_encrypted t in
     Logger.dump "recv_loop" data;
     let obj = MTPObject.decode (TL.Decoder.of_cstruct data) in
@@ -342,7 +354,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
 
   let invoke
     t
-    ?(content_related=true)
+    ?(content_related = true)
     (type a) (type result)
     (module O : TLFunc with type t = a and type ResultM.t = result)
     (o: a)
@@ -353,7 +365,6 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     let (promise, resolver) = Lwt.task () in
     let rq = Request (resolver, (module O)) in
     Hashtbl.set t.request_map ~key:msg_id ~data:rq;
-    (* TODO: Currently data is never removed from hash table *)
     promise
 
   let do_authentication t =

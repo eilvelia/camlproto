@@ -8,6 +8,8 @@ function _isNode () {
 
 var _crypto = _isNode() ? require('crypto') : { 'ENV': 'Browser' }
 
+var _pako = require('pako')
+
 var _js_sha1_node = {
   init: function () { return _crypto.createHash('sha1') },
   feed: function (t, buf) { t.update(buf.data) },
@@ -73,6 +75,11 @@ var js_sha1 = _isNode() ? _js_sha1_node : _js_sha1_browser
 var js_sha256 = _isNode() ? _js_sha256_node : _js_sha256_browser
 var js_aes = _isNode() ? _js_aes_node : _js_aes_browser
 var js_secure_rand = _isNode() ? _js_secure_rand_node : _js_secure_rand_browser
+
+var js_gzip = {
+  // compress: function (buf) { return _pako.deflate(buf.data).buffer },
+  decompress: function (buf) { return _pako.inflate(buf.data).buffer }
+}
 
 // ---
 

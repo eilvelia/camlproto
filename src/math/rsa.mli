@@ -5,7 +5,7 @@ type pub = {
   e: Cstruct.t; (** Public exponent *)
 }
 
-module RSA: sig
+module RsaKey: sig
   type t
   val create: pub -> t
   val encrypt: key:t -> Cstruct.t -> Cstruct.t

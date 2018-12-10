@@ -34,7 +34,7 @@ end
 
 let js_aes: js_aes Js.t = Js.Unsafe.js_expr "js_aes"
 
-module JsCrypto: CRYPTO = struct
+module Crypto: CRYPTO = struct
   module SHA1 = struct
     type t = sha1_t
     let init () = js_sha1##init ()

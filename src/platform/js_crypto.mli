@@ -1,1 +1,1 @@
-module JsCrypto: Types.PLATFORM_CRYPTO
+module Crypto: Types.PLATFORM_CRYPTO
