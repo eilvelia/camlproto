@@ -1,0 +1,5 @@
+(executable
+  (name ex2)
+  (libraries cstruct camlproto lwt lwt.unix)
+  (preprocess (pps lwt_ppx))
+)

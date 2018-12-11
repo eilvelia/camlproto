@@ -3,8 +3,7 @@ open TL
 (* open TL.Types *)
 open TL.Builtin
 open TLGen.MTProto
-
-module Gzip = Platform.PlatformGzip
+open Math
 
 module C_rpc_result = struct
   type t = {

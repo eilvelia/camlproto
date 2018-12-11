@@ -355,7 +355,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   let invoke
     t
     ?(content_related = true)
-    (type a) (type result)
+    (type a result)
     (module O : TLFunc with type t = a and type ResultM.t = result)
     (o: a)
     : result Lwt.t

@@ -1,4 +1,5 @@
 (library
   (name telegram)
-  (libraries base)
+  (libraries base cstruct lwt mtproto mtproto_misc mtproto_transport TLGen)
+  (preprocess (pps lwt_ppx))
 )

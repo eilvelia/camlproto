@@ -8,30 +8,49 @@ MTProto client implementation in OCaml.
 
 ```ocaml
 open Camlproto
-open MTProto
-open MTProtoTransport
+open Telegram
 
-module TLG = TLGen.MTProto
+module TLT = TLGen.Telegram
+
+let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
 
 let main () =
-  let module MTP = MakeMTProtoV2Client(TransportTcpFull) in
-  let%lwt t = MTP.create () in
-  let%lwt () = MTP.do_authentication t in
-  let send_pings () =
-    let%lwt (C_pong a) = MTP.invoke t (module TLG.C_ping) { ping_id = 1L } in
-    Printf.printf "<-- Pong 1 [ping_id %Ld]\n" a.ping_id;
-    let%lwt () = Lwt_unix.sleep 1. in
-    let%lwt (C_pong b) = MTP.invoke t (module TLG.C_ping) { ping_id = 2L } in
-    Printf.printf "<-- Pong 2 [ping_id %Ld]\n" b.ping_id;
+  let%lwt phone_number = prompt "Enter your phone number: " in
+  let%lwt api_id = prompt "Enter your api id: " in
+  let api_id = int_of_string api_id in
+  let%lwt api_hash = prompt "Enter your api hash: " in
+
+  let module Cl = TelegramClient in
+  let%lwt t = Cl.create () in
+
+  let promise =
+    let%lwt () = Cl.connect (Settings.create ~api_id ()) t in
+    let%lwt C_auth_sentCode { phone_code_hash; _ } =
+      Cl.invoke t (module TLT.C_auth_sendCode) {
+        allow_flashcall = None;
+        phone_number;
+        current_number = None;
+        api_id;
+        api_hash;
+      } in
+    let%lwt phone_code = prompt "Enter phone code: " in
+    let%lwt C_auth_authorization ({ user; _ }) =
+      Cl.invoke t (module TLT.C_auth_signIn) {
+        phone_number;
+        phone_code_hash;
+        phone_code;
+      } in
+    let (C_user { id; _ } | C_userEmpty { id }) = user in
+    print_endline ("Signed as " ^ string_of_int id);
     Lwt.return_unit
   in
-  let%lwt () = Lwt.pick [send_pings (); MTP.recv_loop t] in
-  Lwt.return ()
 
-let () = Lwt_main.run (main ())
+  Lwt.pick [promise; Cl.loop t]
+
+let _ = Lwt_main.run (main ())
 ```
 
-(see [examples/ex1/](examples/ex1/))
+(see [examples/ex2/](examples/ex2/) and [examples/ex1/](examples/ex1/))
 
 ### From JavaScript
 
