@@ -15,6 +15,7 @@ module TLT = TLGen.Telegram
 let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
 
 let main () =
+  (* api_id and api_hash can be obtained at https://my.telegram.org/ *)
   let%lwt phone_number = prompt "Enter your phone number: " in
   let%lwt api_id = prompt "Enter your api id: " in
   let api_id = int_of_string api_id in
