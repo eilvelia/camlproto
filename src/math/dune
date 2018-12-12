@@ -1,4 +1,5 @@
 (library
   (name math)
-  (libraries base platform TLGen)
+  (public_name camlproto.math)
+  (libraries base camlproto.platform camlproto.TLGen)
 )

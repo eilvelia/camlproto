@@ -1,0 +1,4 @@
+(alias
+  (name examples)
+  (deps ex1/ex1.exe ex2/ex2.exe)
+)

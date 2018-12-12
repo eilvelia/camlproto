@@ -1,4 +1,17 @@
+(rule
+  (targets mtproto.ml)
+  (action (run npm run codegen:caml:mtproto --prefix %{project_root}/../../codegen))
+  (mode fallback)
+)
+
+(rule
+  (targets telegram.ml)
+  (action (run npm run codegen:caml:telegram --prefix %{project_root}/../../codegen))
+  (mode fallback)
+)
+
 (library
   (name TLGen)
-  (libraries base TL)
+  (public_name camlproto.TLGen)
+  (libraries base camlproto.TL)
 )

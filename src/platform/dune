@@ -1,5 +1,6 @@
 (library
   (name platform)
+  (public_name camlproto.platform)
   (libraries base js_of_ocaml cstruct nocrypto nocrypto.unix zarith ezgzip)
   (js_of_ocaml (javascript_files
     leemon.js

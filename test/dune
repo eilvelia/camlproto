@@ -1,4 +1,6 @@
 (test
   (name test)
-  (libraries ounit cstruct math TL TLGen mtproto)
+  (libraries
+    ounit cstruct
+    camlproto.math camlproto.TL camlproto.TLGen camlproto.mtproto)
 )

@@ -1,4 +1,5 @@
 (library
   (name mtproto_misc)
+  (public_name camlproto.mtproto_misc)
   (libraries base cstruct)
 )

@@ -1,5 +1,6 @@
 (library
   (name mtproto)
+  (public_name camlproto.mtproto)
   (libraries base cstruct logger TL TLGen platform math lwt mtproto_misc mtproto_transport)
   (preprocess (pps lwt_ppx))
 )

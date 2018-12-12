@@ -1,5 +1,9 @@
 (library
   (name telegram)
-  (libraries base cstruct lwt mtproto mtproto_misc mtproto_transport TLGen)
+  (public_name camlproto.telegram)
+  (libraries
+    base cstruct lwt
+    camlproto.mtproto camlproto.mtproto_misc
+    camlproto.mtproto_transport camlproto.TLGen)
   (preprocess (pps lwt_ppx))
 )

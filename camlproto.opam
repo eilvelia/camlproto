@@ -1,0 +1,24 @@
+opam-version: "2.0"
+name: "camlproto"
+version: "0.1.0"
+synopsis: "Telegram's MTProto client implementation"
+description: "Telegram's MTProto client implementation"
+maintainer: "Bannerets <save14@protonmail.com>"
+author: "Bannerets <save14@protonmail.com>"
+license: "MIT"
+homepage: "https://github.com/Bannerets/camlproto"
+dev-repo: "git+https://github.com/Bannerets/camlproto.git"
+bug-reports: "https://github.com/Bannerets/camlproto/issues"
+#build: [[make "build"]]
+build: [["dune" "build" "-p" name "-j" jobs]]
+run-test: [["dune" "runtest" "-p" name]]
+depends: [
+  "dune" {build & >= "1.0.0"}
+  "ounit" {test & >= "2.0.0"}
+  "ocaml" {>= "4.04.1"}
+  "base" {>= "0.11.0"}
+  "cstruct" {>= "3.0.0" & < "4.0.0"}
+  "nocrypto" {>= "0.5.0"}
+  "zarith" {>= "1.7"}
+  "ezgzip" {>= "0.2.1"}
+]
