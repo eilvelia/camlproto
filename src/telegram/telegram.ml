@@ -3,7 +3,7 @@ open Mtproto
 open Mtproto_transport
 open TL.Types
 
-(* module TLM = TLGen.MTProto *)
+module TLM = TLGen.MTProto
 module TLT = TLGen.Telegram
 
 module Settings = struct
@@ -34,21 +34,27 @@ end
 
 let layer_const = 82
 
+(* TODO: *)
+(* module type TelegramSession = sig
+end *)
+
 module MakeTelegramClient (T: MTProtoTransport) = struct
   module MTP = MakeMTProtoV2Client(T)
 
-  type t = { mtproto: MTP.t }
+  type t = { mtp: MTP.t }
 
   let create () =
-    let%lwt mtproto = MTP.create () in
+    let%lwt mtp = MTP.create () in
 
-    let t = { mtproto } in
+    let t = { mtp } in
 
-    let%lwt () = MTP.do_authentication mtproto in
+    let%lwt auth_key = MTP.do_authentication mtp in
+
+    Logger.dump "new auth_key" auth_key;
 
     Lwt.return t
 
-  let invoke t = MTP.invoke t.mtproto
+  let invoke t = MTP.invoke t.mtp
 
   let init_with
     t
@@ -58,8 +64,7 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
     (x: a)
     : result Lwt.t
   =
-    MTP.invoke t.mtproto
-      (module TLT.C_invokeWithLayer(TLT.C_initConnection(X))) {
+    MTP.invoke t.mtp (module TLT.C_invokeWithLayer(TLT.C_initConnection(X))) {
       layer = layer_const;
       query = {
         api_id = s.api_id;
@@ -74,13 +79,13 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
       }
     }
 
-  let connect (s: Settings.t) (t: t) =
+  let init (s: Settings.t) (t: t) =
     let%lwt (C_config res) = init_with t s (module TLT.C_help_getConfig) C in
-    Caml.print_endline ("help.getConig res. me_url_prefix: " ^ res.me_url_prefix);
-    Lwt.return ()
+    Caml.print_endline ("help.getConfig res. me_url_prefix: " ^ res.me_url_prefix);
+    Lwt.return_unit
 
   let loop t =
-    MTP.recv_loop t.mtproto
+    Lwt.pick [MTP.recv_loop t.mtp; MTP.send_loop t.mtp]
 end
 
 module TelegramClient = MakeTelegramClient(TransportTcpFull)

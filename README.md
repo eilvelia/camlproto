@@ -25,7 +25,7 @@ let main () =
   let%lwt t = Cl.create () in
 
   let promise =
-    let%lwt () = Cl.connect (Settings.create ~api_id ()) t in
+    let%lwt () = Cl.init (Settings.create ~api_id ()) t in
     let%lwt C_auth_sentCode { phone_code_hash; _ } =
       Cl.invoke t (module TLT.C_auth_sendCode) {
         allow_flashcall = None;
@@ -35,7 +35,7 @@ let main () =
         api_hash;
       } in
     let%lwt phone_code = prompt "Enter phone code: " in
-    let%lwt C_auth_authorization ({ user; _ }) =
+    let%lwt C_auth_authorization { user; _ } =
       Cl.invoke t (module TLT.C_auth_signIn) {
         phone_number;
         phone_code_hash;

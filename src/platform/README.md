@@ -17,22 +17,22 @@ For crypto and secure random `Nocrypto` is used.
 
 For bigint `Zarith` is used.
 
-For gzip `Ezgip` is used.
+For gzip `Ezgzip` is used.
 
-### Node.js
-
-For crypto builtin `crypto` is used.
-
-For secure random `crypto.randomBytes(size)` is used.
+### JS
 
 For bigint `leemon` is used.
 
 For gzip `pako` is used.
 
-### Browser
+#### Node.js
+
+For crypto builtin `crypto` is used.
+
+For secure random `crypto.randomBytes(size)` is used.
+
+#### Browser
 
 WIP
-
-<!-- For gzip `pako` is used. -->
 
 <!-- TODO: -->

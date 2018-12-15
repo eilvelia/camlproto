@@ -1,9 +1,11 @@
 open! Base
-open TL
 (* open TL.Types *)
 open TL.Builtin
 open TLGen.MTProto
 open Math
+
+module Decoder = TL.Decoder
+(* module Encoder = TL.Encoder *)
 
 module C_rpc_result = struct
   type t = {
@@ -98,7 +100,37 @@ module MTPObject = struct
     messages: message list;
   }
 
-  let rec decode_message dec =
+  type req_message = {
+    msg_id: TLLong.t;
+    seqno: int32;
+    bytes: TLInt.t;
+    body_cs: Cstruct.t;
+  }
+
+  let msg_container_magic = 0x73f1f8dcl
+
+  let encode_message (msg: req_message) =
+    let cs = Cstruct.create_unsafe (8 + 4 + 4 + Cstruct.len msg.body_cs) in
+    Cstruct.LE.set_uint64 cs 0 msg.msg_id;
+    Cstruct.LE.set_uint32 cs 8 msg.seqno;
+    Cstruct.LE.set_uint32 cs 12 (Int32.of_int_trunc msg.bytes);
+    Cstruct.blit msg.body_cs 0 cs 16 (Cstruct.len msg.body_cs);
+    cs
+
+  let encode_msg_container (l: Cstruct.t list) =
+    let cont_len = 4 + 4 + (Cstruct.lenv l) in
+    let cs = Cstruct.create_unsafe cont_len  in
+    Cstruct.LE.set_uint32 cs 0 msg_container_magic;
+    Cstruct.LE.set_uint32 cs 4 (Int32.of_int_trunc @@ List.length l);
+    let i = ref 8 in
+    List.iter l ~f:(fun cs' ->
+      let len = Cstruct.len cs' in
+      Cstruct.blit cs' 0 cs !i len;
+      i := !i + len
+    );
+    cs
+
+  let rec decode_message dec : message =
     let msg_id = TLLong.decode dec in
     let seqno = TLInt.decode dec in
     let bytes = TLInt.decode dec in
@@ -106,7 +138,7 @@ module MTPObject = struct
     { msg_id; seqno; bytes; body }
 
   and decode_msg_container dec =
-    let len = Decoder.read_int32_le dec |> Int32.to_int_exn in
+    let len = Decoder.read_int32_le dec |> Int32.to_int_trunc in
     let list = ref [] in
     for _ = 1 to len do
       let el = decode_message dec in
@@ -120,7 +152,7 @@ module MTPObject = struct
     let open Int32 in
     match magic with
     | x when x = C_rpc_result.magic -> RpcResult (C_rpc_result.decode dec)
-    | 0x73f1f8dcl -> MessageContainer (decode_msg_container dec)
+    | x when x = msg_container_magic -> MessageContainer (decode_msg_container dec)
     | x when x = C_pong.magic -> Pong (C_pong.decode dec)
     | x when x = C_bad_server_salt.magic -> BadServerSalt (C_bad_server_salt.decode dec)
     | x when x = C_bad_msg_notification.magic -> BadMsgNotification (C_bad_msg_notification.decode dec)

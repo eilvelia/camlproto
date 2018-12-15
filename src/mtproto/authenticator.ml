@@ -4,8 +4,13 @@ open Types
 module TLG = TLGen.MTProto
 module Crypto = Math.Crypto
 module Bigint = Math.Bigint
-
 module RsaManager = Crypto.Rsa.RsaManager
+
+let random_padding (cs: Cstruct.t) (start: int): unit =
+  let len = Cstruct.len cs in
+  let size = len - start in
+  let random_bytes = Crypto.SecureRand.rand_cs size in
+  Cstruct.blit random_bytes 0 cs start size
 
 let generate_tmp_aes server_nonce new_nonce =
   let hash1 = Crypto.SHA1.digest (Cstruct.append new_nonce server_nonce) in
@@ -42,10 +47,13 @@ let good_p = Cstruct.of_hex "
   15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5B
 "
 
+let good_g = 3
+
 let authenticate
   (type sender_t)
   (module Sender : MTProtoPlainObjSender with type t = sender_t)
   (t: sender_t)
+  ?(reject_unknown_dh_params = false)
   (rsa: RsaManager.t)
 =
   let open Sender in
@@ -84,9 +92,12 @@ let authenticate
     new_nonce;
   } |> TL.Encoder.to_cstruct in
 
-  let data_with_hash = Cstruct.create 255 in
+  let p_q_inner_data_len = Cstruct.len p_q_inner_data in
+
+  let data_with_hash = Cstruct.create_unsafe 255 in
   Cstruct.blit (Crypto.SHA1.digest p_q_inner_data) 0 data_with_hash 0 20;
-  Cstruct.blit p_q_inner_data 0 data_with_hash 20 (Cstruct.len p_q_inner_data);
+  Cstruct.blit p_q_inner_data 0 data_with_hash 20 p_q_inner_data_len;
+  random_padding data_with_hash (20 + p_q_inner_data_len);
 
   let (C_vector fingerprints) = res_pq.server_public_key_fingerprints in
   let (rsa_key, finger) = RsaManager.find_by_fingerprints rsa fingerprints in
@@ -142,8 +153,18 @@ let authenticate
       let current_time = Platform.get_current_time () |> Float.to_int in
       let time_offset = server_dh_inner.server_time - current_time in
 
-      if Cstruct.equal server_dh_inner.dh_prime good_p |> not then
+      if server_dh_inner.g <> good_g then begin
+        Caml.print_endline @@ Printf.sprintf
+          "Warning: Unknown DH g %d" server_dh_inner.g;
+        if reject_unknown_dh_params then
+          raise @@ AuthenticationError "3: Unknown DH g"
+      end;
+
+      if Cstruct.equal server_dh_inner.dh_prime good_p |> not then begin
         Logger.dump "Warning: Unknown DH p" server_dh_inner.dh_prime;
+        if reject_unknown_dh_params then
+          raise @@ AuthenticationError "3: Unknown DH p"
+      end;
 
       let dh_prime = Bigint.of_cstruct_be server_dh_inner.dh_prime in
       let b = Bigint.of_cstruct_be @@ Crypto.SecureRand.rand_cs 256 in
@@ -186,6 +207,7 @@ let authenticate
       let data_with_hash = Cstruct.create (len_with_hash + (16 - len_with_hash % 16)) in
       Cstruct.blit (Crypto.SHA1.digest client_dh_inner_data) 0 data_with_hash 0 20;
       Cstruct.blit client_dh_inner_data 0 data_with_hash 20 len;
+      random_padding data_with_hash (20 + len);
       let encrypted_data = Crypto.IGE.encrypt data_with_hash tmp_key tmp_iv in
 
       (* Logger.dump "client_dh_inner_data" client_dh_inner_data;

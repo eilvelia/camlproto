@@ -59,7 +59,7 @@ module TransportTcpAbridged: Types.MTProtoTransport = struct
     in
     let len = len lsl 2 in
 
-    Caml.Printf.printf "tcp_full received [len %d]\n" len;
+    Caml.Printf.printf "tcp_abridged received [len %d]\n" len;
 
     let%lwt body_str = Lwt_io.read ~count:len t.input in
     let body = Cstruct.of_string body_str in

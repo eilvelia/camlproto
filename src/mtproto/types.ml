@@ -1,12 +1,14 @@
 open! Base
-open Math
+open Mtproto_misc
 
-module type MTProtoStorage = sig (* TODO: currently not used *)
+(* module type MTProtoStorage = sig
   type t
   val create: unit -> t
   val set_auth_key: t -> Cstruct.t -> unit
-  val get_auth_key: t -> Cstruct.t
-end
+  val get_auth_key: t -> Cstruct.t option
+  val set_server_salt: t -> int64 -> unit
+  val get_server_salt: t -> int64 option
+end *)
 
 module type MTProtoPlainObjSender = sig
   open TL.Types
@@ -36,13 +38,21 @@ module type MTProtoClient = sig
   exception RpcError of int * string
   (** [RpcError (error_code, error_message)] *)
 
-  include MTProtoPlainSender with type t := t
-
-  val create: ?rsa:Crypto.Rsa.RsaManager.t -> unit -> t Lwt.t
+  val create
+    :  ?auth_key:Cstruct.t
+    -> ?rsa:Math.Crypto.Rsa.RsaManager.t
+    -> ?dc:DcList.dc
+    -> unit
+    -> t Lwt.t
 
   val reset_state: t -> unit
 
-  val do_authentication: t -> unit Lwt.t
+  include MTProtoPlainSender with type t := t
+
+  val do_authentication: t -> Cstruct.t Lwt.t
+  (** Returns [auth_key]. *)
+
+  (* val init: t -> unit Lwt.t *)
 
   val send_encrypted_obj
     : t
@@ -53,6 +63,8 @@ module type MTProtoClient = sig
     -> unit Lwt.t
 
   val recv_loop: t -> unit Lwt.t
+
+  val send_loop: t -> unit Lwt.t
 
   val invoke
     : t
