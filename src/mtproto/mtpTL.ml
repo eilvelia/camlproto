@@ -7,6 +7,49 @@ open Math
 module Decoder = TL.Decoder
 (* module Encoder = TL.Encoder *)
 
+module MTPMessage = struct
+  type t = {
+    (* msg_server_salt: int64;
+    msg_session_id: int64; *)
+    msg_id: int64;
+    msg_seq_no: int32;
+    data: Cstruct.t;
+  }
+
+  (* type req_tl_message = {
+    msg_id: TLLong.t;
+    seqno: int32;
+    bytes: TLInt.t;
+    body_cs: Cstruct.t;
+  } *)
+
+  let encode (msg: t) =
+    let bytes = Cstruct.len msg.data in
+    let cs = Cstruct.create_unsafe (8 + 4 + 4 + Cstruct.len msg.data) in
+    Cstruct.LE.set_uint64 cs 0 msg.msg_id;
+    Cstruct.LE.set_uint32 cs 8 msg.msg_seq_no;
+    Cstruct.LE.set_uint32 cs 12 (Int32.of_int_trunc bytes);
+    Cstruct.blit msg.data 0 cs 16 (Cstruct.len msg.data);
+    cs
+end
+
+module MTPContainer = struct
+  let magic = 0x73f1f8dcl
+
+  let encode (l: Cstruct.t list) =
+    let cont_len = 4 + 4 + (Cstruct.lenv l) in
+    let cs = Cstruct.create_unsafe cont_len  in
+    Cstruct.LE.set_uint32 cs 0 magic;
+    Cstruct.LE.set_uint32 cs 4 (Int32.of_int_trunc @@ List.length l);
+    let i = ref 8 in
+    List.iter l ~f:(fun cs' ->
+      let len = Cstruct.len cs' in
+      Cstruct.blit cs' 0 cs !i len;
+      i := !i + len
+    );
+    cs
+end
+
 module C_rpc_result = struct
   type t = {
     req_msg_id: int64;
@@ -17,7 +60,7 @@ module C_rpc_result = struct
 
   let decode dec =
     let req_msg_id = TLLong.decode dec in
-    let data = TL.Decoder.to_cstruct dec in
+    let data = Decoder.to_cstruct dec in
     { req_msg_id; data }
 end
 
@@ -75,7 +118,7 @@ module MTPObject = struct
 
   type t =
     | RpcResult of C_rpc_result.t
-    | MessageContainer of msg_container
+    | MessageContainer of tl_msg_container
     (* | GzipPacked *)
     | Pong of C_pong.t
     | BadServerSalt of C_bad_server_salt.t
@@ -89,48 +132,18 @@ module MTPObject = struct
     | MsgResendReq of C_msg_resend_req.t
     | MsgsAllInfo of C_msgs_all_info.t
 
-  and message = {
+  and tl_message = {
     msg_id: TLLong.t;
     seqno: TLInt.t;
     bytes: TLInt.t;
     body: t;
   }
 
-  and msg_container = {
-    messages: message list;
+  and tl_msg_container = {
+    messages: tl_message list;
   }
 
-  type req_message = {
-    msg_id: TLLong.t;
-    seqno: int32;
-    bytes: TLInt.t;
-    body_cs: Cstruct.t;
-  }
-
-  let msg_container_magic = 0x73f1f8dcl
-
-  let encode_message (msg: req_message) =
-    let cs = Cstruct.create_unsafe (8 + 4 + 4 + Cstruct.len msg.body_cs) in
-    Cstruct.LE.set_uint64 cs 0 msg.msg_id;
-    Cstruct.LE.set_uint32 cs 8 msg.seqno;
-    Cstruct.LE.set_uint32 cs 12 (Int32.of_int_trunc msg.bytes);
-    Cstruct.blit msg.body_cs 0 cs 16 (Cstruct.len msg.body_cs);
-    cs
-
-  let encode_msg_container (l: Cstruct.t list) =
-    let cont_len = 4 + 4 + (Cstruct.lenv l) in
-    let cs = Cstruct.create_unsafe cont_len  in
-    Cstruct.LE.set_uint32 cs 0 msg_container_magic;
-    Cstruct.LE.set_uint32 cs 4 (Int32.of_int_trunc @@ List.length l);
-    let i = ref 8 in
-    List.iter l ~f:(fun cs' ->
-      let len = Cstruct.len cs' in
-      Cstruct.blit cs' 0 cs !i len;
-      i := !i + len
-    );
-    cs
-
-  let rec decode_message dec : message =
+  let rec decode_message dec : tl_message =
     let msg_id = TLLong.decode dec in
     let seqno = TLInt.decode dec in
     let bytes = TLInt.decode dec in
@@ -152,7 +165,7 @@ module MTPObject = struct
     let open Int32 in
     match magic with
     | x when x = C_rpc_result.magic -> RpcResult (C_rpc_result.decode dec)
-    | x when x = msg_container_magic -> MessageContainer (decode_msg_container dec)
+    | x when x = MTPContainer.magic -> MessageContainer (decode_msg_container dec)
     | x when x = C_pong.magic -> Pong (C_pong.decode dec)
     | x when x = C_bad_server_salt.magic -> BadServerSalt (C_bad_server_salt.decode dec)
     | x when x = C_bad_msg_notification.magic -> BadMsgNotification (C_bad_msg_notification.decode dec)

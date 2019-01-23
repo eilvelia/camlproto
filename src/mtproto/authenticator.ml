@@ -1,7 +1,7 @@
 open! Base
 open Types
 
-module TLG = TLGen.MTProto
+module TLM = TLGen.MTProto
 module Crypto = Math.Crypto
 module Bigint = Math.Bigint
 module RsaManager = Crypto.Rsa.RsaManager
@@ -63,7 +63,7 @@ let authenticate
   (* Logger.dump "nonce" nonce; *)
 
   let%lwt (C_resPQ ({ server_nonce; _ } as res_pq)) =
-    invoke_unencrypted_obj t (module TLG.C_req_pq_multi) { nonce } in
+    invoke_unencrypted_obj t (module TLM.C_req_pq_multi) { nonce } in
 
   if Cstruct.equal res_pq.nonce nonce |> not then
     raise @@ AuthenticationError "1: Invalid nonce from server";
@@ -83,7 +83,7 @@ let authenticate
   (* int256 (32 bytes) *)
   let new_nonce = Crypto.SecureRand.rand_cs 32 in
 
-  let p_q_inner_data = TL.Encoder.encode TLG.C_p_q_inner_data.encode_boxed {
+  let p_q_inner_data = TL.Encoder.encode TLM.C_p_q_inner_data.encode_boxed {
     pq = res_pq.pq;
     p = p_bytes;
     q = q_bytes;
@@ -104,7 +104,7 @@ let authenticate
 
   let encrypted_data = RsaManager.encrypt ~key:rsa_key data_with_hash in
 
-  let%lwt dh_params = invoke_unencrypted_obj t (module TLG.C_req_DH_params) {
+  let%lwt dh_params = invoke_unencrypted_obj t (module TLM.C_req_DH_params) {
     nonce;
     server_nonce;
     p = p_bytes;
@@ -131,11 +131,11 @@ let authenticate
       let given_hash = Cstruct.sub decrypted_answer_with_hash 0 20 in
       let decrypted_answer = Cstruct.shift decrypted_answer_with_hash 20 in
       let (C_server_DH_inner_data server_dh_inner) =
-        TLG.Server_DH_inner_data.decode (TL.Decoder.of_cstruct decrypted_answer) in
+        TLM.Server_DH_inner_data.decode (TL.Decoder.of_cstruct decrypted_answer) in
 
       (* Check hash *)
       let calc_hash =
-        TL.Encoder.encode TLG.C_server_DH_inner_data.encode_boxed server_dh_inner
+        TL.Encoder.encode TLM.C_server_DH_inner_data.encode_boxed server_dh_inner
           |> TL.Encoder.to_cstruct |> Crypto.SHA1.digest in
       if Cstruct.equal calc_hash given_hash |> not then
         raise @@ AuthenticationError "3: Invalid hash";
@@ -194,7 +194,7 @@ let authenticate
       (* TODO: check that g_a and g_b are between 2^{2048-64} and dh_prime - 2^{2048-64} *)
 
       let client_dh_inner_data =
-        TL.Encoder.encode TLG.C_client_DH_inner_data.encode_boxed {
+        TL.Encoder.encode TLM.C_client_DH_inner_data.encode_boxed {
           nonce;
           server_nonce;
           retry_id = 0L; (* TODO: *)
@@ -213,7 +213,7 @@ let authenticate
       (* Logger.dump "client_dh_inner_data" client_dh_inner_data;
       Logger.dump "dh data_with_hash" data_with_hash; *)
 
-      let%lwt dh_answer = invoke_unencrypted_obj t (module TLG.C_set_client_DH_params)
+      let%lwt dh_answer = invoke_unencrypted_obj t (module TLM.C_set_client_DH_params)
         { nonce; server_nonce; encrypted_data; } in
 
       match dh_answer with

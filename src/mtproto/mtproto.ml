@@ -2,9 +2,9 @@ open! Base
 open Mtproto_transport
 open Mtproto_misc
 (* open Types *)
-open Misc
+open MtpTL
 
-module TLG = TLGen.MTProto
+module TLM = TLGen.MTProto
 module Crypto = Math.Crypto
 module Bigint = Math.Bigint
 module RsaManager = Crypto.Rsa.RsaManager
@@ -33,20 +33,12 @@ let get_error_description (error_code: int): string =
 module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   open TL.Types
 
-  type encrypted_message = {
-    (* msg_server_salt: int64;
-    msg_session_id: int64; *)
-    msg_id: int64;
-    msg_seq_no: int32;
-    data: Cstruct.t;
-  }
-
   type request = Request
     : 'a Lwt.u * (module TLFunc with type ResultM.t = 'a)
     -> request
 
   type sent_msg =
-    | SimpleMessage of encrypted_message
+    | SimpleMessage of MTPMessage.t
     | ContainerMessage of { msg_ids: int64 list (* ids of inner messages *) }
 
   (* TODO: Container messages are never removed from t.sent_msg_map *)
@@ -62,7 +54,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     mutable last_msg_id: int64;
     request_map: (int64, request) Hashtbl.t; (** (msg_id, request) *)
     sent_msg_map: (int64, sent_msg) Hashtbl.t;
-    send_queue: encrypted_message Mtpqueue.t;
+    send_queue: MTPMessage.t AsyncQueue.t;
     mutable pending_ack: int64 list; (** msg_id list *)
   }
 
@@ -94,7 +86,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       last_msg_id = 0L;
       request_map = Hashtbl.create (module Int64);
       sent_msg_map = Hashtbl.create (module Int64);
-      send_queue = Mtpqueue.create ();
+      send_queue = AsyncQueue.create ();
       pending_ack = [];
     }
 
@@ -220,8 +212,8 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     | None -> raise @@ MTPError "Empty auth key"
 
   module EncryptedMessages: sig
-    val encrypt_message: t -> encrypted_message -> Cstruct.t
-    val decrypt_message: t -> Cstruct.t -> encrypted_message
+    val encrypt_message: t -> MTPMessage.t -> Cstruct.t
+    val decrypt_message: t -> Cstruct.t -> MTPMessage.t
   end = struct
     let sha256 = Crypto.SHA256.digest
     let (++) = Cstruct.append
@@ -242,7 +234,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
 
       (aes_key, aes_iv)
 
-    let encrypt_message (t: t) (msg: encrypted_message) =
+    let encrypt_message (t: t) (msg: MTPMessage.t) =
       let (auth_key, key_id) = get_auth_key_tuple t in
 
       let data_len = Cstruct.len msg.data in
@@ -325,7 +317,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       if padding_len < 12 || padding_len > 1024 then
         raise @@ MTPError "Invalid padding length";
 
-      { msg_id; msg_seq_no; data }
+      MTPMessage.{ msg_id; msg_seq_no; data }
   end
   include EncryptedMessages
 
@@ -334,7 +326,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     let%lwt buf = T.receive t.transport in
     Lwt.return (decrypt_message t buf)
 
-  let send_encrypted t (msg: encrypted_message) =
+  let send_encrypted t (msg: MTPMessage.t) =
     let data_len = Cstruct.len msg.data in
 
     Caml.print_endline @@ Printf.sprintf
@@ -353,7 +345,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     let data_encoder = TL.Encoder.encode O.encode_boxed o in
     let data = data_encoder |> TL.Encoder.to_cstruct in
     let msg_seq_no = gen_seq_no t content_related in
-    let msg = { msg_id; msg_seq_no; data } in
+    let msg = MTPMessage.{ msg_id; msg_seq_no; data } in
     send_encrypted t msg
 
   let req_not_found msg_id =
@@ -369,11 +361,11 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     TL.Encoder.to_cstruct encoder
   [@@inline]
 
-  let send_msg t (msg: encrypted_message) =
+  let send_msg t (msg: MTPMessage.t) =
     Caml.print_endline @@ Printf.sprintf
       "send_msg msg_id(%Ld) seq_no(%ld) data_len(%d)"
       msg.msg_id msg.msg_seq_no (Cstruct.len msg.data);
-    Mtpqueue.add t.send_queue msg
+    AsyncQueue.add t.send_queue msg
 
   let rec resend_packed_msg t packed_msg =
     match packed_msg with
@@ -400,14 +392,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     Hashtbl.remove t.request_map msg_id;
     Hashtbl.remove t.sent_msg_map msg_id
 
-  let convert_msg (msg: encrypted_message): MTPObject.req_message = {
-    msg_id = msg.msg_id;
-    seqno = msg.msg_seq_no;
-    bytes = Cstruct.len msg.data;
-    body_cs = msg.data;
-  }
-
-  let handle_bad_msg_notification t msg_id (obj: TLG.C_bad_msg_notification.t) =
+  let handle_bad_msg_notification t msg_id (obj: TLM.C_bad_msg_notification.t) =
     let error_desc = get_error_description obj.error_code in
     Caml.print_endline @@ Printf.sprintf
       "bad_msg_notification [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
@@ -421,7 +406,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       then remove_req t msg_id (* TODO: raise exception *)
       else resend t obj.bad_msg_id
 
-  let handle_bad_server_salt t (obj: TLG.C_bad_server_salt.t) =
+  let handle_bad_server_salt t (obj: TLM.C_bad_server_salt.t) =
     let error_desc = get_error_description obj.error_code in
     Caml.print_endline @@ Printf.sprintf
       "bad_server_salt [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
@@ -431,20 +416,20 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     t.server_salt <- obj.new_server_salt;
     resend t obj.bad_msg_id
 
-  let handle_pong t (pong: TLG.C_pong.t) =
+  let handle_pong t (pong: TLM.C_pong.t) =
     Caml.print_endline @@ Printf.sprintf
       "Pong [msg_id %Ld] [ping_id %Ld]" pong.msg_id pong.ping_id;
     Hashtbl.remove t.sent_msg_map pong.msg_id;
     match Hashtbl.find_and_remove t.request_map pong.msg_id with
     | Some (Request (resolver, _)) ->
-      let pong = TLG.Pong.(C_pong pong) in
+      let pong = TLM.Pong.(C_pong pong) in
       (* TODO: May cause segmentation fault
         if server sent pong.msg_id that tied to non-ping message *)
       Lwt.wakeup_later resolver (Caml.Obj.magic pong) (* XXX *)
     | None -> Caml.print_endline @@ Printf.sprintf
       "Ping with msg_id %Ld not found" pong.msg_id
 
-  let handle_new_session_created t (obj: TLG.C_new_session_created.t) =
+  let handle_new_session_created t (obj: TLM.C_new_session_created.t) =
     Caml.print_endline @@ Printf.sprintf
       "new_session_created [server_salt 0x%LX]" obj.server_salt;
     t.server_salt <- obj.server_salt
@@ -464,7 +449,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       end
     | None -> Caml.print_endline @@ req_not_found res.req_msg_id
 
-  let handle_msgs_ack t (obj: TLG.C_msgs_ack.t) =
+  let handle_msgs_ack t (obj: TLM.C_msgs_ack.t) =
     (* TODO: *)
     let (C_vector msg_ids) = obj.msg_ids in
     let str = String.concat ~sep:" " (List.map ~f:Int64.to_string msg_ids) in
@@ -474,25 +459,25 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       (* Hashtbl.remove t.request_map msg_id *)
     )
 
-  let handle_detailed_info t msg_id (obj: TLG.C_msg_detailed_info.t) =
+  let handle_detailed_info t msg_id (obj: TLM.C_msg_detailed_info.t) =
     (* TODO: *)
     Caml.print_endline @@ Printf.sprintf
       "msg_detailed_info [msg_id %Ld]" obj.msg_id;
     t.pending_ack <- msg_id :: t.pending_ack
 
-  let handle_new_detailed_info t msg_id (obj: TLG.C_msg_new_detailed_info.t) =
+  let handle_new_detailed_info t msg_id (obj: TLM.C_msg_new_detailed_info.t) =
     (* TODO: *)
     Caml.print_endline @@ Printf.sprintf
       "msg_new_detailed_info [answer_msg_id %Ld]" obj.answer_msg_id;
     t.pending_ack <- msg_id :: t.pending_ack
 
-  let handle_future_salts t (obj: TLG.C_future_salts.t) =
+  let handle_future_salts t (obj: TLM.C_future_salts.t) =
     (* TODO: *)
     Caml.print_endline @@ Printf.sprintf
       "future_salts [req_msg_id %Ld]" obj.req_msg_id;
     Hashtbl.remove t.sent_msg_map obj.req_msg_id
 
-  let rec handle_container t (cont: MTPObject.msg_container) =
+  let rec handle_container t (cont: MTPObject.tl_msg_container) =
     Caml.print_endline @@ Printf.sprintf
       "msg_container [%d messages]" (List.length cont.messages);
     List.iter cont.messages ~f:(fun msg ->
@@ -533,25 +518,24 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       (Hashtbl.keys t.sent_msg_map |> List.sexp_of_t Int64.sexp_of_t |> Sexp.to_string); *)
     recv_loop t
 
-  let create_ack t = {
+  let create_ack t = MTPMessage.{
     msg_id = gen_msg_id t;
     msg_seq_no = gen_seq_no t false;
-    data = tl_encode (module TLG.C_msgs_ack) { msg_ids = C_vector t.pending_ack }
+    data = tl_encode (module TLM.C_msgs_ack) { msg_ids = C_vector t.pending_ack }
   }
 
   let rec send_loop t =
     begin match t.pending_ack with
     | [] -> ()
-    | _ -> Mtpqueue.add t.send_queue (create_ack t); t.pending_ack <- []
+    | _ -> AsyncQueue.add t.send_queue (create_ack t); t.pending_ack <- []
     end;
-    let%lwt list = Mtpqueue.get_all t.send_queue in
+    let%lwt list = AsyncQueue.get_all t.send_queue in
     let msg = match list with
       | [x] ->
         Hashtbl.set t.sent_msg_map ~key:x.msg_id ~data:(SimpleMessage x);
         x
       | xs ->
-        let f x = x |> convert_msg |> MTPObject.encode_message in
-        let data = MTPObject.encode_msg_container (List.map ~f xs) in
+        let data = MTPContainer.encode (List.map ~f:MTPMessage.encode xs) in
         Caml.print_endline @@ Printf.sprintf
           "Sending container with %d message(s)" (List.length xs);
         let msg_ids = List.map xs ~f:(fun x ->
@@ -576,7 +560,8 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
   =
     let msg_id = gen_msg_id t in
     let msg_seq_no = gen_seq_no t content_related in
-    let msg = { msg_id; msg_seq_no; data = tl_encode (module O) o } in
+    let data = tl_encode (module O) o in
+    let msg = MTPMessage.{ msg_id; msg_seq_no; data } in
     let (promise, resolver) = Lwt.task () in
     let rq = Request (resolver, (module O)) in
     Hashtbl.set t.request_map ~key:msg_id ~data:rq;
