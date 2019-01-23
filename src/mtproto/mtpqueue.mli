@@ -6,4 +6,6 @@ val create: unit -> 'a t
 
 val add: 'a t -> 'a -> unit
 
-val get: 'a t -> 'a list Lwt.t
+val add_all: 'a t -> 'a list -> unit
+
+val get_all: 'a t -> 'a list Lwt.t

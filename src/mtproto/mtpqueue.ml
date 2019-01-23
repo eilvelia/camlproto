@@ -1,27 +1,31 @@
 open! Base
 
 type 'a t = {
-  queue: 'a Queue.t;
+  mutable queue: 'a list;
   mutable element_added: unit -> unit;
 }
 
 let noop () = ()
 
 let create () = {
-  queue = Queue.create (); (* TODO: maybe use plain lists instead *)
+  queue = [];
   element_added = noop;
 }
 
 let dequeue_all t =
-  let list = Queue.to_list t.queue in
-  Queue.clear t.queue;
-  list
+  let output_list = t.queue in
+  t.queue <- [];
+  output_list
 
 let add t x =
-  Queue.enqueue t.queue x;
+  t.queue <- x :: t.queue;
   t.element_added ()
 
-let get t =
+let add_all t xs =
+  t.queue <- xs @ t.queue;
+  t.element_added ()
+
+let get_all t =
   let (promise, rs) = Lwt.task () in
 
   let list = dequeue_all t in
