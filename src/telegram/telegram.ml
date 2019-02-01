@@ -43,25 +43,29 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
 
   type t = { mtp: MTP.t }
 
-  let create () =
-    let%lwt mtp = MTP.create () in
+  let create ?(auth_key: Cstruct.t option) () =
+    let%lwt mtp = MTP.create ?auth_key () in
+
+    let%lwt () = match auth_key with
+      | Some _ -> Lwt.return_unit
+      | None ->
+        let%lwt _new_auth_key = MTP.do_authentication mtp in
+        (* Logger.dump "new auth_key" new_auth_key; *)
+        Lwt.return_unit
+    in
 
     let t = { mtp } in
-
-    let%lwt auth_key = MTP.do_authentication mtp in
-
-    Logger.dump "new auth_key" auth_key;
 
     Lwt.return t
 
   let invoke t = MTP.invoke t.mtp
 
   let init_with
-    t
+    (t: t)
     (s: Settings.t)
-    (type a result)
-    (module X : TLFunc with type t = a and type ResultM.t = result)
-    (x: a)
+    (type x result)
+    (module X : TLFunc with type t = x and type ResultM.t = result)
+    (x: x)
     : result Lwt.t
   =
     MTP.invoke t.mtp (module TLT.C_invokeWithLayer(TLT.C_initConnection(X))) {
