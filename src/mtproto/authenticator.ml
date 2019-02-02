@@ -6,6 +6,9 @@ module Crypto = Math.Crypto
 module Bigint = Math.Bigint
 module RsaManager = Crypto.Rsa.RsaManager
 
+let src = Logs.Src.create "camlproto.mtproto.auth"
+module Log = (val Logs.src_log src : Logs.LOG)
+
 let random_padding (cs: Cstruct.t) (start: int): unit =
   let len = Cstruct.len cs in
   let size = len - start in
@@ -57,10 +60,13 @@ let authenticate
   (rsa: RsaManager.t)
 =
   let open Sender in
+  let hexdump_pp = Cstruct.hexdump_pp in
 
   let nonce = Crypto.SecureRand.rand_cs 16 in
 
-  (* Logger.dump "nonce" nonce; *)
+  Log.debug (fun m -> m "nonce:@.%a" hexdump_pp nonce);
+
+  Log.info (fun m -> m "Sending req_pq_multi");
 
   let%lwt (C_resPQ ({ server_nonce; _ } as res_pq)) =
     invoke_unencrypted_obj t (module TLM.C_req_pq_multi) { nonce } in
@@ -68,12 +74,12 @@ let authenticate
   if Cstruct.equal res_pq.nonce nonce |> not then
     raise @@ AuthenticationError "1: Invalid nonce from server";
 
-  (* Logger.dump "server_nonce" res_pq.server_nonce; *)
+  Log.debug (fun m -> m "server_nonce:@.%a" hexdump_pp res_pq.server_nonce);
 
   let pq = Cstruct.BE.get_uint64 res_pq.pq 0 in
   let (p, q) = Math.Factorization.pq_prime pq in
 
-  Caml.print_endline @@ Printf.sprintf "pq %Ld %LX" pq pq;
+  Log.debug (fun m -> m "pq %Ld %LX" pq pq);
 
   let p_bytes = Cstruct.create_unsafe 4 in
   Cstruct.BE.set_uint32 p_bytes 0 (Int32.of_int64_exn p);
@@ -104,6 +110,8 @@ let authenticate
 
   let encrypted_data = RsaManager.encrypt ~key:rsa_key data_with_hash in
 
+  Log.info (fun m -> m "Sending req_DH_params");
+
   let%lwt dh_params = invoke_unencrypted_obj t (module TLM.C_req_DH_params) {
     nonce;
     server_nonce;
@@ -116,7 +124,7 @@ let authenticate
   match dh_params with
   | C_server_DH_params_ok params ->
     begin
-      Caml.print_endline "server_DH_params_ok";
+      Log.info (fun m -> m "server_DH_params_ok");
 
       if Cstruct.equal params.nonce nonce |> not then
         raise @@ AuthenticationError "2: Invalid nonce from server";
@@ -146,22 +154,21 @@ let authenticate
       if Cstruct.equal server_dh_inner.server_nonce server_nonce |> not then
         raise @@ AuthenticationError "3: Invalid server_nonce from server";
 
-      (* Logger.dump "dh_prime" server_dh_inner.dh_prime; *)
-      (* Caml.print_endline @@ Printf.sprintf
-        "server_time %d\n" server_dh_inner.server_time; *)
+      (* Log.debug (fun m -> m "dh_prime:@.%a" hexdump_pp server_dh_inner.dh_prime); *)
+
+      Log.info (fun m -> m "server_time: %d" server_dh_inner.server_time);
 
       let current_time = Platform.get_current_time () |> Float.to_int in
       let time_offset = server_dh_inner.server_time - current_time in
 
       if server_dh_inner.g <> good_g then begin
-        Caml.print_endline @@ Printf.sprintf
-          "Warning: Unknown DH g %d" server_dh_inner.g;
+        Log.warn (fun m -> m "Unknown DH g: %d" server_dh_inner.g);
         if reject_unknown_dh_params then
           raise @@ AuthenticationError "3: Unknown DH g"
       end;
 
       if Cstruct.equal server_dh_inner.dh_prime good_p |> not then begin
-        Logger.dump "Warning: Unknown DH p" server_dh_inner.dh_prime;
+        Log.warn (fun m -> m "Unknown DH p:@.%a" hexdump_pp server_dh_inner.dh_prime);
         if reject_unknown_dh_params then
           raise @@ AuthenticationError "3: Unknown DH p"
       end;
@@ -178,9 +185,9 @@ let authenticate
       let g_a_b = Bigint.powm g_a b dh_prime in
       let auth_key = Bigint.to_cstruct_be g_a_b in
 
-      Caml.print_endline @@ Printf.sprintf
+      Log.info (fun m -> m
         "Auth key created. Auth_key len: %d. Time_offset: %d."
-        (Cstruct.len auth_key) time_offset;
+        (Cstruct.len auth_key) time_offset);
 
       (* TODO: Checks from https://core.telegram.org/mtproto/security_guidelines *)
 
@@ -210,15 +217,19 @@ let authenticate
       random_padding data_with_hash (20 + len);
       let encrypted_data = Crypto.IGE.encrypt data_with_hash tmp_key tmp_iv in
 
-      (* Logger.dump "client_dh_inner_data" client_dh_inner_data;
-      Logger.dump "dh data_with_hash" data_with_hash; *)
+      (* Log.debug (fun m -> m
+        "client_dh_inner_data:@.%a" hexdump_pp client_dh_inner_data); *)
+      (* Log.debug (fun m -> m
+        "dh data_with_hash:@.%a" hexdump_pp data_with_hash); *)
+
+      Log.info (fun m -> m "Sending set_client_DH_params");
 
       let%lwt dh_answer = invoke_unencrypted_obj t (module TLM.C_set_client_DH_params)
         { nonce; server_nonce; encrypted_data; } in
 
       match dh_answer with
       | C_dh_gen_ok dh_gen -> begin
-        Caml.print_endline "dh_gen_ok";
+        Log.info (fun m -> m "dh_gen_ok");
 
         if Cstruct.equal dh_gen.nonce nonce |> not then
           raise @@ AuthenticationError "end: Invalid nonce from server";
@@ -237,8 +248,10 @@ let authenticate
         let new_nonce_hash = Cstruct.sub new_nonce_hash 4 16 in
 
         if Cstruct.equal new_nonce_hash dh_gen.new_nonce_hash1 |> not then begin
-          Logger.dump "client new_nonce_hash" new_nonce_hash;
-          Logger.dump "server new_nonce_hash" dh_gen.new_nonce_hash1;
+          Log.err (fun m -> m
+            "client new_nonce_hash:@.%a" hexdump_pp new_nonce_hash);
+          Log.err (fun m -> m
+            "server new_nonce_hash:@.%a" hexdump_pp dh_gen.new_nonce_hash1);
           raise @@ AuthenticationError "end: Invalid new_nonce_hash"
         end;
 

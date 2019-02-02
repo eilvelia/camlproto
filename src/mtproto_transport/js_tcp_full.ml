@@ -22,7 +22,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
     js_tcp_full##create (Js.string address) (Js.string port) (Js.wrap_callback cb);
     promise
   let send t packet =
-    Caml.print_endline "send";
+    Caml.print_endline "js_tcp_full##send start";
     let (promise, resolver) = Lwt.task () in
     let cb () = Lwt.wakeup_later resolver () in
     js_tcp_full##send t (Cstruct.to_bigarray packet) (Js.wrap_callback cb);

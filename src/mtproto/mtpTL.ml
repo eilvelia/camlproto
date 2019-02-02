@@ -83,10 +83,14 @@ module C_gzip_packed = struct
     decode dec
 end
 
+let src = Logs.Src.create "camlproto.mtproto.gzip"
+module Log = (val Logs.src_log src : Logs.LOG)
+
 let decode_gzip_packed (decoder: Decoder.t) =
-  (C_gzip_packed.decode_boxed decoder).packed_data
-    |> Gzip.decompress
-    |> Logger.dump_t "gzip decompressed"
+  let data = (C_gzip_packed.decode_boxed decoder).packed_data in
+  let decompressed = Gzip.decompress data in
+  Log.debug (fun m -> m "gzip decompressed:@.%a" Cstruct.hexdump_pp decompressed);
+  decompressed
 
 (* let decode_obj_or_gzip_packed (decode: Decoder.t -> 'a) (data: Cstruct.t): 'a =
   let newdata = if Cstruct.equal (Cstruct.sub data 0 4) gzip_packed_magic_le

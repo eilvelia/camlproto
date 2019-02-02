@@ -39,4 +39,7 @@ let main () =
 
   Lwt.pick [promise; Cl.loop t]
 
-let _ = Lwt_main.run (main ())
+let () =
+  Logs.(set_level (Some Debug));
+  Logs.set_reporter (CamlReporter.reporter ());
+  Lwt_main.run (main ())

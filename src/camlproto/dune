@@ -3,7 +3,7 @@
   (public_name camlproto)
   (synopsis "Telegram MTProto client implementation")
   (libraries
-    base
+    base logs
     camlproto.mtproto camlproto.mtproto_transport camlproto.math
     camlproto.telegram camlproto.TL camlproto.TLGen)
 )

@@ -2,7 +2,7 @@
   (name mtproto_transport)
   (public_name camlproto.mtproto_transport)
   (libraries
-    base cstruct lwt js_of_ocaml camlproto.logger
+    base cstruct lwt js_of_ocaml logs
     camlproto.platform camlproto.math camlproto.mtproto_misc)
   (modules (:standard \ caml_tcp_full caml_tcp_abridged))
   (js_of_ocaml (javascript_files

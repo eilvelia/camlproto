@@ -20,4 +20,7 @@ let main () =
   let%lwt () = Lwt.pick [send_pings (); MTP.recv_loop t; MTP.send_loop t] in
   Lwt.return ()
 
-let () = Lwt_main.run (main ())
+let () =
+  Logs.(set_level (Some Debug));
+  Logs.set_reporter (CamlReporter.reporter ());
+  Lwt_main.run (main ())

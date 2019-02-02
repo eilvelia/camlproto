@@ -5,7 +5,6 @@ module TransportTcpFull: Types.MTProtoTransport = struct
   type t = {
     input: Lwt_io.input_channel;
     output: Lwt_io.output_channel;
-    (* conn: Lwt_io.input_channel * Lwt_io.output_channel; *)
     mutable seq_no: int32;
   }
 
@@ -18,7 +17,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
     Lwt.return { input; output; seq_no = 0l }
 
   let send t packet =
-    Caml.Printf.printf "tcp_full send [seq_no %ld]\n" t.seq_no;
+    Log.debug (fun m -> m "tcp_full send [seq_no %ld]" t.seq_no);
     (* Cstruct.hexdump packet; *)
 
     let len = 4 * 3 + Cstruct.len packet in
@@ -41,7 +40,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
 
   let receive t =
     let%lwt len_int32 = Lwt_io.LE.read_int32 t.input in
-    Caml.Printf.printf "tcp_full received [len %ld]\n" len_int32;
+    Log.debug (fun m -> m "tcp_full received [len %ld]" len_int32);
     let len = Int.of_int32_exn len_int32 in
     let%lwt seq_no = Lwt_io.LE.read_int32 t.input in
 

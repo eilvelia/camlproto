@@ -1,5 +1,0 @@
-(library
-  (name logger)
-  (public_name camlproto.logger)
-  (libraries base cstruct)
-)

@@ -6,6 +6,9 @@ open TL.Types
 module TLM = TLGen.MTProto
 module TLT = TLGen.Telegram
 
+let src = Logs.Src.create "camlproto.telegram"
+module Log = (val Logs.src_log src : Logs.LOG)
+
 module Settings = struct
   type t = {
     api_id: int;
@@ -50,7 +53,7 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
       | Some _ -> Lwt.return_unit
       | None ->
         let%lwt _new_auth_key = MTP.do_authentication mtp in
-        (* Logger.dump "new auth_key" new_auth_key; *)
+        (* Log.debug (fun m -> m "new auth_key:@.%a" hexdump_pp new_auth_key); *)
         Lwt.return_unit
     in
 
@@ -85,7 +88,7 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
 
   let init (s: Settings.t) (t: t) =
     let%lwt (C_config res) = init_with t s (module TLT.C_help_getConfig) C in
-    Caml.print_endline ("help.getConfig res. me_url_prefix: " ^ res.me_url_prefix);
+    Log.info (fun m -> m "help.getConfig res. me_url_prefix: %s" res.me_url_prefix);
     Lwt.return_unit
 
   let loop t =

@@ -1,5 +1,0 @@
-open! Base
-
-type logger = string -> unit
-type logger_name = string
-val create: logger_name -> logger

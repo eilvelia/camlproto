@@ -41,7 +41,8 @@ module RsaManager = struct
       |> Platform.PlatformCrypto.SHA1.digest
     in
     (* let finger_cs = Cstruct.sub cs 12 8 in
-    Logger.dump "New fingerprint" finger_cs; *)
+    Caml.print_endline "New fingerprint";
+    Cstruct.hexdump finger_cs; *)
     Cstruct.LE.get_uint64 cs 12
 
   let create_with_pub_keys (l: pub list) = List.map l ~f:(fun k -> {

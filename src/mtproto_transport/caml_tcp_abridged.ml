@@ -4,7 +4,6 @@ module TransportTcpAbridged: Types.MTProtoTransport = struct
   type t = {
     input: Lwt_io.input_channel;
     output: Lwt_io.output_channel;
-    (* conn: Lwt_io.input_channel * Lwt_io.output_channel; *)
   }
 
   exception Error of string
@@ -17,7 +16,7 @@ module TransportTcpAbridged: Types.MTProtoTransport = struct
     Lwt.return { input; output }
 
   let send t packet =
-    Caml.Printf.printf "tcp_abridged send (len %d)\n" (Cstruct.len packet);
+    Log.debug (fun m -> m "tcp_abridged send (len %d)" (Cstruct.len packet));
     (* Cstruct.hexdump packet; *)
 
     let data_len = Cstruct.len packet / 4 in
@@ -59,7 +58,7 @@ module TransportTcpAbridged: Types.MTProtoTransport = struct
     in
     let len = len lsl 2 in
 
-    Caml.Printf.printf "tcp_abridged received [len %d]\n" len;
+    Log.debug (fun m -> m "tcp_abridged received [len %d]" len);
 
     let%lwt body_str = Lwt_io.read ~count:len t.input in
     let body = Cstruct.of_string body_str in
