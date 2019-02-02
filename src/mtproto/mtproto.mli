@@ -1,8 +1,7 @@
 open! Base
 open Mtproto_transport
-open Types
 
-module Types = Types
+include (module type of Types)
 
 val get_error_description: int -> string
 (** [get_error_description error_code] *)

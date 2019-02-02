@@ -13,6 +13,7 @@ module TransportTcpFull: Types.MTProtoTransport = struct
   let create (address, port): t Lwt.t =
     let%lwt addresses = Lwt_unix.getaddrinfo address port [] in
     let addr = (List.hd_exn addresses).ai_addr in
+    Log.info (fun m -> m "tcp_full: Connecting to %s:%s" address port);
     let%lwt (input, output) = Lwt_io.open_connection addr in
     Lwt.return { input; output; seq_no = 0l }
 

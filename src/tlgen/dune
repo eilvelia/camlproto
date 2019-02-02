@@ -12,6 +12,6 @@
 
 (library
   (name TLGen)
-  (public_name camlproto.TLGen)
-  (libraries base camlproto.TL)
+  (public_name camlproto.tlgen)
+  (libraries base camlproto.tl)
 )

@@ -1,6 +1,6 @@
 open! Base
 
-module MakeIGE (ECB: Platform.Types.AES): sig
+module MakeIGE (ECB: Platform.AES): sig
   val encrypt: Cstruct.t -> Cstruct.t -> Cstruct.t -> Cstruct.t
   (** [encrypt plaintext key iv] *)
 

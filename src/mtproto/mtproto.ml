@@ -1,7 +1,6 @@
 open! Base
 open Mtproto_transport
 open Mtproto_misc
-(* open Types *)
 open MtpTL
 
 module TLM = TLGen.MTProto
@@ -9,7 +8,7 @@ module Crypto = Math.Crypto
 module Bigint = Math.Bigint
 module RsaManager = Crypto.Rsa.RsaManager
 
-module Types = Types
+include Types
 
 let src = Logs.Src.create "camlproto.mtproto.client"
 module Log = (val Logs.src_log src : Logs.LOG)
@@ -374,7 +373,7 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     match packed_msg with
     | SimpleMessage ({ msg_id; _ } as msg) -> begin
       Log.info (fun m -> m
-        "Resending message [msg_id %Ld] [seqno %ld]" msg.msg_id msg.msg_seq_no);
+        "Resending message [msg_id %Ld] [seqno %ld]" msg_id msg.msg_seq_no);
       let new_msg_id = gen_msg_id t in
       let new_msg = { msg with msg_id = new_msg_id } in
       send_msg t new_msg;
@@ -396,10 +395,10 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
     Hashtbl.remove t.sent_msg_map msg_id
 
   let handle_bad_msg_notification t msg_id (obj: TLM.C_bad_msg_notification.t) =
-    let error_desc = get_error_description obj.error_code in
-    Log.info (fun m -> m
-      "bad_msg_notification [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
-      obj.bad_msg_id obj.bad_msg_seqno obj.error_code error_desc);
+    Log.warn (fun m ->
+      let error_desc = get_error_description obj.error_code in
+      m "bad_msg_notification [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
+        obj.bad_msg_id obj.bad_msg_seqno obj.error_code error_desc);
     let fatal = ref false in
     begin match obj.error_code with
     | 16 | 17 -> update_time_offset t msg_id
@@ -410,10 +409,10 @@ module MakeMTProtoV2Client (T: MTProtoTransport) = struct
       else resend t obj.bad_msg_id
 
   let handle_bad_server_salt t (obj: TLM.C_bad_server_salt.t) =
-    let error_desc = get_error_description obj.error_code in
-    Log.info (fun m -> m
-      "bad_server_salt [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
-      obj.bad_msg_id obj.bad_msg_seqno obj.error_code error_desc);
+    Log.warn (fun m ->
+      let error_desc = get_error_description obj.error_code in
+      m "bad_server_salt [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
+        obj.bad_msg_id obj.bad_msg_seqno obj.error_code error_desc);
     Log.info (fun m -> m "New server salt: 0x%LX" obj.new_server_salt);
     t.server_salt <- obj.new_server_salt;
     resend t obj.bad_msg_id

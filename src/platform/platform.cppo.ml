@@ -2,6 +2,8 @@
 
 open! Base
 
+include Types
+
 #ifdef JS_OF_OCAML
 
 include Js_time
@@ -19,5 +21,3 @@ module PlatformBigint = Caml_bigint
 module PlatformGzip = Caml_gzip.Gzip
 
 #endif
-
-module Types = Types

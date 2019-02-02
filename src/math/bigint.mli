@@ -1,4 +1,4 @@
-include Platform.Types.PLATFORM_BIGINT
+include Platform.PLATFORM_BIGINT
 
 (* val bits: t -> int *)
 (* val of_cstruct_be: ?bits:int -> Cstruct.t -> t *)

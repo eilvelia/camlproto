@@ -3,7 +3,7 @@
   (public_name camlproto.mtproto)
   (libraries
     base cstruct lwt logs
-    camlproto.TL camlproto.TLGen camlproto.platform
+    camlproto.tl camlproto.tlgen camlproto.platform
     camlproto.math camlproto.mtproto_misc camlproto.mtproto_transport)
   (preprocess (pps lwt_ppx))
 )

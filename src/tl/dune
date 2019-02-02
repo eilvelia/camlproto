@@ -1,5 +1,5 @@
 (library
   (name TL)
-  (public_name camlproto.TL)
+  (public_name camlproto.tl)
   (libraries base cstruct)
 )

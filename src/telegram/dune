@@ -4,6 +4,6 @@
   (libraries
     base cstruct lwt
     camlproto.mtproto camlproto.mtproto_misc
-    camlproto.mtproto_transport camlproto.TLGen)
+    camlproto.mtproto_transport camlproto.tlgen)
   (preprocess (pps lwt_ppx))
 )

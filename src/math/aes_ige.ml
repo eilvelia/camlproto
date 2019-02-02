@@ -1,7 +1,5 @@
 open! Base
 
-module type IAES = Platform.Types.AES
-
 (* let (.%[]<-) = Cstruct.set_char
 let (.%[]) = Cstruct.get_char *)
 
@@ -15,7 +13,7 @@ let clone_cstruct (cs: Cstruct.t): Cstruct.t =
   Caml.print_endline (name ^ " " ^ (Int.to_string @@ Cstruct.len cs));
   Cstruct.hexdump cs *)
 
-module MakeIGE (ECB: IAES) = struct
+module MakeIGE (ECB: Platform.AES) = struct
   open ECB
 
   let encrypt (plain: Cstruct.t) (key: Cstruct.t) (iv: Cstruct.t) =
