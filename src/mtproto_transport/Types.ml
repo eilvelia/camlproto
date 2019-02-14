@@ -1,5 +1,5 @@
 open! Base
-open Mtproto_misc
+open MTProtoMisc
 
 module type MTProtoTransport = sig
   type t

@@ -13,7 +13,7 @@ end
 
 let js_tcp_full: js_tcp_full Js.t = Js.Unsafe.js_expr "js_tcp_full"
 
-module TransportTcpFull: Types.MTProtoTransport = struct
+module Transport: Types.MTProtoTransport = struct
   type t = js_t
   exception Error of string (* Not used *)
   let create (address, port) =

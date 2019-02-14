@@ -6,10 +6,10 @@ Platform-dependent functions:
 - sha1
 - sha256
 - secure random (`rand_cs(size)` function that returns byte array)
-- bigint, full list of functions is available in [types.ml][] file.
+- bigint, full list of functions is available in [Types.ml][] file.
 - gzip (decompress)
 
-[types.ml]: types.ml
+[Types.ml]: Types.ml
 
 ### OCaml
 

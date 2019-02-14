@@ -1,14 +1,12 @@
 open! Base
 
-module Crypto: Types.PLATFORM_CRYPTO = struct
-  module SHA1 = Nocrypto.Hash.SHA1
-  module SHA256 = Nocrypto.Hash.SHA256
-  module AES = struct
-    type key = Nocrypto.Cipher_block.AES.ECB.key
-    let ecb_create_key = Nocrypto.Cipher_block.AES.ECB.of_secret
-    let ecb_encrypt = Nocrypto.Cipher_block.AES.ECB.encrypt
-    let ecb_decrypt = Nocrypto.Cipher_block.AES.ECB.decrypt
-  end
+module SHA1 = Nocrypto.Hash.SHA1
+module SHA256 = Nocrypto.Hash.SHA256
+module AES = struct
+  type key = Nocrypto.Cipher_block.AES.ECB.key
+  let ecb_create_key = Nocrypto.Cipher_block.AES.ECB.of_secret
+  let ecb_encrypt = Nocrypto.Cipher_block.AES.ECB.encrypt
+  let ecb_decrypt = Nocrypto.Cipher_block.AES.ECB.decrypt
 end
 
 

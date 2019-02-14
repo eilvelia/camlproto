@@ -1,5 +1,5 @@
 (library
-  (name telegram)
+  (name Telegram)
   (public_name camlproto.telegram)
   (libraries
     base cstruct lwt

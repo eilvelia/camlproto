@@ -1,16 +1,16 @@
 (library
-  (name platform)
+  (name Platform)
   (public_name camlproto.platform)
   (libraries base js_of_ocaml cstruct nocrypto nocrypto.unix zarith ezgzip)
   (js_of_ocaml (javascript_files
-    leemon.js
-    js.js
-    js_primitives.js))
+    Leemon.js
+    Js.js
+    JsPrimitives.js))
   (preprocess (pps js_of_ocaml-ppx))
 )
 
 (rule
-  (targets platform.ml)
-  (deps   (:first-dep platform.cppo.ml))
+  (targets Platform.ml)
+  (deps   (:first-dep Platform.cppo.ml))
   (action (run %{bin:cppo} %{first-dep} -D "%{profile} 1" -o %{targets}))
 )

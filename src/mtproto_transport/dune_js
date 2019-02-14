@@ -1,18 +1,18 @@
 (library
-  (name mtproto_transport)
+  (name MTProtoTransport)
   (public_name camlproto.mtproto_transport)
   (libraries
     base cstruct lwt js_of_ocaml logs
     camlproto.platform camlproto.math camlproto.mtproto_misc)
-  (modules (:standard \ caml_tcp_full caml_tcp_abridged))
+  (modules (:standard \ CamlTcpFull CamlTcpAbridged))
   (js_of_ocaml (javascript_files
-    js_tcp_full.js
-    js_websocket.js))
+    JsTcpFull.js
+    JsWebsocket.js))
   (preprocess (pps lwt_ppx js_of_ocaml-ppx))
 )
 
 (rule
-  (targets mtproto_transport.ml)
-  (deps   (:first-dep mtproto_transport.cppo.ml))
+  (targets MTProtoTransport.ml)
+  (deps   (:first-dep MTProtoTransport.cppo.ml))
   (action (run %{bin:cppo} %{first-dep} -D "%{profile} 1" -o %{targets}))
 )

@@ -1,5 +1,5 @@
 open! Base
-open Mtproto_transport
+open MTProtoTransport
 
 include (module type of Types)
 

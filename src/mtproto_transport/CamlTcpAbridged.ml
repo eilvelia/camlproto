@@ -1,6 +1,6 @@
 open! Base
 
-module TransportTcpAbridged: Types.MTProtoTransport = struct
+module Transport: Types.MTProtoTransport = struct
   type t = {
     input: Lwt_io.input_channel;
     output: Lwt_io.output_channel;

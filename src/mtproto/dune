@@ -1,5 +1,5 @@
 (library
-  (name mtproto)
+  (name MTProto)
   (public_name camlproto.mtproto)
   (libraries
     base cstruct lwt logs

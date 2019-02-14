@@ -1,6 +1,6 @@
 open! Base
-open Mtproto
-open Mtproto_transport
+open MTProto
+open MTProtoTransport
 open TL.Types
 
 module TLM = TLGen.MTProto
