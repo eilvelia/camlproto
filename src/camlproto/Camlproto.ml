@@ -2,7 +2,7 @@
 
 module TL = TL
 module MTProto = MTProto
-module MTProtoTransport = MTProtoTransport
+module MTPTransport = MTPTransport
 module Telegram = Telegram
 module TLGen = TLGen
 module Rsa = Math.Crypto.Rsa

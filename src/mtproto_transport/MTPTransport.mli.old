@@ -1,6 +1,6 @@
 open! Base
 
+include (module type of Types)
+
 module TransportTcpFull: Types.MTProtoTransport
 (* module TransportTcpAbridged: Types.MTProtoTransport *)
-
-include (module type of Types)

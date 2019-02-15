@@ -1,7 +1,7 @@
 open! Base
 open MTProtoMisc
 
-module type MTProtoTransport = sig
+module type S = sig
   type t
   exception Error of string
   val create: DcList.dc -> t Lwt.t

@@ -1,5 +1,4 @@
 open! Base
-open MTProtoTransport
 open MTProtoMisc
 open MtpTL
 
@@ -34,7 +33,7 @@ let get_error_description (error_code: int): string =
 
 (* module BaseMTProtoClient = struct end *)
 (* module MakeMTProtoV1Client = struct end *)
-module MakeMTProtoV2Client (T: MTProtoTransport) = struct
+module MakeMTProtoV2Client (T: MTPTransport.S) = struct
   open TL.Types
 
   type request = Request

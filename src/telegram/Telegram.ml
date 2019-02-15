@@ -1,6 +1,5 @@
 open! Base
 open MTProto
-open MTProtoTransport
 open TL.Types
 
 module TLM = TLGen.MTProto
@@ -41,7 +40,7 @@ let layer_const = 82
 (* module type TelegramSession = sig
 end *)
 
-module MakeTelegramClient (T: MTProtoTransport) = struct
+module MakeTelegramClient (T: MTPTransport.S) = struct
   module MTP = MakeMTProtoV2Client(T)
 
   type t = { mtp: MTP.t }
@@ -95,5 +94,5 @@ module MakeTelegramClient (T: MTProtoTransport) = struct
     Lwt.pick [MTP.recv_loop t.mtp; MTP.send_loop t.mtp]
 end
 
-module TelegramClient = MakeTelegramClient(TransportTcpFull)
-(** [TelegramClient = MakeTelegramClient(TransportTcpFull)] *)
+module TelegramClient = MakeTelegramClient(MTPTransport.TcpFull)
+(** [TelegramClient = MakeTelegramClient(MTPTransport.TcpFull)] *)
