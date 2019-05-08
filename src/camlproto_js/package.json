@@ -4,6 +4,7 @@
   "description": "Reserved package.",
   "main": "index.js",
   "scripts": {
+    "prepack": "node copy-files.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Bannerets <comonoid@protonmail.com>",
