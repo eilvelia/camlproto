@@ -5,7 +5,7 @@ Partially taken from
 ISC License
 
 Copyright (c) 2014-2016 David Kaloper Meršinjak
-Copyright (c) 2018 Bannerets <save14@protonmail.com>
+Copyright (c) 2018-2019 Bannerets <comonoid@protonmail.com>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

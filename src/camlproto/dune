@@ -1,7 +1,7 @@
 (library
   (name Camlproto)
   (public_name camlproto)
-  (synopsis "Telegram MTProto client implementation")
+  (synopsis "Type-safe client implementation of Telegram's MTProto")
   (libraries
     base logs
     camlproto.mtproto camlproto.mtproto_transport camlproto.math

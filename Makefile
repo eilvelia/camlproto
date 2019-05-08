@@ -20,3 +20,7 @@ clean:
 .PHONY: distrib
 distrib:
 	dune-release distrib
+
+.PHONY: lock
+lock:
+	opam lock
