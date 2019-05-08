@@ -13,15 +13,18 @@ bug-reports: "https://github.com/Bannerets/camlproto/issues"
 build: [["dune" "build" "-p" name "-j" jobs]]
 run-test: [["dune" "runtest" "-p" name]]
 depends: [
+  "ocaml" {>= "4.04.1"}
   "dune" {build & >= "1.0.0"}
   "ounit" {test & >= "2.0.0"}
-  "ocaml" {>= "4.04.1"}
   "base" {>= "0.11.0"}
-  "cstruct" {>= "3.0.0" & < "4.0.0"}
+  "cstruct" {>= "3.0.0" & < "5.0.0"}
   "lwt" {>= "3.2.1"}
   "lwt_ppx" {>= "1.0.1"}
   "logs" {>= "0.6.0"}
   "nocrypto" {>= "0.5.0"}
   "zarith" {>= "1.7"}
   "ezgzip" {>= "0.2.1"}
+  "js_of_ocaml-compiler" {build & >= "3.1.0" & < "4.0"}
+  "js_of_ocaml-ppx" {build & >= "3.1.0" & < "4.0"}
+  "js_of_ocaml" {>= "3.1.0" & < "4.0"}
 ]
