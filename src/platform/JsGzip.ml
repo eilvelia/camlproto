@@ -1,4 +1,5 @@
 open! Base
+open Js_of_ocaml
 
 class type js_gzip = object
   (* method compress: Cstruct.buffer -> Typed_array.arrayBuffer Js.t Js.meth *)

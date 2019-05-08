@@ -1,4 +1,5 @@
 open! Base
+open Js_of_ocaml
 
 type js_t
 

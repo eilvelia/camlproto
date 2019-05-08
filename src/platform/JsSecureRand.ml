@@ -1,4 +1,5 @@
 open! Base
+open Js_of_ocaml
 
 class type js_secure_rand = object
   method rand: int -> Typed_array.arrayBuffer Js.t Js.meth
