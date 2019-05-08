@@ -1,6 +1,6 @@
 # Camlproto
 
-MTProto client implementation in OCaml.
+Fully type-safe MTProto client implementation in OCaml.
 
 ## Usage
 
