@@ -1,0 +1,1 @@
+include PlatformTypes.SecureRand

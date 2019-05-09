@@ -2,7 +2,6 @@ open! Base
 (* open TL.Types *)
 open TL.Builtin
 open TLGen.MTProto
-open Math
 
 module Decoder = TL.Decoder
 (* module Encoder = TL.Encoder *)
@@ -86,36 +85,38 @@ end
 let src = Logs.Src.create "camlproto.mtproto.gzip"
 module Log = (val Logs.src_log src : Logs.LOG)
 
-let decode_gzip_packed (decoder: Decoder.t) =
-  let data = (C_gzip_packed.decode_boxed decoder).packed_data in
-  let decompressed = Gzip.decompress data in
-  Log.debug (fun m -> m "gzip decompressed:@.%a" Cstruct.hexdump_pp decompressed);
-  decompressed
+module MakeRes (Platform: PlatformTypes.S) = struct
+  module Math = Math.Make(Platform)
+  open Math
 
-(* let decode_obj_or_gzip_packed (decode: Decoder.t -> 'a) (data: Cstruct.t): 'a =
-  let newdata = if Cstruct.equal (Cstruct.sub data 0 4) gzip_packed_magic_le
-    then decode_gzip_packed (Decoder.of_cstruct data)
-    else data
-  in
-  decode (Decoder.of_cstruct newdata) *)
+  let decode_gzip_packed (decoder: Decoder.t) =
+    let data = (C_gzip_packed.decode_boxed decoder).packed_data in
+    let decompressed = Gzip.decompress data in
+    Log.debug (fun m -> m "gzip decompressed:@.%a" Cstruct.hexdump_pp decompressed);
+    decompressed
 
-let rec decode_result
-  (decode: Decoder.t -> 'a) (data: Cstruct.t)
-  : ('a, C_rpc_error.t) Result.t
-=
-  let decoder = Decoder.of_cstruct data in
-  let magic = Cstruct.sub data 0 4 in
-  match magic with
-  | x when Cstruct.equal x gzip_packed_magic_le ->
-    decode_result decode (decode_gzip_packed decoder)
-  | x when Cstruct.equal x rpc_error_magic_le ->
-    let (C_rpc_error err) = RpcError.decode decoder in
-    Error err
-  | _ ->
-    Ok (decode decoder)
+  (* let decode_obj_or_gzip_packed (decode: Decoder.t -> 'a) (data: Cstruct.t): 'a =
+    let newdata = if Cstruct.equal (Cstruct.sub data 0 4) gzip_packed_magic_le
+      then decode_gzip_packed (Decoder.of_cstruct data)
+      else data
+    in
+    decode (Decoder.of_cstruct newdata) *)
 
-(* let _ = decode_result C_req_pq.decode (
-  Cstruct.of_hex "19 ca 44 21  00 11 22 33  01 60 00 00") *)
+  let rec decode_result
+    (decode: Decoder.t -> 'a) (data: Cstruct.t)
+    : ('a, C_rpc_error.t) Result.t
+  =
+    let decoder = Decoder.of_cstruct data in
+    let magic = Cstruct.sub data 0 4 in
+    match magic with
+    | x when Cstruct.equal x gzip_packed_magic_le ->
+      decode_result decode (decode_gzip_packed decoder)
+    | x when Cstruct.equal x rpc_error_magic_le ->
+      let (C_rpc_error err) = RpcError.decode decoder in
+      Error err
+    | _ ->
+      Ok (decode decoder)
+end
 
 module MTPObject = struct
   exception NotFound of int32 (* magic *)

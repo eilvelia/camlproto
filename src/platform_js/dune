@@ -1,0 +1,10 @@
+(library
+  (name PlatformJs)
+  (public_name camlproto.platform_js)
+  (libraries base js_of_ocaml cstruct camlproto.platform_types)
+  (js_of_ocaml (javascript_files
+    Leemon.js
+    Js.js
+    Primitives.js))
+  (preprocess (pps js_of_ocaml-ppx))
+)

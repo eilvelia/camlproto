@@ -1,7 +1,9 @@
 open! Base
-open Math
 
 module Transport: Types.S = struct
+  module Math = Math.Make(PlatformCaml)
+  module Crypto = Math.Crypto
+
   type t = {
     input: Lwt_io.input_channel;
     output: Lwt_io.output_channel;

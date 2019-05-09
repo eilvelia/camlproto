@@ -33,6 +33,8 @@ module type MTProtoClient = sig
 
   type t
 
+  type rsa_manager
+
   exception MTPError of string
 
   exception RpcError of int * string
@@ -40,7 +42,7 @@ module type MTProtoClient = sig
 
   val create
     :  ?auth_key:Cstruct.t
-    -> ?rsa:Math.Crypto.Rsa.RsaManager.t
+    -> ?rsa:rsa_manager
     -> ?dc:DcList.dc
     -> unit
     -> t Lwt.t

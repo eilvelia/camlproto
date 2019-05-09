@@ -1,8 +1,6 @@
 open! Base
 open Js_of_ocaml
 
-module type CRYPTO = Types.PLATFORM_CRYPTO
-
 type sha1_t
 
 class type js_sha1 = object
@@ -34,7 +32,7 @@ end
 
 let js_aes: js_aes Js.t = Js.Unsafe.js_expr "js_aes"
 
-module Crypto: CRYPTO = struct
+module Crypto: PlatformTypes.Crypto = struct
   module SHA1 = struct
     type t = sha1_t
     let init () = js_sha1##init ()

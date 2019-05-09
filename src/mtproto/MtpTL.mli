@@ -38,8 +38,10 @@ module C_gzip_packed: sig
   val decode_boxed: TL.Decoder.t -> t
 end
 
-val decode_result
-  : (TL.Decoder.t -> 'a) -> Cstruct.t -> ('a, C_rpc_error.t) Result.t
+module MakeRes (Platform: PlatformTypes.S): sig
+  val decode_result
+    : (TL.Decoder.t -> 'a) -> Cstruct.t -> ('a, C_rpc_error.t) Result.t
+end
 
 module MTPObject: sig
   exception NotFound of int32

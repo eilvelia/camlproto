@@ -1,4 +1,6 @@
-include Platform.PLATFORM_BIGINT
+open! Base
+
+module Make (Platform: PlatformTypes.S): PlatformTypes.Bigint
 
 (* val bits: t -> int *)
 (* val of_cstruct_be: ?bits:int -> Cstruct.t -> t *)

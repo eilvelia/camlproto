@@ -5,11 +5,11 @@ Platform-dependent functions:
 - aes ecb
 - sha1
 - sha256
-- secure random (`rand_cs(size)` function that returns byte array)
-- bigint, full list of functions is available in [Types.ml][] file.
+- secure random (`rand_cs(size)` function that returns a byte array)
+- bigint, full list of functions is available in the [PlatformTypes.ml][] file.
 - gzip (decompress)
 
-[Types.ml]: Types.ml
+[PlatformTypes.ml]: PlatformTypes.ml
 
 ### OCaml
 

@@ -3,9 +3,6 @@ open MTProtoMisc
 open MtpTL
 
 module TLM = TLGen.MTProto
-module Crypto = Math.Crypto
-module Bigint = Math.Bigint
-module RsaManager = Crypto.Rsa.RsaManager
 
 include Types
 
@@ -33,8 +30,18 @@ let get_error_description (error_code: int): string =
 
 (* module BaseMTProtoClient = struct end *)
 (* module MakeMTProtoV1Client = struct end *)
-module MakeMTProtoV2Client (T: MTPTransport.S) = struct
+module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: MTPTransport.S) = struct
   open TL.Types
+
+  module Math = Math.Make(Platform)
+  module Crypto = Math.Crypto
+  module Bigint = Math.Bigint
+  module RsaManager = Crypto.Rsa.RsaManager
+
+  type rsa_manager = RsaManager.t
+
+  module Res = MakeRes(Platform)
+  open Res
 
   type request = Request
     : 'a Lwt.u * (module TLFunc with type ResultM.t = 'a)
@@ -207,6 +214,13 @@ module MakeMTProtoV2Client (T: MTPTransport.S) = struct
   =
     let%lwt () = send_unencrypted_obj t (module O) o in
     receive_unencrypted_obj t (module O.ResultM)
+
+  module Authenticator = Authenticator.Make(Platform)(struct
+    type nonrec t = t
+    let send_unencrypted_obj = send_unencrypted_obj
+    let receive_unencrypted_obj = receive_unencrypted_obj
+    let invoke_unencrypted_obj = invoke_unencrypted_obj
+  end)
 
   let get_auth_key_tuple t = match t.auth_key_tuple with
     | Some x -> x
@@ -565,13 +579,7 @@ module MakeMTProtoV2Client (T: MTPTransport.S) = struct
 
   let do_authentication t =
     let%lwt (auth_key, server_salt, time_offset) =
-      Authenticator.authenticate (module struct
-        type nonrec t = t
-        let send_unencrypted_obj = send_unencrypted_obj
-        let receive_unencrypted_obj = receive_unencrypted_obj
-        let invoke_unencrypted_obj = invoke_unencrypted_obj
-      end) t t.rsa
-    in
+      Authenticator.authenticate t t.rsa in
     t.server_salt <- server_salt;
     t.time_offset <- Int.to_int64 time_offset;
     set_auth_key t auth_key;

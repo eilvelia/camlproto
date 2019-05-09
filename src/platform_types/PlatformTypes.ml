@@ -1,6 +1,6 @@
 open! Base
 
-module type HASH_FN = sig
+module type HashFn = sig
   type t
   val init: unit -> t
   val feed: t -> Cstruct.t -> unit
@@ -15,17 +15,17 @@ module type AES = sig
   val ecb_decrypt: key:key -> Cstruct.t -> Cstruct.t
 end
 
-module type PLATFORM_CRYPTO = sig
-  module SHA1: HASH_FN
-  module SHA256: HASH_FN
+module type Crypto = sig
+  module SHA1: HashFn
+  module SHA256: HashFn
   module AES: AES
 end
 
-module type PLATFORM_SECURE_RAND = sig
+module type SecureRand = sig
   val rand_cs: int -> Cstruct.t
 end
 
-module type PLATFORM_BIGINT = sig
+module type Bigint = sig
   type t
   exception Overflow
 
@@ -60,8 +60,16 @@ module type PLATFORM_BIGINT = sig
   val to_cstruct_be: t -> Cstruct.t
 end
 
-module type GZIP = sig
+module type Gzip = sig
   exception Error of string
   (* val compress: Cstruct.t -> Cstruct.t *)
   val decompress: Cstruct.t -> Cstruct.t
+end
+
+module type S = sig
+  val get_current_time: unit -> float
+  module Crypto: Crypto
+  module SecureRand: SecureRand
+  module Bigint: Bigint
+  module Gzip: Gzip
 end

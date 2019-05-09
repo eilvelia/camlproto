@@ -1,0 +1,6 @@
+(library
+  (name PlatformCaml)
+  (public_name camlproto.platform_caml)
+  (libraries base cstruct nocrypto nocrypto.unix zarith ezgzip
+    camlproto.platform_types)
+)

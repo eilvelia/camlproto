@@ -8,7 +8,7 @@ end
 
 let js_gzip: js_gzip Js.t = Js.Unsafe.js_expr "js_gzip"
 
-module Gzip: Types.GZIP = struct
+module Gzip: PlatformTypes.Gzip = struct
   exception Error of string (* not used *)
   (* let compress cs = js_gzip##compress (Cstruct.to_bigarray cs)
     |> Typed_array.Bigstring.of_arrayBuffer

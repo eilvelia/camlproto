@@ -3,7 +3,7 @@
   (public_name camlproto.mtproto_transport)
   (libraries
     base cstruct lwt lwt.unix js_of_ocaml logs
-    camlproto.platform camlproto.math camlproto.mtproto_misc)
+    camlproto.platform_caml camlproto.math camlproto.mtproto_misc)
   (js_of_ocaml (javascript_files
     JsTcpFull.js
     JsWebsocket.js))
