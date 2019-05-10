@@ -1,5 +1,7 @@
 open! Base
 
+(* TODO: Remove the 'mtproto_misc' module. *)
+
 module type DC_LIST = sig
   type dc = string * string
   (** [(addres, port)] *)

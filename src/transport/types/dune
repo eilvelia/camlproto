@@ -1,0 +1,5 @@
+(library
+  (name TransportTypes)
+  (public_name camlproto.transport_types)
+  (libraries base cstruct lwt camlproto.mtproto_misc)
+)

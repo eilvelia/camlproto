@@ -40,7 +40,7 @@ let layer_const = 82
 (* module type TelegramSession = sig
 end *)
 
-module MakeTelegramClient (Platform: PlatformTypes.S) (T: MTPTransport.S) = struct
+module MakeTelegramClient (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
   module MTP = MakeMTProtoV2Client(Platform)(T)
 
   type t = { mtp: MTP.t }
@@ -93,8 +93,3 @@ module MakeTelegramClient (Platform: PlatformTypes.S) (T: MTPTransport.S) = stru
   let loop t =
     Lwt.pick [MTP.recv_loop t.mtp; MTP.send_loop t.mtp]
 end
-
-
-(* TODO: Remove hard-coded 'PlatformCaml' *)
-module TelegramClient = MakeTelegramClient(PlatformCaml)(MTPTransport.TcpFull)
-(** [TelegramClient = MakeTelegramClient(PlatformCaml)(MTPTransport.TcpFull)] *)

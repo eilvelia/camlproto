@@ -1,0 +1,7 @@
+(library
+  (name TransportTcpAbridgedCaml)
+  (public_name camlproto.transport_tcp_abridged_caml)
+  (libraries
+    base cstruct lwt lwt.unix logs camlproto.transport_types)
+  (preprocess (pps lwt_ppx))
+)

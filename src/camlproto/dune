@@ -4,6 +4,6 @@
   (synopsis "Type-safe client implementation of Telegram's MTProto")
   (libraries
     base logs
-    camlproto.mtproto camlproto.mtproto_transport camlproto.math
+    camlproto.mtproto camlproto.transport_types camlproto.math
     camlproto.telegram camlproto.tl camlproto.tlgen)
 )

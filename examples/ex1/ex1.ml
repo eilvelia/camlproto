@@ -4,7 +4,7 @@ open MTProto
 module TLM = TLGen.MTProto
 
 let main () =
-  let module MTP = MakeMTProtoV2Client(PlatformCaml)(MTPTransport.TcpFull) in
+  let module MTP = MakeMTProtoV2Client(PlatformCaml)(TransportTcpFullCaml) in
   let%lwt t = MTP.create () in
   let%lwt _ = MTP.do_authentication t in
   let send_pings () =

@@ -12,13 +12,13 @@ let main () =
   let api_id = int_of_string api_id in
   let%lwt api_hash = prompt "Enter your api hash: " in
 
-  let module Cl = TelegramClient in
-  let%lwt t = Cl.create () in
+  let module Client = MakeTelegramClient(PlatformCaml)(TransportTcpFullCaml) in
+  let%lwt t = Client.create () in
 
   let promise =
-    let%lwt () = Cl.init (Settings.create ~api_id ()) t in
+    let%lwt () = Client.init (Settings.create ~api_id ()) t in
     let%lwt C_auth_sentCode { phone_code_hash; _ } =
-      Cl.invoke t (module TLT.C_auth_sendCode) {
+      Client.invoke t (module TLT.C_auth_sendCode) {
         allow_flashcall = None;
         phone_number;
         current_number = None;
@@ -27,7 +27,7 @@ let main () =
       } in
     let%lwt phone_code = prompt "Enter phone code: " in
     let%lwt C_auth_authorization { user; _ } =
-      Cl.invoke t (module TLT.C_auth_signIn) {
+      Client.invoke t (module TLT.C_auth_signIn) {
         phone_number;
         phone_code_hash;
         phone_code;
@@ -37,7 +37,7 @@ let main () =
     Lwt.return_unit
   in
 
-  Lwt.pick [promise; Cl.loop t]
+  Lwt.pick [promise; Client.loop t]
 
 let () =
   Logs.(set_level (Some Debug));

@@ -1,0 +1,8 @@
+(library
+  (name TransportTcpFullCaml)
+  (public_name camlproto.transport_tcp_full_caml)
+  (libraries
+    base cstruct lwt lwt.unix logs
+    camlproto.math camlproto.transport_types)
+  (preprocess (pps lwt_ppx))
+)

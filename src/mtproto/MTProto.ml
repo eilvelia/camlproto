@@ -30,7 +30,7 @@ let get_error_description (error_code: int): string =
 
 (* module BaseMTProtoClient = struct end *)
 (* module MakeMTProtoV1Client = struct end *)
-module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: MTPTransport.S) = struct
+module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
   open TL.Types
 
   module Math = Math.Make(Platform)

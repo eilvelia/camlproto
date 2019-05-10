@@ -1,0 +1,9 @@
+(library
+  (name TransportTcpFullNode)
+  (public_name camlproto.transport_tcp_full_node)
+  (libraries
+    base cstruct lwt js_of_ocaml camlproto.transport_types)
+  (js_of_ocaml (javascript_files
+    TcpFull.js))
+  (preprocess (pps js_of_ocaml-ppx))
+)
