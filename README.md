@@ -8,11 +8,12 @@ Fully type-safe MTProto client implementation in OCaml.
 
 ```ocaml
 open Camlproto
-open Telegram
 
 module TLT = TLGen.Telegram
 
 let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
+
+module Client = Telegram.Client.Make(PlatformCaml)(TransportTcpFullCaml)
 
 let main () =
   (* api_id and api_hash can be obtained at https://my.telegram.org/ *)
@@ -21,13 +22,12 @@ let main () =
   let api_id = int_of_string api_id in
   let%lwt api_hash = prompt "Enter your api hash: " in
 
-  let module Cl = TelegramClient in
-  let%lwt t = Cl.create () in
+  let%lwt t = Client.create () in
 
   let promise =
-    let%lwt () = Cl.init (Settings.create ~api_id ()) t in
+    let%lwt () = Client.init (Telegram.Settings.create ~api_id ()) t in
     let%lwt C_auth_sentCode { phone_code_hash; _ } =
-      Cl.invoke t (module TLT.C_auth_sendCode) {
+      Client.invoke t (module TLT.C_auth_sendCode) {
         allow_flashcall = None;
         phone_number;
         current_number = None;
@@ -36,7 +36,7 @@ let main () =
       } in
     let%lwt phone_code = prompt "Enter phone code: " in
     let%lwt C_auth_authorization { user; _ } =
-      Cl.invoke t (module TLT.C_auth_signIn) {
+      Client.invoke t (module TLT.C_auth_signIn) {
         phone_number;
         phone_code_hash;
         phone_code;
@@ -46,7 +46,7 @@ let main () =
     Lwt.return_unit
   in
 
-  Lwt.pick [promise; Cl.loop t]
+  Lwt.pick [promise; Client.loop t]
 
 let _ = Lwt_main.run (main ())
 ```
@@ -99,7 +99,7 @@ wip
 
 - tcp_abridged (node.js)
 
-### Unimplemented
+### Not implemented
 
 - websocket secure (browser)
 
