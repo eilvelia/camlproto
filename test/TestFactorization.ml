@@ -1,6 +1,6 @@
 open OUnit
 
-let pq_prime = Math.Factorization.pq_prime
+let pq_prime = Common.Math.Factorization.pq_prime
 
 let suite =
   "pq_prime" >:: (fun _ ->

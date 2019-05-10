@@ -1,5 +1,5 @@
 open OUnit
-open Math.Crypto
+open Common.Math.Crypto
 
 let encrypt = IGE.encrypt
 let decrypt = IGE.decrypt
