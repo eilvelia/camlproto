@@ -1,6 +1,9 @@
 # Camlproto
 
-Fully type-safe MTProto client implementation in OCaml.
+Portable and type-safe client implementation of Telegram's [MTProto][] protocol and [TL][] data serialization format.
+
+[MTProto]: https://core.telegram.org/mtproto
+[TL]: https://core.telegram.org/mtproto/TL
 
 ## Usage
 
@@ -72,7 +75,7 @@ wip
 | `int256`         | `Cstruct.t`      | `Uint8Array`     |
 | `bytes`          | `Cstruct.t`      | `Uint8Array`     |
 
-### Non builtins
+### Non-builtins
 
 | TL               | OCaml            | JavaScript       |
 |------------------|------------------|------------------|
@@ -85,7 +88,7 @@ wip
 
 | TL                       | OCaml            | JavaScript       |
 |--------------------------|------------------|------------------|
-| Conditional definitions  | `'a option`      | `A OR undefined` |
+| Conditional definitions  | `'a option`      | `A \| undefined` |
 
 ## Transport components
 
@@ -127,7 +130,7 @@ npm run codegen
 cd ..
 ```
 
-Compile ocaml code:
+Compile the OCaml code:
 
 ```sh
 dune build
