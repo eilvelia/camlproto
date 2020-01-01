@@ -12,8 +12,12 @@ module type S = sig
   module Vertex : sig type t = vertex end
   module Edge : sig type t end
 
-  type vs (** vertices *)
-  type es (** edges *)
+  type vs
+  (** vertices *)
+
+  type es
+  (** edges *)
+
   type t
 
   val empty : t

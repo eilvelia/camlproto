@@ -1,6 +1,6 @@
 (test
   (name test)
   (libraries
-    ounit cstruct
+    ounit2 cstruct
     camlproto.math camlproto.tl.runtime camlproto.tlgen camlproto.mtproto)
 )
