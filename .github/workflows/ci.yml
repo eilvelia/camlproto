@@ -5,6 +5,7 @@ jobs:
     name: Build
     runs-on: ${{ matrix.operating-system }}
     strategy:
+      fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
         ocaml-version: [4.09.0, 4.08.1, 4.07.1, 4.06.1]
