@@ -6,3 +6,5 @@ module Make (Platform: PlatformTypes.S) = struct
   module Bigint = Bigint.Make(Platform)
   module Gzip = Platform.Gzip
 end
+
+let crossplatform_crc32 = Crc32.crc32

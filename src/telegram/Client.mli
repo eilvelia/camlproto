@@ -1,5 +1,5 @@
 open! Base
-open TL.Types
+open TLRuntime.Types
 
 module Make (Platform: PlatformTypes.S) (T: TransportTypes.S): sig
   type t

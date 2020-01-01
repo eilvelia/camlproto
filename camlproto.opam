@@ -9,13 +9,13 @@ license: "MIT"
 homepage: "https://github.com/Bannerets/camlproto"
 dev-repo: "git+https://github.com/Bannerets/camlproto.git"
 bug-reports: "https://github.com/Bannerets/camlproto/issues"
-#build: [[make "build"]]
 build: [["dune" "build" "-p" name "-j" jobs]]
 run-test: [["dune" "runtest" "-p" name]]
 depends: [
   "ocaml" {>= "4.04.1"}
-  "dune" {>= "1.0.0"}
-  "ounit" {test & >= "2.0.0"}
+  "dune" {>= "1.11.0"}
+  "ounit" {with-test & >= "2.0.0"}
+  "ppx_expect" {with-test & >= "v10.0.1"}
   "base" {>= "0.11.0"}
   "cstruct" {>= "3.0.0" & < "5.0.0"}
   "lwt" {>= "3.2.1"}
@@ -24,7 +24,16 @@ depends: [
   "nocrypto" {>= "0.5.0"}
   "zarith" {>= "1.7"}
   "ezgzip" {>= "0.2.1"}
+  "ppx_let" {>= "v0.11.0"}
+  "ppx_deriving" {>= "4.3" & < "5.0"}
+  "ppxlib" {>= "0.9.0"}
+  # "ppx_import" {>= "1.5" & < "2.0"}
+  "fmt" {>= "0.8.7"}
   "js_of_ocaml-compiler" {build & >= "3.1.0" & < "4.0"}
   "js_of_ocaml-ppx" {build & >= "3.1.0" & < "4.0"}
   "js_of_ocaml" {>= "3.1.0" & < "4.0"}
+  "bisect_ppx" {dev & >= "1.5.0"}
+]
+pin-depends: [
+  ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git#a00c26d5cd"]
 ]

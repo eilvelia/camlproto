@@ -11,7 +11,7 @@ open MTProtoMisc
 end *)
 
 module type MTProtoPlainObjSender = sig
-  open TL.Types
+  open TLRuntime.Types
   type t
   val send_unencrypted_obj
     : t -> (module TLFunc with type t = 'a) -> 'a -> unit Lwt.t
@@ -29,7 +29,7 @@ module type MTProtoPlainSender = sig
 end
 
 module type MTProtoClient = sig
-  open TL.Types
+  open TLRuntime.Types
 
   type t
 

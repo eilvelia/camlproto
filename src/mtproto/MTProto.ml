@@ -31,7 +31,9 @@ let get_error_description (error_code: int): string =
 (* module BaseMTProtoClient = struct end *)
 (* module MakeMTProtoV1Client = struct end *)
 module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
-  open TL.Types
+  module TLR = TLRuntime
+
+  open TLR.Types
 
   module Math = Math.Make(Platform)
   module Crypto = Math.Crypto
@@ -196,13 +198,13 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Lwt.return data
 
   let send_unencrypted_obj t (type a) (module O : TLFunc with type t = a) (o: a) =
-    let data = TL.Encoder.encode O.encode_boxed o in
-    let data_cs = data |> TL.Encoder.to_cstruct in
+    let data = TLR.Encoder.encode O.encode_boxed o in
+    let data_cs = data |> TLR.Encoder.to_cstruct in
     send_unencrypted t data_cs
 
   let receive_unencrypted_obj t (type a) (module O : TLObject with type t = a): a Lwt.t =
     let%lwt data = receive_unencrypted t in
-    let o = O.decode (TL.Decoder.of_cstruct data) in
+    let o = O.decode (TLR.Decoder.of_cstruct data) in
     Lwt.return o
 
   let invoke_unencrypted_obj
@@ -358,8 +360,8 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     ?(msg_id = gen_msg_id t) ?(content_related = false)
     (type a) (module O : TLFunc with type t = a) (o: a)
   =
-    let data_encoder = TL.Encoder.encode O.encode_boxed o in
-    let data = data_encoder |> TL.Encoder.to_cstruct in
+    let data_encoder = TLR.Encoder.encode O.encode_boxed o in
+    let data = data_encoder |> TLR.Encoder.to_cstruct in
     let msg_seq_no = gen_seq_no t content_related in
     let msg = MTPMessage.{ msg_id; msg_seq_no; data } in
     send_encrypted t msg
@@ -373,8 +375,8 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   [@@inline]
 
   let tl_encode (type a) (module O : TLObject with type t = a) (o: a): Cstruct.t =
-    let encoder = TL.Encoder.encode O.encode_boxed o in
-    TL.Encoder.to_cstruct encoder
+    let encoder = TLR.Encoder.encode O.encode_boxed o in
+    TLR.Encoder.to_cstruct encoder
   [@@inline]
 
   let send_msg t (msg: MTPMessage.t) =
@@ -407,7 +409,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Hashtbl.remove t.request_map msg_id;
     Hashtbl.remove t.sent_msg_map msg_id
 
-  let handle_bad_msg_notification t msg_id (obj: TLM.C_bad_msg_notification.t) =
+  let handle_bad_msg_notification t msg_id (obj: TLM.TL_bad_msg_notification.t) =
     Log.warn (fun m ->
       let error_desc = get_error_description obj.error_code in
       m "bad_msg_notification [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
@@ -421,7 +423,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       then remove_req t msg_id (* TODO: raise exception *)
       else resend t obj.bad_msg_id
 
-  let handle_bad_server_salt t (obj: TLM.C_bad_server_salt.t) =
+  let handle_bad_server_salt t (obj: TLM.TL_bad_server_salt.t) =
     Log.warn (fun m ->
       let error_desc = get_error_description obj.error_code in
       m "bad_server_salt [bad_msg_id %Ld] [bad_msg_seqno %d] (%d - %s)"
@@ -430,23 +432,23 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     t.server_salt <- obj.new_server_salt;
     resend t obj.bad_msg_id
 
-  let handle_pong t (pong: TLM.C_pong.t) =
+  let handle_pong t (pong: TLM.TL_pong.t) =
     Log.info (fun m -> m
       "Pong [msg_id %Ld] [ping_id %Ld]" pong.msg_id pong.ping_id);
     Hashtbl.remove t.sent_msg_map pong.msg_id;
     match Hashtbl.find_and_remove t.request_map pong.msg_id with
     | Some (Request (resolver, _)) ->
-      let pong = TLM.Pong.(C_pong pong) in
+      let pong = TLM.TLT_Pong.(TL_pong pong) in
       (* TODO: May cause segmentation fault
         if server sent pong.msg_id that tied to non-ping message *)
       Lwt.wakeup_later resolver (Caml.Obj.magic pong) (* XXX *)
     | None -> Log.info (fun m -> m "Ping with msg_id %Ld not found" pong.msg_id)
 
-  let handle_new_session_created t (obj: TLM.C_new_session_created.t) =
+  let handle_new_session_created t (obj: TLM.TL_new_session_created.t) =
     Log.info (fun m -> m "new_session_created [server_salt 0x%LX]" obj.server_salt);
     t.server_salt <- obj.server_salt
 
-  let handle_rpc_result t (res: C_rpc_result.t) =
+  let handle_rpc_result t (res: TL_rpc_result.t) =
     Log.info (fun m -> m "rpc_result [req_msg_id %Ld]" res.req_msg_id);
     Hashtbl.remove t.sent_msg_map res.req_msg_id;
     match Hashtbl.find_and_remove t.request_map res.req_msg_id with
@@ -460,9 +462,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       end
     | None -> Log.warn (fun m -> m "%s" (req_not_found res.req_msg_id))
 
-  let handle_msgs_ack t (obj: TLM.C_msgs_ack.t) =
+  let handle_msgs_ack t (obj: TLM.TL_msgs_ack.t) =
     (* TODO: *)
-    let (C_vector msg_ids) = obj.msg_ids in
+    let (TL_vector msg_ids) = obj.msg_ids in
     let str = String.concat ~sep:" " (List.map ~f:Int64.to_string msg_ids) in
     Log.info (fun m -> m "msgs_ack [msg_ids %s]" str);
     List.iter msg_ids ~f:(fun msg_id ->
@@ -470,18 +472,18 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       (* Hashtbl.remove t.request_map msg_id *)
     )
 
-  let handle_detailed_info t msg_id (obj: TLM.C_msg_detailed_info.t) =
+  let handle_detailed_info t msg_id (obj: TLM.TL_msg_detailed_info.t) =
     (* TODO: *)
     Log.info (fun m -> m "msg_detailed_info [msg_id %Ld]" obj.msg_id);
     t.pending_ack <- msg_id :: t.pending_ack
 
-  let handle_new_detailed_info t msg_id (obj: TLM.C_msg_new_detailed_info.t) =
+  let handle_new_detailed_info t msg_id (obj: TLM.TL_msg_new_detailed_info.t) =
     (* TODO: *)
     Log.info (fun m -> m
       "msg_new_detailed_info [answer_msg_id %Ld]" obj.answer_msg_id);
     t.pending_ack <- msg_id :: t.pending_ack
 
-  let handle_future_salts t (obj: TLM.C_future_salts.t) =
+  let handle_future_salts t (obj: TLM.TL_future_salts.t) =
     (* TODO: *)
     Log.info (fun m -> m "future_salts [req_msg_id %Ld]" obj.req_msg_id);
     Hashtbl.remove t.sent_msg_map obj.req_msg_id
@@ -518,7 +520,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Log.info (fun m -> m "recv_loop msg_id(%Ld) seq_no(%ld) data_len(%d)"
       msg.msg_id msg.msg_seq_no (Cstruct.len msg.data));
     Log.debug (fun m -> m "recv_loop data:@.%a" hexdump_pp msg.data);
-    let obj = MTPObject.decode (TL.Decoder.of_cstruct msg.data) in
+    let obj = MTPObject.decode (TLR.Decoder.of_cstruct msg.data) in
     process_mtp_object t msg.msg_id obj;
     Log.debug (fun m ->
       let keys hashtable = hashtable
@@ -530,7 +532,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   let create_ack t = MTPMessage.{
     msg_id = gen_msg_id t;
     msg_seq_no = gen_seq_no t false;
-    data = tl_encode (module TLM.C_msgs_ack) { msg_ids = C_vector t.pending_ack }
+    data = tl_encode (module TLM.TL_msgs_ack) { msg_ids = TL_vector t.pending_ack }
   }
 
   let rec send_loop t =

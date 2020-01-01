@@ -12,7 +12,7 @@ Portable and type-safe client implementation of Telegram's [MTProto][] protocol 
 ```ocaml
 open Camlproto
 
-module TLT = TLGen.Telegram
+module T = TLGen.Telegram
 
 let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
 
@@ -29,22 +29,25 @@ let main () =
 
   let promise =
     let%lwt () = Client.init (Telegram.Settings.create ~api_id ()) t in
-    let%lwt C_auth_sentCode { phone_code_hash; _ } =
-      Client.invoke t (module TLT.C_auth_sendCode) {
-        allow_flashcall = None;
+    let%lwt TL_auth_sentCode { phone_code_hash; _ } =
+      Client.invoke t (module T.TL_auth_sendCode) {
         phone_number;
-        current_number = None;
         api_id;
         api_hash;
+        settings = TL_codeSettings {
+         allow_flashcall = None;
+         current_number = None;
+         allow_app_hash = None;
+        }
       } in
-    let%lwt phone_code = prompt "Enter phone code: " in
-    let%lwt C_auth_authorization { user; _ } =
-      Client.invoke t (module TLT.C_auth_signIn) {
+    let%lwt phone_code = prompt "Enter the code: " in
+    let%lwt [@warning "-8"] TL_auth_authorization { user; _ } =
+      Client.invoke t (module T.TL_auth_signIn) {
         phone_number;
         phone_code_hash;
         phone_code;
       } in
-    let (C_user { id; _ } | C_userEmpty { id }) = user in
+    let TL_user { id; _ } | TL_userEmpty { id } = user in
     print_endline ("Signed as " ^ string_of_int id);
     Lwt.return_unit
   in
@@ -62,8 +65,6 @@ wip
 
 ## TL <-> OCaml <-> JS mapping
 
-### Builtins
-
 | TL               | OCaml            | JavaScript       |
 |------------------|------------------|------------------|
 | `int`            | `int`            | `number`         |
@@ -74,15 +75,10 @@ wip
 | `int128`         | `Cstruct.t`      | `Uint8Array`     |
 | `int256`         | `Cstruct.t`      | `Uint8Array`     |
 | `bytes`          | `Cstruct.t`      | `Uint8Array`     |
-
-### Non-builtins
-
-| TL               | OCaml            | JavaScript       |
-|------------------|------------------|------------------|
 | `Bool`           | `bool`           | `boolean`        |
 | `true`           | default          | `true`           |
 | `vector a`       | `'a list`        | `Array<A>`       |
-| `Null`           | skipped          | skipped          |
+| `Null`           | default          | `true`           |
 
 ### Other
 
@@ -118,25 +114,11 @@ wip
 
 ## Build
 
-> Note: Node.js v6.0+ is also required.
-
-Codegen:
-
-```sh
-cd codegen
-npm install
-npm run build
-npm run codegen
-cd ..
-```
-
-Compile the OCaml code:
-
 ```sh
 dune build
 ```
 
-Run tests:
+Run the tests:
 
 ```sh
 dune runtest

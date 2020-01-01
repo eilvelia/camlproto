@@ -1,10 +1,10 @@
 open! Base
-(* open TL.Types *)
-open TL.Builtin
+(* open TLRuntime.Types *)
+open TLRuntime.Builtin
 open TLGen.MTProto
 
-module Decoder = TL.Decoder
-(* module Encoder = TL.Encoder *)
+module Decoder = TLRuntime.Decoder
+(* module Encoder = TLRuntime.Encoder *)
 
 module MTPMessage = struct
   type t = {
@@ -33,12 +33,12 @@ module MTPMessage = struct
 end
 
 module MTPContainer = struct
-  let magic = 0x73f1f8dcl
+ let [@inline] magic () = 0x73f1f8dcl
 
   let encode (l: Cstruct.t list) =
     let cont_len = 4 + 4 + (Cstruct.lenv l) in
     let cs = Cstruct.create_unsafe cont_len  in
-    Cstruct.LE.set_uint32 cs 0 magic;
+    Cstruct.LE.set_uint32 cs 0 (magic ());
     Cstruct.LE.set_uint32 cs 4 (Int32.of_int_trunc @@ List.length l);
     let i = ref 8 in
     List.iter l ~f:(fun cs' ->
@@ -49,16 +49,16 @@ module MTPContainer = struct
     cs
 end
 
-module C_rpc_result = struct
+module TL_rpc_result = struct
   type t = {
     req_msg_id: int64;
     data: Cstruct.t;
   }
 
-  let magic = 0xf35c6d01l
+  let [@inline] magic () = 0xf35c6d01l
 
   let decode dec =
-    let req_msg_id = TLLong.decode dec in
+    let req_msg_id = TL_long.decode dec in
     let data = Decoder.to_cstruct dec in
     { req_msg_id; data }
 end
@@ -66,7 +66,7 @@ end
 let gzip_packed_magic_le = Cstruct.of_hex "a1 cf 72 30"
 let rpc_error_magic_le = Cstruct.of_hex "19 ca 44 21"
 
-module C_gzip_packed = struct
+module TL_gzip_packed = struct
   type t = {
     packed_data: Cstruct.t
   }
@@ -74,7 +74,7 @@ module C_gzip_packed = struct
   (* let magic = 0x3072cfa1l *)
 
   let decode dec =
-    let packed_data = TLBytes.decode dec in
+    let packed_data = TL_bytes.decode dec in
     { packed_data }
 
   let decode_boxed dec =
@@ -90,7 +90,7 @@ module MakeRes (Platform: PlatformTypes.S) = struct
   open Math
 
   let decode_gzip_packed (decoder: Decoder.t) =
-    let data = (C_gzip_packed.decode_boxed decoder).packed_data in
+    let data = (TL_gzip_packed.decode_boxed decoder).packed_data in
     let decompressed = Gzip.decompress data in
     Log.debug (fun m -> m "gzip decompressed:@.%a" Cstruct.hexdump_pp decompressed);
     decompressed
@@ -104,7 +104,7 @@ module MakeRes (Platform: PlatformTypes.S) = struct
 
   let rec decode_result
     (decode: Decoder.t -> 'a) (data: Cstruct.t)
-    : ('a, C_rpc_error.t) Result.t
+    : ('a, TL_rpc_error.t) Result.t
   =
     let decoder = Decoder.of_cstruct data in
     let magic = Cstruct.sub data 0 4 in
@@ -112,7 +112,7 @@ module MakeRes (Platform: PlatformTypes.S) = struct
     | x when Cstruct.equal x gzip_packed_magic_le ->
       decode_result decode (decode_gzip_packed decoder)
     | x when Cstruct.equal x rpc_error_magic_le ->
-      let (C_rpc_error err) = RpcError.decode decoder in
+      let (TL_rpc_error err) = TLT_RpcError.decode decoder in
       Error err
     | _ ->
       Ok (decode decoder)
@@ -122,25 +122,25 @@ module MTPObject = struct
   exception NotFound of int32 (* magic *)
 
   type t =
-    | RpcResult of C_rpc_result.t
+    | RpcResult of TL_rpc_result.t
     | MessageContainer of tl_msg_container
     (* | GzipPacked *)
-    | Pong of C_pong.t
-    | BadServerSalt of C_bad_server_salt.t
-    | BadMsgNotification of C_bad_msg_notification.t
-    | MsgDetailedInfo of C_msg_detailed_info.t
-    | MsgNewDetailedInfo of C_msg_new_detailed_info.t
-    | NewSessionCreated of C_new_session_created.t
-    | MsgsAck of C_msgs_ack.t
-    | FutureSalts of C_future_salts.t
-    | MsgsStateReq of C_msgs_state_req.t
-    | MsgResendReq of C_msg_resend_req.t
-    | MsgsAllInfo of C_msgs_all_info.t
+    | Pong of TL_pong.t
+    | BadServerSalt of TL_bad_server_salt.t
+    | BadMsgNotification of TL_bad_msg_notification.t
+    | MsgDetailedInfo of TL_msg_detailed_info.t
+    | MsgNewDetailedInfo of TL_msg_new_detailed_info.t
+    | NewSessionCreated of TL_new_session_created.t
+    | MsgsAck of TL_msgs_ack.t
+    | FutureSalts of TL_future_salts.t
+    | MsgsStateReq of TL_msgs_state_req.t
+    | MsgResendReq of TL_msg_resend_req.t
+    | MsgsAllInfo of TL_msgs_all_info.t
 
   and tl_message = {
-    msg_id: TLLong.t;
-    seqno: TLInt.t;
-    bytes: TLInt.t;
+    msg_id: TL_long.t;
+    seqno: TL_int.t;
+    bytes: TL_int.t;
     body: t;
   }
 
@@ -149,9 +149,9 @@ module MTPObject = struct
   }
 
   let rec decode_message dec : tl_message =
-    let msg_id = TLLong.decode dec in
-    let seqno = TLInt.decode dec in
-    let bytes = TLInt.decode dec in
+    let msg_id = TL_long.decode dec in
+    let seqno = TL_int.decode dec in
+    let bytes = TL_int.decode dec in
     let body = decode dec in
     { msg_id; seqno; bytes; body }
 
@@ -169,18 +169,18 @@ module MTPObject = struct
     (* Decoder.skip_len dec (-4); *)
     let open Int32 in
     match magic with
-    | x when x = C_rpc_result.magic -> RpcResult (C_rpc_result.decode dec)
-    | x when x = MTPContainer.magic -> MessageContainer (decode_msg_container dec)
-    | x when x = C_pong.magic -> Pong (C_pong.decode dec)
-    | x when x = C_bad_server_salt.magic -> BadServerSalt (C_bad_server_salt.decode dec)
-    | x when x = C_bad_msg_notification.magic -> BadMsgNotification (C_bad_msg_notification.decode dec)
-    | x when x = C_msg_detailed_info.magic -> MsgDetailedInfo (C_msg_detailed_info.decode dec)
-    | x when x = C_msg_new_detailed_info.magic -> MsgNewDetailedInfo (C_msg_new_detailed_info.decode dec)
-    | x when x = C_new_session_created.magic -> NewSessionCreated (C_new_session_created.decode dec)
-    | x when x = C_msgs_ack.magic -> MsgsAck (C_msgs_ack.decode dec)
-    | x when x = C_future_salts.magic -> FutureSalts (C_future_salts.decode dec)
-    | x when x = C_msgs_state_req.magic -> MsgsStateReq (C_msgs_state_req.decode dec)
-    | x when x = C_msg_resend_req.magic -> MsgResendReq (C_msg_resend_req.decode dec)
-    | x when x = C_msgs_all_info.magic -> MsgsAllInfo (C_msgs_all_info.decode dec)
+    | x when x = TL_rpc_result.magic () -> RpcResult (TL_rpc_result.decode dec)
+    | x when x = MTPContainer.magic () -> MessageContainer (decode_msg_container dec)
+    | x when x = TL_pong.magic () -> Pong (TL_pong.decode dec)
+    | x when x = TL_bad_server_salt.magic () -> BadServerSalt (TL_bad_server_salt.decode dec)
+    | x when x = TL_bad_msg_notification.magic () -> BadMsgNotification (TL_bad_msg_notification.decode dec)
+    | x when x = TL_msg_detailed_info.magic () -> MsgDetailedInfo (TL_msg_detailed_info.decode dec)
+    | x when x = TL_msg_new_detailed_info.magic () -> MsgNewDetailedInfo (TL_msg_new_detailed_info.decode dec)
+    | x when x = TL_new_session_created.magic () -> NewSessionCreated (TL_new_session_created.decode dec)
+    | x when x = TL_msgs_ack.magic () -> MsgsAck (TL_msgs_ack.decode dec)
+    | x when x = TL_future_salts.magic () -> FutureSalts (TL_future_salts.decode dec)
+    | x when x = TL_msgs_state_req.magic () -> MsgsStateReq (TL_msgs_state_req.decode dec)
+    | x when x = TL_msg_resend_req.magic () -> MsgResendReq (TL_msg_resend_req.decode dec)
+    | x when x = TL_msgs_all_info.magic () -> MsgsAllInfo (TL_msgs_all_info.decode dec)
     | x -> raise @@ NotFound x
 end

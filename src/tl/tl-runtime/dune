@@ -1,0 +1,5 @@
+(library
+  (name TLRuntime)
+  (public_name camlproto.tl.runtime)
+  (libraries cstruct)
+)

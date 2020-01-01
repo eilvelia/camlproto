@@ -8,3 +8,6 @@ node_modules/
 /package-lock.json
 /*.txt
 /*_test/
+*.corrected
+*.conflicts
+_coverage/

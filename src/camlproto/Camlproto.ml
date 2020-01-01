@@ -1,9 +1,10 @@
-module TL = TL
+module TLRuntime = TLRuntime
+module TLLib = TLLib
+module TLGen = TLGen
 module MTProto = MTProto
 module TransportTypes = TransportTypes
 module PlatformTypes = PlatformTypes
 module Telegram = Telegram
-module TLGen = TLGen
 module Math = Math
 
 module CamlReporter = CamlReporter

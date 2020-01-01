@@ -1,17 +1,23 @@
 (rule
-  (targets mtproto.ml)
-  (action (run npm run codegen:caml:mtproto --prefix %{project_root}/../../codegen))
-  (mode fallback)
+  (target Mtproto.ml)
+  (deps
+    %{project_root}/src/tl/tl-cli/TLCli.exe
+    %{project_root}/schema/mtproto.tl
+  )
+  (action (run %{deps} %{target}))
 )
 
 (rule
-  (targets telegram.ml)
-  (action (run npm run codegen:caml:telegram --prefix %{project_root}/../../codegen))
-  (mode fallback)
+  (target Telegram.ml)
+  (deps
+    %{project_root}/src/tl/tl-cli/TLCli.exe
+    %{project_root}/schema/l108.tl
+  )
+  (action (run %{deps} %{target}))
 )
 
 (library
   (name TLGen)
   (public_name camlproto.tlgen)
-  (libraries base camlproto.tl)
+  (libraries base camlproto.tl.runtime)
 )

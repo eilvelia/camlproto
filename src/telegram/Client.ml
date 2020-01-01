@@ -1,14 +1,14 @@
 open! Base
 open MTProto
-open TL.Types
+open TLRuntime.Types
 
-module TLM = TLGen.MTProto
-module TLT = TLGen.Telegram
+module Mtp = TLGen.MTProto
+module Tel = TLGen.Telegram
 
 let src = Logs.Src.create "camlproto.telegram.client"
 module Log = (val Logs.src_log src : Logs.LOG)
 
-let layer_const = 82
+let layer_const = 108
 
 (* TODO: *)
 (* module type TelegramSession = sig
@@ -44,7 +44,7 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
     (x: x)
     : result Lwt.t
   =
-    MTP.invoke t.mtp (module TLT.C_invokeWithLayer(TLT.C_initConnection(X))) {
+    MTP.invoke t.mtp (module Tel.TL_invokeWithLayer(Tel.TL_initConnection(X))) {
       layer = layer_const;
       query = {
         api_id = s.api_id;
@@ -60,7 +60,7 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
     }
 
   let init (s: Settings.t) (t: t) =
-    let%lwt (C_config res) = init_with t s (module TLT.C_help_getConfig) C in
+    let%lwt (TL_config res) = init_with t s (module Tel.TL_help_getConfig) E in
     Log.info (fun m -> m "help.getConfig res. me_url_prefix: %s" res.me_url_prefix);
     Lwt.return_unit
 

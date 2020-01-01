@@ -1,0 +1,5 @@
+(executable
+  (name TLCli)
+  (public_name camlproto.tl.cli)
+  (libraries base camlproto.tl.lib)
+)

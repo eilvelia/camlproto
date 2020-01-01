@@ -1,5 +1,5 @@
 open! Base
-open TL.Builtin
+open TLRuntime.Builtin
 open TLGen.MTProto
 
 module MTPMessage: sig
@@ -13,34 +13,34 @@ module MTPMessage: sig
 end
 
 module MTPContainer: sig
-  val magic: int32
+  val magic: unit -> int32
 
   val encode: Cstruct.t list -> Cstruct.t
 end
 
-module C_rpc_result: sig
+module TL_rpc_result: sig
   type t = {
     req_msg_id: int64;
     data: Cstruct.t;
   }
 
-  val magic: int32
+  val magic: unit -> int32
 
-  val decode: TL.Decoder.t -> t
+  val decode: TLRuntime.Decoder.t -> t
 end
 
-module C_gzip_packed: sig
+module TL_gzip_packed: sig
   type t = {
     packed_data: Cstruct.t
   }
 
-  val decode: TL.Decoder.t -> t
-  val decode_boxed: TL.Decoder.t -> t
+  val decode: TLRuntime.Decoder.t -> t
+  val decode_boxed: TLRuntime.Decoder.t -> t
 end
 
 module MakeRes (Platform: PlatformTypes.S): sig
   val decode_result
-    : (TL.Decoder.t -> 'a) -> Cstruct.t -> ('a, C_rpc_error.t) Result.t
+    : (TLRuntime.Decoder.t -> 'a) -> Cstruct.t -> ('a, TL_rpc_error.t) Result.t
 end
 
 module MTPObject: sig
@@ -48,24 +48,24 @@ module MTPObject: sig
   (** [NotFound magic] *)
 
   type t =
-    | RpcResult of C_rpc_result.t
+    | RpcResult of TL_rpc_result.t
     | MessageContainer of tl_msg_container
-    | Pong of C_pong.t
-    | BadServerSalt of C_bad_server_salt.t
-    | BadMsgNotification of C_bad_msg_notification.t
-    | MsgDetailedInfo of C_msg_detailed_info.t
-    | MsgNewDetailedInfo of C_msg_new_detailed_info.t
-    | NewSessionCreated of C_new_session_created.t
-    | MsgsAck of C_msgs_ack.t
-    | FutureSalts of C_future_salts.t
-    | MsgsStateReq of C_msgs_state_req.t
-    | MsgResendReq of C_msg_resend_req.t
-    | MsgsAllInfo of C_msgs_all_info.t
+    | Pong of TL_pong.t
+    | BadServerSalt of TL_bad_server_salt.t
+    | BadMsgNotification of TL_bad_msg_notification.t
+    | MsgDetailedInfo of TL_msg_detailed_info.t
+    | MsgNewDetailedInfo of TL_msg_new_detailed_info.t
+    | NewSessionCreated of TL_new_session_created.t
+    | MsgsAck of TL_msgs_ack.t
+    | FutureSalts of TL_future_salts.t
+    | MsgsStateReq of TL_msgs_state_req.t
+    | MsgResendReq of TL_msg_resend_req.t
+    | MsgsAllInfo of TL_msgs_all_info.t
 
   and tl_message = {
-    msg_id: TLLong.t;
-    seqno: TLInt.t;
-    bytes: TLInt.t;
+    msg_id: TL_long.t;
+    seqno: TL_int.t;
+    bytes: TL_int.t;
     body: t;
   }
 
@@ -73,5 +73,5 @@ module MTPObject: sig
     messages: tl_message list;
   }
 
-  val decode: TL.Decoder.t -> t
+  val decode: TLRuntime.Decoder.t -> t
 end

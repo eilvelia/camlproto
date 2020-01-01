@@ -2,6 +2,7 @@ open! Base
 open Types
 
 module TLM = TLGen.MTProto
+module TLR = TLRuntime
 
 let src = Logs.Src.create "camlproto.mtproto.auth"
 module Log = (val Logs.src_log src : Logs.LOG)
@@ -69,8 +70,8 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
 
     Log.info (fun m -> m "Sending req_pq_multi");
 
-    let%lwt (C_resPQ ({ server_nonce; _ } as res_pq)) =
-      invoke_unencrypted_obj t (module TLM.C_req_pq_multi) { nonce } in
+    let%lwt (TL_resPQ ({ server_nonce; _ } as res_pq)) =
+      invoke_unencrypted_obj t (module TLM.TL_req_pq_multi) { nonce } in
 
     if Cstruct.equal res_pq.nonce nonce |> not then
       raise @@ AuthenticationError "1: Invalid nonce from server";
@@ -90,14 +91,14 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
     (* int256 (32 bytes) *)
     let new_nonce = Crypto.SecureRand.rand_cs 32 in
 
-    let p_q_inner_data = TL.Encoder.encode TLM.C_p_q_inner_data.encode_boxed {
+    let p_q_inner_data = TLR.Encoder.encode TLM.TL_p_q_inner_data.encode_boxed {
       pq = res_pq.pq;
       p = p_bytes;
       q = q_bytes;
       nonce;
       server_nonce;
       new_nonce;
-    } |> TL.Encoder.to_cstruct in
+    } |> TLR.Encoder.to_cstruct in
 
     let p_q_inner_data_len = Cstruct.len p_q_inner_data in
 
@@ -106,14 +107,14 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
     Cstruct.blit p_q_inner_data 0 data_with_hash 20 p_q_inner_data_len;
     random_padding data_with_hash (20 + p_q_inner_data_len);
 
-    let (C_vector fingerprints) = res_pq.server_public_key_fingerprints in
+    let (TL_vector fingerprints) = res_pq.server_public_key_fingerprints in
     let (rsa_key, finger) = RsaManager.find_by_fingerprints rsa fingerprints in
 
     let encrypted_data = RsaManager.encrypt ~key:rsa_key data_with_hash in
 
     Log.info (fun m -> m "Sending req_DH_params");
 
-    let%lwt dh_params = invoke_unencrypted_obj t (module TLM.C_req_DH_params) {
+    let%lwt dh_params = invoke_unencrypted_obj t (module TLM.TL_req_DH_params) {
       nonce;
       server_nonce;
       p = p_bytes;
@@ -123,7 +124,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
     } in
 
     match dh_params with
-    | C_server_DH_params_ok params ->
+    | TL_server_DH_params_ok params ->
       begin
         Log.info (fun m -> m "server_DH_params_ok");
 
@@ -139,13 +140,13 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
           Crypto.IGE.decrypt params.encrypted_answer tmp_key tmp_iv in
         let given_hash = Cstruct.sub decrypted_answer_with_hash 0 20 in
         let decrypted_answer = Cstruct.shift decrypted_answer_with_hash 20 in
-        let (C_server_DH_inner_data server_dh_inner) =
-          TLM.Server_DH_inner_data.decode (TL.Decoder.of_cstruct decrypted_answer) in
+        let (TL_server_DH_inner_data server_dh_inner) =
+          TLM.TLT_Server_DH_inner_data.decode (TLR.Decoder.of_cstruct decrypted_answer) in
 
         (* Check hash *)
         let calc_hash =
-          TL.Encoder.encode TLM.C_server_DH_inner_data.encode_boxed server_dh_inner
-            |> TL.Encoder.to_cstruct |> Crypto.SHA1.digest in
+          TLR.Encoder.encode TLM.TL_server_DH_inner_data.encode_boxed server_dh_inner
+            |> TLR.Encoder.to_cstruct |> Crypto.SHA1.digest in
         if Cstruct.equal calc_hash given_hash |> not then
           raise @@ AuthenticationError "3: Invalid hash";
 
@@ -202,12 +203,12 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
         (* TODO: check that g_a and g_b are between 2^{2048-64} and dh_prime - 2^{2048-64} *)
 
         let client_dh_inner_data =
-          TL.Encoder.encode TLM.C_client_DH_inner_data.encode_boxed {
+          TLR.Encoder.encode TLM.TL_client_DH_inner_data.encode_boxed {
             nonce;
             server_nonce;
             retry_id = 0L; (* TODO: *)
             g_b = g_b_cs;
-          } |> TL.Encoder.to_cstruct in
+          } |> TLR.Encoder.to_cstruct in
 
         let len = Cstruct.len client_dh_inner_data in
         let len_with_hash = len + 20 in
@@ -225,11 +226,11 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
 
         Log.info (fun m -> m "Sending set_client_DH_params");
 
-        let%lwt dh_answer = invoke_unencrypted_obj t (module TLM.C_set_client_DH_params)
+        let%lwt dh_answer = invoke_unencrypted_obj t (module TLM.TL_set_client_DH_params)
           { nonce; server_nonce; encrypted_data; } in
 
         match dh_answer with
-        | C_dh_gen_ok dh_gen -> begin
+        | TL_dh_gen_ok dh_gen -> begin
           Log.info (fun m -> m "dh_gen_ok");
 
           if Cstruct.equal dh_gen.nonce nonce |> not then
@@ -263,9 +264,9 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
 
           Lwt.return (auth_key, server_salt, time_offset)
         end
-        | C_dh_gen_retry _ -> raise @@ AuthenticationError "dh_gen_retry" (* TODO: *)
-        | C_dh_gen_fail _ -> raise @@ AuthenticationError "dh_gen_fail"
+        | TL_dh_gen_retry _ -> raise @@ AuthenticationError "dh_gen_retry" (* TODO: *)
+        | TL_dh_gen_fail _ -> raise @@ AuthenticationError "dh_gen_fail"
       end
-    | C_server_DH_params_fail _ ->
+    | TL_server_DH_params_fail _ ->
       raise @@ AuthenticationError "server_DH_params_fail"
 end

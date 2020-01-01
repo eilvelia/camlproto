@@ -2,5 +2,5 @@
   (name test)
   (libraries
     ounit cstruct
-    camlproto.math camlproto.tl camlproto.tlgen camlproto.mtproto)
+    camlproto.math camlproto.tl.runtime camlproto.tlgen camlproto.mtproto)
 )
