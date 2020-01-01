@@ -1,0 +1,24 @@
+name: Build and test
+on: [push]
+jobs:
+  run:
+    name: Build
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        ocaml-version: [4.09.0, 4.08.1, 4.07.1, 4.06.1]
+    steps:
+    - uses: actions/checkout@master
+    - uses: avsm/setup-ocaml@master
+      with:
+        ocaml-version: ${{ matrix.ocaml-version }}
+    - name: Install dependencies
+      run: |
+        opam pin add camlproto.dev -n .
+        opam depext -yt camlproto
+        opam install -t . --deps-only
+    - name: Build
+      run: opam exec -- dune build @install @examples
+    - name: Test
+      run: opam exec -- dune runtest
