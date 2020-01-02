@@ -1,4 +1,4 @@
-# Camlproto
+# Camlproto &nbsp; ![](https://github.com/Bannerets/camlproto/workflows/Build%20and%20test/badge.svg)
 
 Portable and type-safe client implementation of Telegram's [MTProto][] protocol and [TL][] data serialization format.
 
