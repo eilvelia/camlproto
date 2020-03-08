@@ -5,18 +5,21 @@ default: build
 build:
 	dune build @install @examples
 
+.PHONY: clean-build
+clean-build: clean build
+
 .PHONY: test
 test:
 	dune runtest
 
-COVERAGE_FILES := \
-	--expect src/tl2/tl-lib/
+# COVERAGE_FILES := \
+# 	--expect src/tl/tl-lib/ \
+# 	--expect src/math/
 
 .PHONY: coverage
 coverage: clean
-	BISECT_ENABLE=yes dune build
-	dune runtest --no-buffer
-	bisect-ppx-report html $(COVERAGE_FILES)
+	BISECT_ENABLE=yes dune runtest --force
+	bisect-ppx-report html
 	bisect-ppx-report summary
 	@echo See _coverage/index.html
 

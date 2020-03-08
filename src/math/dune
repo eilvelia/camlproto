@@ -1,6 +1,8 @@
 (library
   (name Math)
   (public_name camlproto.math)
-  (libraries base
-    camlproto.platform_caml camlproto.tlgen camlproto.platform_types)
+  (libraries
+    base camlproto.platform_caml camlproto.tlgen camlproto.platform_types)
+  (preprocess (pps ppx_expect bisect_ppx --conditional))
+  (inline_tests)
 )

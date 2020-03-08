@@ -13,7 +13,7 @@ let clone_cstruct (cs: Cstruct.t): Cstruct.t =
   Caml.print_endline (name ^ " " ^ (Int.to_string @@ Cstruct.len cs));
   Cstruct.hexdump cs *)
 
-module MakeIGE (ECB: PlatformTypes.AES) = struct
+module Make (ECB: PlatformTypes.AES) = struct
   open ECB
 
   let encrypt (plain: Cstruct.t) (key: Cstruct.t) (iv: Cstruct.t) =

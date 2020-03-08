@@ -1,6 +1,8 @@
-(test
-  (name test)
+(library
+  (name ExpectTest)
   (libraries
-    ounit2 cstruct
-    camlproto.math camlproto.tl.runtime camlproto.tlgen camlproto.mtproto)
+    camlproto.platform_types camlproto.platform_caml
+    camlproto.math)
+  (preprocess (pps ppx_expect bisect_ppx --conditional))
+  (inline_tests)
 )

@@ -1,7 +1,7 @@
 open! Base
 
 include Random
-let () = self_init ()
+let () = init 2751212
 
 (* let int128 () =
   let cs = Cstruct.create_unsafe 16 in

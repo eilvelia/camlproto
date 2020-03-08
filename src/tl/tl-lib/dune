@@ -7,7 +7,8 @@
   (libraries base ppx_deriving ppx_let fmt ppxlib)
   (preprocess (pps
     bisect_ppx --conditional
-    ppx_deriving.show ppx_let ppx_expect
+    ppx_expect
+    ppx_deriving.show ppx_let
     ppx_sexp_conv ppx_compare ppx_hash))
   (inline_tests)
 )
