@@ -1,7 +1,7 @@
 (rule
   (target Mtproto.ml)
   (deps
-    %{project_root}/src/tl/tl-cli/TLCli.exe
+    %{project_root}/src/tl/cli/TLCli.exe
     %{project_root}/schema/mtproto.tl
   )
   (action (run %{deps} %{target}))
@@ -10,7 +10,7 @@
 (rule
   (target Telegram.ml)
   (deps
-    %{project_root}/src/tl/tl-cli/TLCli.exe
+    %{project_root}/src/tl/cli/TLCli.exe
     %{project_root}/schema/l108.tl
   )
   (action (run %{deps} %{target}))

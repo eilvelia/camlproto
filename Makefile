@@ -13,7 +13,7 @@ test:
 	dune runtest
 
 # COVERAGE_FILES := \
-# 	--expect src/tl/tl-lib/ \
+# 	--expect src/tl/lib/ \
 # 	--expect src/math/
 
 .PHONY: coverage
