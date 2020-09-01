@@ -2,24 +2,30 @@ name: Build and test
 on: [push, pull_request]
 jobs:
   run:
-    name: Build
+    name: Run
     runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest]
-        ocaml-version: [4.09.0, 4.08.1, 4.07.1]
+        operating-system:
+          - ubuntu-latest
+        ocaml-version:
+          - 4.07.1
+          - 4.08.1
+          - 4.09.1
+          - 4.10.1
+          - 4.11.1
     steps:
-    - uses: actions/checkout@master
-    - uses: avsm/setup-ocaml@master
-      with:
-        ocaml-version: ${{ matrix.ocaml-version }}
-    - name: Install dependencies
-      run: |
-        opam pin add camlproto.dev -n .
-        opam depext -yt camlproto
-        opam install -t . --deps-only
-    - name: Build
-      run: opam exec -- dune build @install @examples
-    - name: Test
-      run: opam exec -- dune runtest
+      - uses: actions/checkout@v2
+      - uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+      - name: Install dependencies
+        run: |
+          opam pin add camlproto.dev --no-action .
+          opam depext camlproto -y --with-test
+          opam install . --deps-only --with-test
+      - name: Build
+        run: opam exec -- dune build @install @examples
+      - name: Test
+        run: opam exec -- dune runtest
