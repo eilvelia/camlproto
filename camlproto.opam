@@ -14,26 +14,25 @@ run-test: [["dune" "runtest" "-p" name]]
 depends: [
   "ocaml" {>= "4.07.0"}
   "dune" {>= "1.11.0"}
-  "ppx_expect" {>= "v0.10.1"} # "with-test" doesn't work for now
-  "js_of_ocaml-compiler" {build & >= "3.1.0" & < "4.0"}
-  "js_of_ocaml-ppx" {build & >= "3.1.0" & < "4.0"}
-  "js_of_ocaml" {>= "3.1.0" & < "4.0"}
+  "ppx_expect" # can't be "with-test", since let%expect_test needs to be preprocessed away
+  "js_of_ocaml-compiler" {>= "3.2.0" & < "4.0"}
+  "js_of_ocaml-ppx" {>= "3.2.0" & < "4.0"}
+  "js_of_ocaml" {>= "3.2.0" & < "4.0"}
   "bisect_ppx" # again, "dev"/"with-test" don't work for now, https://github.com/ocaml/dune/issues/57
-  "base" {>= "0.11.0"}
+  "base"
   "cstruct" {>= "3.0.0"}
-  "lwt" {>= "3.2.1"}
-  "lwt_ppx" {>= "1.0.1"}
+  "lwt"
+  "lwt_ppx"
   "logs" {>= "0.6.0"}
   "nocrypto" {>= "0.5.0"}
-  "zarith" {>= "1.7"}
-  "ezgzip" {>= "0.2.1"}
+  "zarith"
+  "ezgzip"
+  "fmt" {>= "0.8.7"}
   "ppx_let" {>= "v0.11.0"}
   "ppx_deriving" {>= "4.3" & < "5.0"}
-  "ppx_hash" {>= "v0.11.0"}
-  "ppxlib" {>= "0.9.0"}
+  "ppx_hash"
   # "ppx_import" {>= "1.5" & < "2.0"}
   "menhir"
-  "fmt" {>= "0.8.7"}
 ]
 pin-depends: [
   ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git#02c841c257126cb7d672ae84da646a1e165d87ca"]
