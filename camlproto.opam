@@ -18,7 +18,7 @@ depends: [
   "js_of_ocaml-compiler" {>= "3.2.0" & < "4.0"}
   "js_of_ocaml-ppx" {>= "3.2.0" & < "4.0"}
   "js_of_ocaml" {>= "3.2.0" & < "4.0"}
-  "bisect_ppx" # again, "dev"/"with-test" don't work for now, https://github.com/ocaml/dune/issues/57
+  "bisect_ppx" {>= "2.0.0"} # again, "dev"/"with-test" don't work for now, https://github.com/ocaml/dune/issues/57
   "base"
   "cstruct" {>= "3.0.0"}
   "lwt"
@@ -33,7 +33,4 @@ depends: [
   "ppx_hash"
   # "ppx_import" {>= "1.5" & < "2.0"}
   "menhir"
-]
-pin-depends: [
-  ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git#02c841c257126cb7d672ae84da646a1e165d87ca"]
 ]

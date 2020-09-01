@@ -19,7 +19,7 @@ depends: [
   "base-unix" {= "base"}
   "bigarray-compat" {= "1.0.0"}
   "biniou" {= "1.2.1"}
-  "bisect_ppx" {= "git"}
+  "bisect_ppx" {= "2.4.1"}
   "camlzip" {= "1.10"}
   "cmdliner" {= "1.0.4"}
   "conf-gmp" {= "1"}
@@ -98,8 +98,5 @@ depends: [
   "uchar" {= "0.0.2"}
   "yojson" {= "1.7.0"}
   "zarith" {= "1.9.1"}
-]
-pin-depends: [
-  ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git#02c841c257126cb7d672ae84da646a1e165d87ca"]
 ]
 authors: "Bannerets <comonoid@protonmail.com>"
