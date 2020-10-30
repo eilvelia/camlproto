@@ -13,12 +13,12 @@ build: [["dune" "build" "-p" name "-j" jobs]]
 run-test: [["dune" "runtest" "-p" name]]
 depends: [
   "ocaml" {>= "4.07.0"}
-  "dune" {>= "1.11.0"}
+  "dune" {>= "2.7.1"}
   "ppx_expect" # can't be "with-test", since let%expect_test needs to be preprocessed away
   "js_of_ocaml-compiler" {>= "3.2.0" & < "4.0"}
   "js_of_ocaml-ppx" {>= "3.2.0" & < "4.0"}
   "js_of_ocaml" {>= "3.2.0" & < "4.0"}
-  "bisect_ppx" {>= "2.0.0"} # again, "dev"/"with-test" don't work for now, https://github.com/ocaml/dune/issues/57
+  "bisect_ppx" {dev & >= "2.5.0"}
   "base"
   "cstruct" {>= "3.0.0"}
   "lwt"

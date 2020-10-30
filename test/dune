@@ -3,6 +3,7 @@
   (libraries
     camlproto.platform_types camlproto.platform_caml
     camlproto.math)
-  (preprocess (pps ppx_expect bisect_ppx --conditional))
+  (preprocess (pps ppx_expect))
   (inline_tests)
+  (instrumentation (backend bisect_ppx))
 )

@@ -17,8 +17,8 @@ test:
 # 	--expect src/math/
 
 .PHONY: coverage
-coverage: clean
-	BISECT_ENABLE=yes dune runtest --force
+coverage:
+	dune runtest --instrument-with bisect_ppx --force
 	bisect-ppx-report html
 	bisect-ppx-report summary
 	@echo See _coverage/index.html
