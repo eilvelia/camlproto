@@ -1,13 +1,13 @@
-# Camlproto &nbsp; ![](https://github.com/Bannerets/camlproto/workflows/Build%20and%20test/badge.svg)
+# Camlproto &nbsp; [![CI](https://github.com/Bannerets/camlproto/workflows/Build%20and%20test/badge.svg)](https://github.com/Bannerets/camlproto/actions?query=workflow%3A%22Build+and+test%22)
 
-Portable and type-safe client implementation of Telegram's [MTProto][] protocol and [TL][] data serialization format.
+A portable and type-safe client implementation of Telegram's [MTProto][] protocol and [TL][] data serialization format.
 
 [MTProto]: https://core.telegram.org/mtproto
 [TL]: https://core.telegram.org/mtproto/TL
 
 ## Usage
 
-### From OCaml
+Example to use with Telegram:
 
 ```ocaml
 open Camlproto
@@ -59,32 +59,26 @@ let _ = Lwt_main.run (main ())
 
 (see [examples/ex2/](examples/ex2/) and [examples/ex1/](examples/ex1/))
 
-### From JavaScript
+## TL <-> OCaml mapping
 
-wip
-
-## TL <-> OCaml <-> JS mapping
-
-| TL               | OCaml            | JavaScript       |
-|------------------|------------------|------------------|
-| `int`            | `int`            | `number`         |
-| `nat` (`#`)      | `int32`          | `number`         |
-| `long`           | `int64`          | `string`         |
-| `string`         | `string`         | `string`         |
-| `double`         | `float`          | `number`         |
-| `int128`         | `Cstruct.t`      | `Uint8Array`     |
-| `int256`         | `Cstruct.t`      | `Uint8Array`     |
-| `bytes`          | `Cstruct.t`      | `Uint8Array`     |
-| `Bool`           | `bool`           | `boolean`        |
-| `true`           | default          | `true`           |
-| `vector a`       | `'a list`        | `Array<A>`       |
-| `Null`           | default          | `true`           |
+| TL               | OCaml            |
+|------------------|------------------|
+| `int`            | `int`            |
+| `nat` (`#`)      | `int32`          |
+| `long`           | `int64`          |
+| `string`         | `string`         |
+| `double`         | `float`          |
+| `int128`         | `Cstruct.t`      |
+| `int256`         | `Cstruct.t`      |
+| `bytes`          | `Cstruct.t`      |
+| `Bool`           | `bool`           |
+| `vector a`       | `'a list`        |
 
 ### Other
 
-| TL                       | OCaml            | JavaScript       |
-|--------------------------|------------------|------------------|
-| Conditional definitions  | `'a option`      | `A \| undefined` |
+| TL                       | OCaml            |
+|--------------------------|------------------|
+| Conditional definitions  | `'a option`      |
 
 ## Transport components
 
@@ -111,15 +105,3 @@ wip
 - https
 
 - udp
-
-## Build
-
-```sh
-dune build
-```
-
-Run the tests:
-
-```sh
-dune runtest
-```
