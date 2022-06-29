@@ -4,20 +4,20 @@ open! Base
 let (.%[]) = Cstruct.get_char *)
 
 let clone_cstruct (cs: Cstruct.t): Cstruct.t =
-  let len = Cstruct.len cs in
+  let len = Cstruct.length cs in
   let cs' = Cstruct.create_unsafe len in
   Cstruct.blit cs 0 cs' 0 len;
   cs'
 
 (* let print_cstruct name cs =
-  Caml.print_endline (name ^ " " ^ (Int.to_string @@ Cstruct.len cs));
+  Caml.print_endline (name ^ " " ^ (Int.to_string @@ Cstruct.length cs));
   Cstruct.hexdump cs *)
 
 module Make (ECB: PlatformTypes.AES) = struct
   open ECB
 
   let encrypt (plain: Cstruct.t) (key: Cstruct.t) (iv: Cstruct.t) =
-    let plain_len = Cstruct.len plain in
+    let plain_len = Cstruct.length plain in
     let plain = if plain_len % 16 = 0
       then plain
       else begin (* Add padding *)
@@ -26,9 +26,9 @@ module Make (ECB: PlatformTypes.AES) = struct
         plain'
       end
     in
-    let plain_len = Cstruct.len plain in
+    let plain_len = Cstruct.length plain in
 
-    let (iv1, iv2) = Cstruct.split iv (Cstruct.len iv / 2) in
+    let (iv1, iv2) = Cstruct.split iv (Cstruct.length iv / 2) in
     let (iv1, iv2) = (ref iv1, ref iv2) in
 
     let aes_key = ecb_create_key key in
@@ -80,9 +80,9 @@ module Make (ECB: PlatformTypes.AES) = struct
     cipher_text
 
   let decrypt (cipher_text: Cstruct.t) (key: Cstruct.t) (iv: Cstruct.t) =
-    let cipher_len = Cstruct.len cipher_text in
+    let cipher_len = Cstruct.length cipher_text in
 
-    let (iv1, iv2) = Cstruct.split iv (Cstruct.len iv / 2) in
+    let (iv1, iv2) = Cstruct.split iv (Cstruct.length iv / 2) in
     let (iv1, iv2) = (ref iv1, ref iv2) in
 
     let aes_key = ecb_create_key key in

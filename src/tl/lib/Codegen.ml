@@ -273,7 +273,7 @@ let build_comb store : _ -> comb Fmt.t =
     | _, TypeExpr (tref, params) ->
       Fmt.pf ppf "module %a = %a"
         (build_module_name store) texpr
-        (pp_functor_appl ~sep:(Fmt.always " ")) (tref, params)
+        (pp_functor_appl ~sep:(Fmt.any " ")) (tref, params)
     | _ -> ()
   in
   let pp_module_decls ppf comb : unit =
@@ -470,7 +470,7 @@ let build_comb store : _ -> comb Fmt.t =
       (pp_t ~is_sig:true)
       include_module_name
       (match comb with
-       | `Constr _ -> Fmt.always ""
+       | `Constr _ -> Fmt.any ""
        | `Func f -> fun ppf _ -> Fmt.pf ppf " and %a"
            (pp_result_module ~is_sig:true) f) ()
       pp_module_decls comb
@@ -478,8 +478,8 @@ let build_comb store : _ -> comb Fmt.t =
       (result_module ~trailer:cut) comb
       name_of_make_functor
       (match comb with
-       | `Constr _ -> Fmt.always ""
-       | `Func _ -> Fmt.always "module ResultM = ResultM@,") ()
+       | `Constr _ -> Fmt.any ""
+       | `Func _ -> Fmt.any "module ResultM = ResultM@,") ()
       magic
       pp_arg_encodes (required_args, cond_args_map)
       (my_pp_list pp_arg_decode ~trailer:cut) required_args

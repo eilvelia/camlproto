@@ -3,18 +3,18 @@ open Js_of_ocaml
 
 type bigint
 
-let int2bigInt: int -> bigint = Js.Unsafe.variable "int2bigInt"
+let int2bigInt: int -> bigint = Js.Unsafe.pure_js_expr "int2bigInt"
 (* external bigInt2str: bigint -> Js.js_string Js.t = "bigInt2str" *)
 (* external str2bigInt: Js.js_string Js.t -> bigint = "bigInt2str" *)
 (* external bitSize: bigint -> int = "bitSize" *)
 (* external dup: bigint -> bigint = "dup"
 external rightShift_: bigint -> int -> unit = "rightShift_"
 external leftShift_: bigint -> int -> unit = "leftShift_" *)
-let add: bigint -> bigint -> bigint = Js.Unsafe.variable "add"
-let sub: bigint -> bigint -> bigint = Js.Unsafe.variable "sub"
-let powMod: bigint -> bigint -> bigint -> bigint = Js.Unsafe.variable "powMod"
-let greater: bigint -> bigint -> bool = Js.Unsafe.variable "greater"
-let equals: bigint -> bigint -> bool = Js.Unsafe.variable "equals"
+let add: bigint -> bigint -> bigint = Js.Unsafe.pure_js_expr "add"
+let sub: bigint -> bigint -> bigint = Js.Unsafe.pure_js_expr "sub"
+let powMod: bigint -> bigint -> bigint -> bigint = Js.Unsafe.pure_js_expr "powMod"
+let greater: bigint -> bigint -> bool = Js.Unsafe.pure_js_expr "greater"
+let equals: bigint -> bigint -> bool = Js.Unsafe.pure_js_expr "equals"
 
 (* external arrayBufferFromHex
   : Js.js_string Js.t -> Typed_array.arrayBuffer Js.t = "arrayBufferFromHex"
@@ -22,16 +22,16 @@ external arrayBufferToHex
   : Typed_array.arrayBuffer Js.t -> Js.js_string Js.t = "arrayBufferToHex" *)
 
 let bigInt2ArrayBuffer
-  : bigint -> Typed_array.arrayBuffer Js.t = Js.Unsafe.variable "bigInt2ArrayBuffer"
+  : bigint -> Typed_array.arrayBuffer Js.t = Js.Unsafe.pure_js_expr "bigInt2ArrayBuffer"
 
 (* let arrayBuffer2bigInt
-  : Typed_array.arrayBuffer Js.t -> bigint = Js.Unsafe.variable "arrayBuffer2bigInt" *)
+  : Typed_array.arrayBuffer Js.t -> bigint = Js.Unsafe.pure_js_expr "arrayBuffer2bigInt" *)
 
 let camlBigarray2bigInt
-  : Cstruct.buffer -> bigint = Js.Unsafe.variable "camlBigarray2bigInt"
+  : Cstruct.buffer -> bigint = Js.Unsafe.pure_js_expr "camlBigarray2bigInt"
 
-let bigint_zero: bigint = Js.Unsafe.variable "leemon_zero"
-let bigint_one: bigint = Js.Unsafe.variable "one"
+let bigint_zero: bigint = Js.Unsafe.pure_js_expr "leemon_zero"
+let bigint_one: bigint = Js.Unsafe.pure_js_expr "one"
 
 (* TODO: Some bigint functions don't seem to work *)
 

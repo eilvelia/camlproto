@@ -23,12 +23,12 @@ module MTPMessage = struct
   } *)
 
   let encode (msg: t) =
-    let bytes = Cstruct.len msg.data in
-    let cs = Cstruct.create_unsafe (8 + 4 + 4 + Cstruct.len msg.data) in
+    let bytes = Cstruct.length msg.data in
+    let cs = Cstruct.create_unsafe (8 + 4 + 4 + Cstruct.length msg.data) in
     Cstruct.LE.set_uint64 cs 0 msg.msg_id;
     Cstruct.LE.set_uint32 cs 8 msg.msg_seq_no;
     Cstruct.LE.set_uint32 cs 12 (Int32.of_int_trunc bytes);
-    Cstruct.blit msg.data 0 cs 16 (Cstruct.len msg.data);
+    Cstruct.blit msg.data 0 cs 16 (Cstruct.length msg.data);
     cs
 end
 
@@ -42,7 +42,7 @@ module MTPContainer = struct
     Cstruct.LE.set_uint32 cs 4 (Int32.of_int_trunc @@ List.length l);
     let i = ref 8 in
     List.iter l ~f:(fun cs' ->
-      let len = Cstruct.len cs' in
+      let len = Cstruct.length cs' in
       Cstruct.blit cs' 0 cs !i len;
       i := !i + len
     );

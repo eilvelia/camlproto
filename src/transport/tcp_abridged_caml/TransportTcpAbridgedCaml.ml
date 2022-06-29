@@ -19,12 +19,12 @@ let create (address, port): t Lwt.t =
   Lwt.return { input; output }
 
 let send t packet =
-  Log.debug (fun m -> m "tcp_abridged send (len %d)" (Cstruct.len packet));
+  Log.debug (fun m -> m "tcp_abridged send (len %d)" (Cstruct.length packet));
   (* Cstruct.hexdump packet; *)
 
-  let data_len = Cstruct.len packet / 4 in
+  let data_len = Cstruct.length packet / 4 in
   let header_len = if data_len >= 127 then 4 else 1 in
-  let len = header_len + Cstruct.len packet in
+  let len = header_len + Cstruct.length packet in
 
   let buf = Cstruct.create_unsafe len in
   if header_len = 4 then begin
@@ -35,7 +35,7 @@ let send t packet =
   end else begin
     Cstruct.set_uint8 buf 0 data_len
   end;
-  Cstruct.blit packet 0 buf header_len (Cstruct.len packet);
+  Cstruct.blit packet 0 buf header_len (Cstruct.length packet);
 
   (* Caml.print_endline "To server:";
   Cstruct.hexdump buf; *)

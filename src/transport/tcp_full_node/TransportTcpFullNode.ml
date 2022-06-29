@@ -37,7 +37,7 @@ let receive t =
   let cb x =
     let data = x
       |> Typed_array.Bigstring.of_arrayBuffer
-      |> Cstruct.of_bigarray in Caml.print_endline (Int.to_string @@ Cstruct.len data); Cstruct.hexdump data;
+      |> Cstruct.of_bigarray in Caml.print_endline (Int.to_string @@ Cstruct.length data); Cstruct.hexdump data;
     Lwt.wakeup_later resolver data
   in
   js_tcp_full##receive t (Js.wrap_callback cb);

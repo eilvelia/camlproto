@@ -72,9 +72,9 @@ let of_cstruct_be cs =
         Z_core.(of_int x lsr b' + acc lsl b)
     | _              -> acc in
   (* loop Z_core.zero 0 @@ match bits with
-    | None   -> Cstruct.len cs * 8
-    | Some b -> imin b (Cstruct.len cs * 8) *)
-  loop Z_core.zero 0 (Cstruct.len cs * 8)
+    | None   -> Cstruct.length cs * 8
+    | Some b -> imin b (Cstruct.length cs * 8) *)
+  loop Z_core.zero 0 (Cstruct.length cs * 8)
 
 let byte1 = Z_core.of_int64 0xffL
 and byte2 = Z_core.of_int64 0xffffL
@@ -97,7 +97,7 @@ let into_cstruct_be n cs =
     | 0 -> set_uint8 cs 0 Z_core.(to_int (n land byte1));
     | _ -> ()
   in
-  write n (len cs - 1)
+  write n (length cs - 1)
 
 (* let to_cstruct_be ?size n =
   let cs = Cstruct.create_unsafe @@ match size with

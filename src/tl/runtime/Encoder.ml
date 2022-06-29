@@ -57,15 +57,15 @@ let add_cstruct b (cs: Cstruct.t) =
 exception InvalidLengthError
 
 let add_int128 b (cs: Cstruct.t) =
-  if Cstruct.len cs <> 16 then raise InvalidLengthError;
+  if Cstruct.length cs <> 16 then raise InvalidLengthError;
   add_cstruct b cs
 
 let add_int256 b (cs: Cstruct.t) =
-  if Cstruct.len cs <> 32 then raise InvalidLengthError;
+  if Cstruct.length cs <> 32 then raise InvalidLengthError;
   add_cstruct b cs
 
 let add_tl_bytes buf (cs: Cstruct.t) =
-  let len = Cstruct.len cs in
+  let len = Cstruct.length cs in
 
   if len <= 253 then
     Buffer.add_char buf (Char.unsafe_chr len)

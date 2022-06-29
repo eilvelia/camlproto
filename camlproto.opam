@@ -12,25 +12,25 @@ bug-reports: "https://github.com/Bannerets/camlproto/issues"
 build: [["dune" "build" "-p" name "-j" jobs]]
 run-test: [["dune" "runtest" "-p" name]]
 depends: [
-  "ocaml" {>= "4.08.0"}
+  "ocaml" {>= "4.08.1"}
   "dune" {>= "2.7.1"}
-  "ppx_expect" # can't be "with-test", since let%expect_test needs to be preprocessed away
-  "js_of_ocaml-compiler" {>= "3.2.0" & < "4.0"}
-  "js_of_ocaml-ppx" {>= "3.2.0" & < "4.0"}
-  "js_of_ocaml" {>= "3.2.0" & < "4.0"}
+  "base" {>= "v0.14.0"}
+  "js_of_ocaml-compiler" {>= "4.0"}
+  "js_of_ocaml-ppx" {>= "4.0"}
+  "js_of_ocaml" {>= "4.0"}
   "bisect_ppx" {dev & >= "2.5.0"}
-  "base"
-  "cstruct" {>= "3.0.0"}
-  "lwt"
-  "lwt_ppx"
-  "logs" {>= "0.6.0"}
-  "nocrypto" {>= "0.5.0"}
-  "zarith"
-  "ezgzip"
-  "fmt" {>= "0.8.7"}
-  "ppx_let" {>= "v0.11.0"}
-  "ppx_deriving" {>= "4.3" & < "5.0"}
+  "ppx_expect" # cannot be "with-test" because let%expect_test should be preprocessed away
+  "ppx_let" # TODO: replace with (let*)?
+  "ppx_deriving"
   "ppx_hash"
   # "ppx_import" {>= "1.5" & < "2.0"}
+  "cstruct"
+  "lwt"
+  "lwt_ppx"
+  "logs"
+  "nocrypto" {>= "0.5.0"} # Note: Does not work with ocamls 4.08.0 (but works with 4.08.1)
+  "zarith"
+  "ezgzip"
+  "fmt"
   "menhir"
 ]

@@ -49,7 +49,7 @@ let crc32_tab: int32 array = [|
 let crc32 (cs: Cstruct.t) =
   let crc = ref 0xFF_FF_FF_FFl in
   let i = ref 0 in
-  for _ = Cstruct.len cs - 1 downto 0 do
+  for _ = Cstruct.length cs - 1 downto 0 do
     let ch = Cstruct.get_uint8 cs !i |> Int32.of_int_trunc in
     Int32.(
       let n = (!crc lxor ch) land 0xFFl in
@@ -62,4 +62,3 @@ let crc32 (cs: Cstruct.t) =
 let%expect_test "match/crc32" =
   Caml.Printf.printf "%lX" @@ crc32 @@ Cstruct.of_hex "1c b5 c4 15";
   [%expect {| 3A55FD61 |}]
-

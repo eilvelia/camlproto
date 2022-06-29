@@ -35,7 +35,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
   module RsaManager = Crypto.Rsa.RsaManager
 
   let random_padding (cs: Cstruct.t) (start: int): unit =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     let size = len - start in
     let random_bytes = Crypto.SecureRand.rand_cs size in
     Cstruct.blit random_bytes 0 cs start size
@@ -100,7 +100,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
       new_nonce;
     } |> TLR.Encoder.to_cstruct in
 
-    let p_q_inner_data_len = Cstruct.len p_q_inner_data in
+    let p_q_inner_data_len = Cstruct.length p_q_inner_data in
 
     let data_with_hash = Cstruct.create_unsafe 255 in
     Cstruct.blit (Crypto.SHA1.digest p_q_inner_data) 0 data_with_hash 0 20;
@@ -189,7 +189,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
 
         Log.info (fun m -> m
           "Auth key created. Auth_key len: %d. Time_offset: %d."
-          (Cstruct.len auth_key) time_offset);
+          (Cstruct.length auth_key) time_offset);
 
         (* TODO: Checks from https://core.telegram.org/mtproto/security_guidelines *)
 
@@ -210,7 +210,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
             g_b = g_b_cs;
           } |> TLR.Encoder.to_cstruct in
 
-        let len = Cstruct.len client_dh_inner_data in
+        let len = Cstruct.length client_dh_inner_data in
         let len_with_hash = len + 20 in
 
         let data_with_hash = Cstruct.create (len_with_hash + (16 - len_with_hash % 16)) in

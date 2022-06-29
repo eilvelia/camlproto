@@ -151,7 +151,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   let send_unencrypted t data =
     let auth_key_id = 0L in
     let msg_id = gen_msg_id t in
-    let data_len = Cstruct.len data in
+    let data_len = Cstruct.length data in
 
     Log.debug (fun m -> m "send_unencrypted msg_id(%Ld) data_len(%d)" msg_id data_len);
 
@@ -159,7 +159,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Cstruct.LE.set_uint64 buf 0 auth_key_id;
     Cstruct.LE.set_uint64 buf 8 msg_id;
     Cstruct.LE.set_uint64 buf 16 (Int64.of_int data_len);
-    Cstruct.blit data 0 buf 20 (Cstruct.len data);
+    Cstruct.blit data 0 buf 20 (Cstruct.length data);
 
     T.send t.transport buf
 
@@ -168,9 +168,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     let%lwt buf = T.receive t.transport in
 
     (* Log.debug (fun m -> m "From server [%d]:@.%a"
-      (Cstruct.len buf) hexdump_pp buf); *)
+      (Cstruct.length buf) hexdump_pp buf); *)
 
-    if Cstruct.len buf < 20 then begin
+    if Cstruct.length buf < 20 then begin
       Log.err (fun m -> m "invalid unenc msg length:@.%a" hexdump_pp buf);
       raise @@ MTPError "Invalid MTProto unencrypted message"
     end;
@@ -254,7 +254,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     let encrypt_message (t: t) (msg: MTPMessage.t) =
       let (auth_key, key_id) = get_auth_key_tuple t in
 
-      let data_len = Cstruct.len msg.data in
+      let data_len = Cstruct.length msg.data in
       let len_without_padding = 8 + 8 + 8 + 4 + 4 + data_len in
       let padding_len = ~-(len_without_padding + 12) % 16 + 12 in
       let len_with_padding = len_without_padding + padding_len in
@@ -287,7 +287,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       join [key_id; msg_key; ige_encrypted]
 
     let decrypt_message t (enc: Cstruct.t) =
-      if Cstruct.len enc < 8 then begin
+      if Cstruct.length enc < 8 then begin
         Log.err (fun m -> m "invalid length:@.%a" hexdump_pp enc);
         raise @@ MTPError "Invalid length"
       end;
@@ -330,7 +330,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       let data = Cstruct.sub plain 32 data_len in
 
       let padding = Cstruct.shift plain (32 + data_len) in
-      let padding_len = Cstruct.len padding in
+      let padding_len = Cstruct.length padding in
 
       if padding_len < 12 || padding_len > 1024 then
         raise @@ MTPError "Invalid padding length";
@@ -345,7 +345,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Lwt.return (decrypt_message t buf)
 
   let send_encrypted t (msg: MTPMessage.t) =
-    let data_len = Cstruct.len msg.data in
+    let data_len = Cstruct.length msg.data in
 
     Log.info (fun m -> m
       "send_encrypted msg_id(%Ld) seq_no(%ld) data_len(%d)"
@@ -381,7 +381,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
 
   let send_msg t (msg: MTPMessage.t) =
     Log.info (fun m -> m "send_msg msg_id(%Ld) seq_no(%ld) data_len(%d)"
-      msg.msg_id msg.msg_seq_no (Cstruct.len msg.data));
+      msg.msg_id msg.msg_seq_no (Cstruct.length msg.data));
     AsyncQueue.add t.send_queue msg
 
   let rec resend_packed_msg t packed_msg =
@@ -518,7 +518,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Log.debug (fun m -> m "recv_loop start");
     let%lwt msg = receive_encrypted t in
     Log.info (fun m -> m "recv_loop msg_id(%Ld) seq_no(%ld) data_len(%d)"
-      msg.msg_id msg.msg_seq_no (Cstruct.len msg.data));
+      msg.msg_id msg.msg_seq_no (Cstruct.length msg.data));
     Log.debug (fun m -> m "recv_loop data:@.%a" hexdump_pp msg.data);
     let obj = MTPObject.decode (TLR.Decoder.of_cstruct msg.data) in
     process_mtp_object t msg.msg_id obj;

@@ -25,11 +25,11 @@ let send t packet =
   Log.debug (fun m -> m "tcp_full send [seq_no %ld]" t.seq_no);
   (* Cstruct.hexdump packet; *)
 
-  let len = 4 * 3 + Cstruct.len packet in
+  let len = 4 * 3 + Cstruct.length packet in
   let buf = Cstruct.create_unsafe len in
   Cstruct.LE.set_uint32 buf 0 (Int.to_int32_exn len);
   Cstruct.LE.set_uint32 buf 4 t.seq_no;
-  Cstruct.blit packet 0 buf 8 (Cstruct.len packet);
+  Cstruct.blit packet 0 buf 8 (Cstruct.length packet);
   let checksum = Crypto.crc32 (Cstruct.sub buf 0 (len - 4)) in
   Cstruct.LE.set_uint32 buf (len - 4) checksum;
 
@@ -37,7 +37,7 @@ let send t packet =
   Cstruct.hexdump buf; *)
 
   let%lwt _ =
-    Lwt_io.write_from t.output (Cstruct.to_bytes buf) 0 (Cstruct.len buf) in
+    Lwt_io.write_from t.output (Cstruct.to_bytes buf) 0 (Cstruct.length buf) in
 
   Int32.(t.seq_no <- t.seq_no + 1l);
 
@@ -53,7 +53,7 @@ let receive t =
   let body_bytes = Bytes.create given_body_len in
   let%lwt () = Lwt_io.read_into_exactly t.input body_bytes 0 given_body_len in
   let body = Cstruct.of_bytes body_bytes in (* TODO: inefficient *)
-  let body_len = Cstruct.len body in
+  let body_len = Cstruct.length body in
 
   (* if body_len < given_body_len then begin
     Cstruct.hexdump body;

@@ -34,4 +34,4 @@ distrib:
 
 .PHONY: lock
 lock:
-	opam lock
+	opam lock ./camlproto.opam
