@@ -1,5 +1,5 @@
 (executable
-  (name ex2)
+  (name e01_mtproto)
   (libraries cstruct lwt lwt.unix logs
     camlproto camlproto.transport_tcp_full_caml)
   (preprocess (pps lwt_ppx))

@@ -1,5 +1,5 @@
 (executable
-  (name ex1)
+  (name e02_telegram)
   (libraries cstruct lwt lwt.unix logs
     camlproto camlproto.transport_tcp_full_caml)
   (preprocess (pps lwt_ppx))

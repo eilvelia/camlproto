@@ -7,7 +7,7 @@ A portable and type-safe client implementation of Telegram's [MTProto][] protoco
 
 ## Usage
 
-Example to use with Telegram:
+Example to use the library with Telegram:
 
 ```ocaml
 open Camlproto
@@ -53,27 +53,22 @@ let main () =
 let _ = Lwt_main.run (main ())
 ```
 
-(see [examples/ex2/](examples/ex2/) and [examples/ex1/](examples/ex1/))
+(see [examples/e02_telegram/](examples/e02_telegram/) and [examples/e01_mtproto/](examples/e01_mtproto/))
 
 ## TL <-> OCaml mapping
 
-| TL               | OCaml            |
-|------------------|------------------|
-| `int`            | `int`            |
-| `nat` (`#`)      | `int32`          |
-| `long`           | `int64`          |
-| `string`         | `string`         |
-| `double`         | `float`          |
-| `int128`         | `Cstruct.t`      |
-| `int256`         | `Cstruct.t`      |
-| `bytes`          | `Cstruct.t`      |
-| `Bool`           | `bool`           |
-| `vector a`       | `'a list`        |
-
-### Other
-
 | TL                       | OCaml            |
 |--------------------------|------------------|
+| `int`                    | `int`            |
+| `nat` (`#`)              | `int32`          |
+| `long`                   | `int64`          |
+| `string`                 | `string`         |
+| `double`                 | `float`          |
+| `int128`                 | `Cstruct.t`      |
+| `int256`                 | `Cstruct.t`      |
+| `bytes`                  | `Cstruct.t`      |
+| `Bool`                   | `bool`           |
+| `vector a`               | `'a list`        |
 | Conditional definitions  | `'a option`      |
 
 ## "Transport components"

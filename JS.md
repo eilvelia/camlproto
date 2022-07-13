@@ -8,23 +8,18 @@ wip
 
 ## TL <-> JavaScript mapping
 
-| TL               | JavaScript       |
-|------------------|------------------|
-| `int`            | `number`         |
-| `nat` (`#`)      | `number`         |
-| `long`           | `string`         |
-| `string`         | `string`         |
-| `double`         | `number`         |
-| `int128`         | `Uint8Array`     |
-| `int256`         | `Uint8Array`     |
-| `bytes`          | `Uint8Array`     |
-| `Bool`           | `boolean`        |
-| `vector a`       | `Array<A>`       |
-| `true`           | `true`           |
-| `Null`           | `true`           |
-
-### Other
-
 | TL                       | JavaScript                      |
 |--------------------------|---------------------------------|
+| `int`                    | `number`                        |
+| `nat` (`#`)              | `number`                        |
+| `long`                   | `string`                        |
+| `string`                 | `string`                        |
+| `double`                 | `number`                        |
+| `int128`                 | `Uint8Array`                    |
+| `int256`                 | `Uint8Array`                    |
+| `bytes`                  | `Uint8Array`                    |
+| `Bool`                   | `boolean`                       |
+| `vector a`               | `Array<A>`                      |
+| `true`                   | `true`                          |
+| `Null`                   | `true`                          |
 | Conditional definitions  | <code>A &#124; undefined</code> |

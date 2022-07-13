@@ -1,4 +1,4 @@
 (alias
   (name examples)
-  (deps ex1/ex1.exe ex2/ex2.exe)
+  (deps e01_mtproto/e01_mtproto.exe e02_telegram/e02_telegram.exe)
 )
