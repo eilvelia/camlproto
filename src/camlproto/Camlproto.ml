@@ -1,6 +1,6 @@
 module TLRuntime = TLRuntime
 module TLLib = TLLib
-module TLGen = TLGen
+module TLSchema = TLSchema
 module MTProto = MTProto
 module TransportTypes = TransportTypes
 module PlatformTypes = PlatformTypes

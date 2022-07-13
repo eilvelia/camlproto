@@ -39,7 +39,7 @@ module Make (Platform: PlatformTypes.S) = struct
     exception FingerprintsNotFound of fingerprint list
 
     module TLR = TLRuntime
-    module M = TLGen.MTProto
+    module M = TLSchema.MTProto
 
     let calc_fingerprint { n; e } =
       let cs = TLR.Encoder.encode M.TL_rsa_public_key.encode { n; e }

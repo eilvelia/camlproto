@@ -2,8 +2,8 @@ open! Base
 open MTProto
 open TLRuntime.Types
 
-module Mtp = TLGen.MTProto
-module Tel = TLGen.Telegram
+module Mtp = TLSchema.MTProto
+module Tel = TLSchema.Telegram
 
 let src = Logs.Src.create "camlproto.telegram.client"
 module Log = (val Logs.src_log src : Logs.LOG)

@@ -2,7 +2,7 @@ open! Base
 open MTProtoMisc
 open MtpTL
 
-module TLM = TLGen.MTProto
+module TLM = TLSchema.MTProto
 
 include Types
 

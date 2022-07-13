@@ -1,7 +1,7 @@
 open! Base
 (* open TLRuntime.Types *)
 open TLRuntime.Builtin
-open TLGen.MTProto
+open TLSchema.MTProto
 
 module Decoder = TLRuntime.Decoder
 (* module Encoder = TLRuntime.Encoder *)

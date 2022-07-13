@@ -6,7 +6,7 @@ type t = {
   system_lang_code: string;
   lang_pack: string;
   lang_code: string;
-  proxy: TLGen.Telegram.TLT_InputClientProxy.t option;
+  proxy: TLSchema.Telegram.TLT_InputClientProxy.t option;
 }
 
 let create

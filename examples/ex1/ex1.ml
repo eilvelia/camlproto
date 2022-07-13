@@ -1,7 +1,7 @@
 open Camlproto
 open MTProto
 
-module M = TLGen.MTProto
+module M = TLSchema.MTProto
 
 let main () =
   let module MTP = MakeMTProtoV2Client(PlatformCaml)(TransportTcpFullCaml) in

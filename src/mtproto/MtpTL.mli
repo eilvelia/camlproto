@@ -1,6 +1,6 @@
 open! Base
 open TLRuntime.Builtin
-open TLGen.MTProto
+open TLSchema.MTProto
 
 module MTPMessage: sig
   type t = {

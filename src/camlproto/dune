@@ -5,5 +5,5 @@
   (libraries
     base logs
     camlproto.mtproto camlproto.transport_types camlproto.math
-    camlproto.telegram camlproto.tl.lib camlproto.tl.runtime camlproto.tlgen)
+    camlproto.telegram camlproto.tl.lib camlproto.tl.runtime camlproto.tlschema)
 )

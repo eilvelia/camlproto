@@ -17,7 +17,7 @@
 )
 
 (library
-  (name TLGen)
-  (public_name camlproto.tlgen)
+  (name TLSchema)
+  (public_name camlproto.tlschema)
   (libraries base camlproto.tl.runtime)
 )

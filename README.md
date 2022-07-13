@@ -12,7 +12,7 @@ Example to use with Telegram:
 ```ocaml
 open Camlproto
 
-module T = TLGen.Telegram
+module T = TLSchema.Telegram
 
 module Client = Telegram.Client.Make(PlatformCaml)(TransportTcpFullCaml)
 

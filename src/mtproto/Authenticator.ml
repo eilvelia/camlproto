@@ -1,7 +1,7 @@
 open! Base
 open Types
 
-module TLM = TLGen.MTProto
+module TLM = TLSchema.MTProto
 module TLR = TLRuntime
 
 let src = Logs.Src.create "camlproto.mtproto.auth"
