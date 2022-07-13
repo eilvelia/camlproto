@@ -10,7 +10,7 @@ class type js_sha1 = object
   method get: sha1_t -> Typed_array.arrayBuffer Js.t Js.meth
 end
 
-let js_sha1: js_sha1 Js.t = Js.Unsafe.js_expr "js_sha1"
+let js_sha1: js_sha1 Js.t = Js.Unsafe.pure_js_expr "js_sha1"
 
 type sha256_t
 
@@ -20,7 +20,7 @@ class type js_sha256 = object
   method get: sha256_t -> Typed_array.arrayBuffer Js.t Js.meth
 end
 
-let js_sha256: js_sha256 Js.t = Js.Unsafe.js_expr "js_sha1"
+let js_sha256: js_sha256 Js.t = Js.Unsafe.pure_js_expr "js_sha1"
 
 type aes_t
 
@@ -30,7 +30,7 @@ class type js_aes = object
   method ecbDecrypt: aes_t -> Cstruct.buffer -> Typed_array.arrayBuffer Js.t Js.meth
 end
 
-let js_aes: js_aes Js.t = Js.Unsafe.js_expr "js_aes"
+let js_aes: js_aes Js.t = Js.Unsafe.pure_js_expr "js_aes"
 
 module Crypto: PlatformTypes.Crypto = struct
   module SHA1 = struct
@@ -45,6 +45,7 @@ module Crypto: PlatformTypes.Crypto = struct
       feed t cs;
       get t
   end
+
   module SHA256 = struct
     type t = sha256_t
     let init () = js_sha256##init ()
@@ -57,6 +58,7 @@ module Crypto: PlatformTypes.Crypto = struct
       feed t cs;
       get t
   end
+
   module AES = struct
     type key = aes_t
     let ecb_create_key cs = js_aes##ecbCreateKey (Cstruct.to_bigarray cs)

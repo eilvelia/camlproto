@@ -30,16 +30,16 @@ let bigInt2ArrayBuffer
 let camlBigarray2bigInt
   : Cstruct.buffer -> bigint = Js.Unsafe.pure_js_expr "camlBigarray2bigInt"
 
-let bigint_zero: bigint = Js.Unsafe.pure_js_expr "leemon_zero"
-let bigint_one: bigint = Js.Unsafe.pure_js_expr "one"
+let leemonZero: bigint = Js.Unsafe.pure_js_expr "leemonZero"
+let leemonOne: bigint = Js.Unsafe.pure_js_expr "leemonOne"
 
 (* TODO: Some bigint functions don't seem to work *)
 
 module Bigint = struct
   type t = bigint
   exception Overflow (* not used *)
-  let zero = bigint_zero
-  let one = bigint_one
+  let zero = leemonZero
+  let one = leemonOne
   (* let size = bitSize *)
   (* let shift_right t n = let new_t = dup t in rightShift_ new_t n; new_t
   let shift_left t n = let new_t = dup t in leftShift_ new_t n; new_t *)

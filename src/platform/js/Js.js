@@ -71,12 +71,12 @@ var _js_secure_rand_browser = { // TODO:
   rand: function (size) { console.log('secure rand'); return new Uint8Array([1]).buffer }
 }
 
-var js_sha1 = _isNode() ? _js_sha1_node : _js_sha1_browser
-var js_sha256 = _isNode() ? _js_sha256_node : _js_sha256_browser
-var js_aes = _isNode() ? _js_aes_node : _js_aes_browser
-var js_secure_rand = _isNode() ? _js_secure_rand_node : _js_secure_rand_browser
+this.js_sha1 = _isNode() ? _js_sha1_node : _js_sha1_browser
+this.js_sha256 = _isNode() ? _js_sha256_node : _js_sha256_browser
+this.js_aes = _isNode() ? _js_aes_node : _js_aes_browser
+this.js_secure_rand = _isNode() ? _js_secure_rand_node : _js_secure_rand_browser
 
-var js_gzip = {
+this.js_gzip = {
   // compress: function (buf) { return _pako.deflate(buf.data).buffer },
   decompress: function (buf) { return _pako.inflate(buf.data).buffer }
 }
@@ -131,3 +131,9 @@ function arrayBuffer2bigInt (buf) {
 function camlBigarray2bigInt (arr) {
   return arrayBuffer2bigInt(arr.data.buffer)
 }
+
+this.arrayBufferFromHex = arrayBufferFromHex
+this.arrayBufferToHex = arrayBufferToHex
+this.bigInt2ArrayBuffer = bigInt2ArrayBuffer
+this.arrayBuffer2bigInt = arrayBuffer2bigInt
+this.camlBigarray2bigInt = camlBigarray2bigInt

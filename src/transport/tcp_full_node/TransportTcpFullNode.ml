@@ -12,7 +12,7 @@ class type js_tcp_full = object
     : js_t -> (Typed_array.arrayBuffer Js.t -> unit) Js.callback -> unit Js.meth
 end
 
-let js_tcp_full: js_tcp_full Js.t = Js.Unsafe.js_expr "js_tcp_full"
+let js_tcp_full: js_tcp_full Js.t = Js.Unsafe.pure_js_expr "js_tcp_full"
 
 type t = js_t
 

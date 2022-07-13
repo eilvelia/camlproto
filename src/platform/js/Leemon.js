@@ -193,7 +193,7 @@ bpe>>=1;                   //bpe=number of bits in one element of the array repr
 mask=(1<<bpe)-1;           //AND the mask with an integer to get its bpe least significant bits
 radix=mask+1;              //2^bpe.  a single 1 bit to the left of the first bit of mask
 var one=int2bigInt(1,1,1);     //constant used in powMod_()
-var leemon_zero = int2bigInt(0, 1, 1)
+var zero = int2bigInt(0, 1, 1)
 
 //the following global variables are scratchpad memory to
 //reduce dynamic memory allocation in the inner loop
@@ -1507,3 +1507,66 @@ function mont_(x,y,n,np) {
     sub_(sa,n);
   copy_(x,sa);
 }
+
+this.add = add
+this.addInt = addInt
+this.bigInt2str = bigInt2str
+this.bitSize = bitSize
+this.dup = dup
+this.equals = equals
+this.equalsInt = equalsInt
+this.expand = expand
+this.findPrimes = findPrimes
+this.GCD = GCD
+this.greater = greater
+this.greaterShift = greaterShift
+this.int2bigInt = int2bigInt
+this.inverseMod = inverseMod
+this.inverseModInt = inverseModInt
+this.isZero = isZero
+this.millerRabin = millerRabin
+this.millerRabinInt = millerRabinInt
+this.mod = mod
+this.modInt = modInt
+this.mult = mult
+this.multMod = multMod
+this.negative = negative
+this.powMod = powMod
+this.randBigInt = randBigInt
+this.randTruePrime = randTruePrime
+this.randProbPrime = randProbPrime
+this.str2bigInt = str2bigInt
+this.sub = sub
+this.trim = trim
+
+this.addInt_ = addInt_
+this.add_ = add_
+this.copy_ = copy_
+this.copyInt_ = copyInt_
+this.GCD_ = GCD_
+this.inverseMod_ = inverseMod_
+this.mod_ = mod_
+this.mult_ = mult_
+this.multMod_ = multMod_
+this.powMod_ = powMod_
+this.randBigInt_ = randBigInt_
+this.randTruePrime_ = randTruePrime_
+this.sub_ = sub_
+
+this.addShift_ = addShift_
+this.carry_ = carry_
+this.divide_ = divide_
+this.divInt_ = divInt_
+this.eGCD_ = eGCD_
+this.halve_ = halve_
+this.leftShift_ = leftShift_
+this.linComb_ = linComb_
+this.linCombShift_ = linCombShift_
+this.mont_ = mont_
+this.multInt_ = multInt_
+this.rightShift_ = rightShift_
+this.squareMod_ = squareMod_
+this.subShift_ = subShift_
+
+this.leemonZero = zero
+this.leemonOne = one

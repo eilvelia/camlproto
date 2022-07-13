@@ -6,7 +6,7 @@ var _net = require('net')
 // CRC32 taken from
 // https://github.com/SheetJS/js-crc32/blob/02caecf54f5f8cd9fbcbc295cbf3d6553db97e58/crc32.js
 
-function _signed_crc_table() {
+function _signedCrcTable() {
 	var c = 0, table = new Array(256);
 
 	for(var n =0; n != 256; ++n){
@@ -25,9 +25,9 @@ function _signed_crc_table() {
 	return typeof Int32Array !== 'undefined' ? new Int32Array(table) : table;
 }
 
-var _crc_T = _signed_crc_table();
+var _crcT = _signedCrcTable();
 
-function crc32_buf_8(buf, seed) {
+function crc32Buf8(buf, seed) {
 	var C = seed ^ -1, L = buf.length - 7;
 	for(var i = 0; i < L;) {
 		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
@@ -43,22 +43,22 @@ function crc32_buf_8(buf, seed) {
 	return C ^ -1;
 }
 
-function crc32_buf(buf, seed) {
-	if(buf.length > 10000) return crc32_buf_8(buf, seed);
+function crc32Buf(buf, seed) {
+	if(buf.length > 10000) return crc32Buf8(buf, seed);
 	var C = seed ^ -1, L = buf.length - 3;
 	for(var i = 0; i < L;) {
-		C = (C>>>8) ^ _crc_T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ _crc_T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ _crc_T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ _crc_T[(C^buf[i++])&0xFF];
+		C = (C>>>8) ^ _crcT[(C^buf[i++])&0xFF];
+		C = (C>>>8) ^ _crcT[(C^buf[i++])&0xFF];
+		C = (C>>>8) ^ _crcT[(C^buf[i++])&0xFF];
+		C = (C>>>8) ^ _crcT[(C^buf[i++])&0xFF];
 	}
-	while(i < L+3) C = (C>>>8) ^ _crc_T[(C^buf[i++])&0xFF];
+	while(i < L+3) C = (C>>>8) ^ _crcT[(C^buf[i++])&0xFF];
 	return C ^ -1;
 }
 
 /** Returns Uint8Array with length 4 */
-function js_crc32 (buf) {
-  var int = crc32_buf(buf)
+function jsCrc32 (buf) {
+  var int = crc32Buf(buf)
   var uint32Arr = new Uint32Array([int])
   var uint8Arr = new Uint8Array(uint32Arr.buffer)
   return uint8Arr
@@ -93,7 +93,7 @@ function _nodeBufferToArrayBuffer (data) {
 
 // TCP Full for Node.js.
 
-var js_tcp_full = {
+this.js_tcp_full = {
   create: function (address, port, cb) {
     var socket = _net.createConnection(port, address, function () {
       console.log('js_tcp_full connected')
@@ -115,7 +115,7 @@ var js_tcp_full = {
     bufUint8.set(packet, 8)
 
     var forChecksum = bufUint8.slice(0, len - 4)
-    var checksum = js_crc32(forChecksum)
+    var checksum = jsCrc32(forChecksum)
     bufUint8.set(checksum, len - 4)
 
     console.log('socket.write', bufUint8.length)
@@ -155,7 +155,7 @@ var js_tcp_full = {
 
     var forChecksum = Buffer.concat([lenSeq, body])
     console.log('forChecksum len', forChecksum.length)
-    var calcChecksumArr = js_crc32(forChecksum)
+    var calcChecksumArr = jsCrc32(forChecksum)
 
     if (!_eq(calcChecksumArr, givenChecksumArr)) {
       console.error('Invalid checksum', calcChecksumArr, givenChecksumArr)
