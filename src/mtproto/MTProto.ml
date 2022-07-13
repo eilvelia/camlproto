@@ -560,6 +560,11 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     let%lwt () = send_encrypted t msg in
     send_loop t
 
+    let loop t =
+      Lwt.async (fun () -> recv_loop t);
+      Lwt.async (fun () -> send_loop t);
+      ()
+
   let invoke
     t
     ?(content_related = true)

@@ -14,9 +14,9 @@ open Camlproto
 
 module T = TLGen.Telegram
 
-let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
-
 module Client = Telegram.Client.Make(PlatformCaml)(TransportTcpFullCaml)
+
+let prompt str = Lwt_io.(let%lwt () = write stdout str in read_line stdin)
 
 let main () =
   (* api_id and api_hash can be obtained at https://my.telegram.org/ *)
@@ -27,32 +27,28 @@ let main () =
 
   let%lwt t = Client.create () in
 
-  let promise =
-    let%lwt () = Client.init (Telegram.Settings.create ~api_id ()) t in
-    let%lwt TL_auth_sentCode { phone_code_hash; _ } =
-      Client.invoke t (module T.TL_auth_sendCode) {
-        phone_number;
-        api_id;
-        api_hash;
-        settings = TL_codeSettings {
-         allow_flashcall = None;
-         current_number = None;
-         allow_app_hash = None;
-        }
-      } in
-    let%lwt phone_code = prompt "Enter the code: " in
-    let%lwt [@warning "-8"] TL_auth_authorization { user; _ } =
-      Client.invoke t (module T.TL_auth_signIn) {
-        phone_number;
-        phone_code_hash;
-        phone_code;
-      } in
-    let TL_user { id; _ } | TL_userEmpty { id } = user in
-    print_endline ("Signed as " ^ string_of_int id);
-    Lwt.return_unit
-  in
-
-  Lwt.pick [promise; Client.loop t]
+  let%lwt () = Client.init (Telegram.Settings.create ~api_id ()) t in
+  let%lwt TL_auth_sentCode { phone_code_hash; _ } =
+    Client.invoke t (module T.TL_auth_sendCode) {
+      phone_number;
+      api_id;
+      api_hash;
+      settings = TL_codeSettings {
+        allow_flashcall = None;
+        current_number = None;
+        allow_app_hash = None;
+      }
+    } in
+  let%lwt phone_code = prompt "Enter the code: " in
+  let%lwt [@warning "-8"] TL_auth_authorization { user; _ } =
+    Client.invoke t (module T.TL_auth_signIn) {
+      phone_number;
+      phone_code_hash;
+      phone_code;
+    } in
+  let TL_user { id; _ } | TL_userEmpty { id } = user in
+  print_endline ("Signed as " ^ string_of_int id);
+  Lwt.return_unit
 
 let _ = Lwt_main.run (main ())
 ```
@@ -80,7 +76,7 @@ let _ = Lwt_main.run (main ())
 |--------------------------|------------------|
 | Conditional definitions  | `'a option`      |
 
-## Transport components
+## "Transport components"
 
 ### Implemented
 

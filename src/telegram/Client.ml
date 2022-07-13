@@ -32,6 +32,8 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
 
     let t = { mtp } in
 
+    MTP.loop t.mtp;
+
     Lwt.return t
 
   let invoke t = MTP.invoke t.mtp
@@ -63,7 +65,4 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
     let%lwt (TL_config res) = init_with t s (module Tel.TL_help_getConfig) E in
     Log.info (fun m -> m "help.getConfig res. me_url_prefix: %s" res.me_url_prefix);
     Lwt.return_unit
-
-  let loop t =
-    Lwt.pick [MTP.recv_loop t.mtp; MTP.send_loop t.mtp]
 end

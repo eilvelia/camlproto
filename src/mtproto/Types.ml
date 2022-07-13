@@ -68,6 +68,8 @@ module type MTProtoClient = sig
 
   val send_loop: t -> unit Lwt.t
 
+  val loop : t -> unit
+
   val invoke
     : t
     -> ?content_related:bool
