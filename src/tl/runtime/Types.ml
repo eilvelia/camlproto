@@ -1,6 +1,9 @@
 module type Serializable = sig
   type t
-  val encode : Encoder.t -> t -> unit (* encode bare *)
+
+  val encode : Encoder.t -> t -> unit
+  (** [encode enc t] serializes the bare version of [t] *)
+
   val encode_boxed : Encoder.t -> t -> unit
 end
 
@@ -16,6 +19,7 @@ end
 
 module type DesMin = sig include Deserializable end
 
+(* TODO: A better error *)
 exception DeserializationError of int32
 
 module type SerDes = sig
@@ -47,13 +51,13 @@ end
 
 module type TLConstr = sig
   include TLComb
-  val kind : [ `TLConstructor ]
+  type tl_constr
 end
 
 module type TLFunc = sig
   include TLComb
-  val kind : [ `TLFunction ]
   module ResultM : TLObject
+  type tl_func
 end
 
 module type TLFuncMin = sig
@@ -63,8 +67,8 @@ end
 
 module type TLType = sig
   type t
-  type tl_type
   include SerDes with type t := t
+  type tl_type
 end
 
 module type TLTypeMin = sig include SerDesMin end
@@ -78,6 +82,7 @@ end
 
 module MakeConstr (M : TLCombMin) : TLConstr with type t := M.t = struct
   include M
+  type tl_constr
   let kind = `TLConstructor
   include MakeEncodeBoxed(M)
 end
@@ -86,12 +91,13 @@ module MakeFunc (M : TLFuncMin)
   : TLFunc with type t := M.t and module ResultM := M.ResultM
 = struct
   include M
+  type tl_func
   let kind = `TLFunction
   include MakeEncodeBoxed(M)
 end
 
 module MakeType (M : TLTypeMin) : TLType with type t := M.t = struct
   include M
-  let encode_boxed = encode
+  let encode_boxed = encode (*_ TODO: calculate magic for types *)
   type tl_type
 end
