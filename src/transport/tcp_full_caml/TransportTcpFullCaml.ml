@@ -3,77 +3,87 @@ open! Base
 module Math = Math.Make(PlatformCaml)
 module Crypto = Math.Crypto
 
-let src = Logs.Src.create "camlproto.transport.tcp_full_caml"
+let src = Logs.Src.create "camlproto.transport.tcp_full.caml"
 module Log = (val Logs.src_log src : Logs.LOG)
 
 type t = {
-  input: Lwt_io.input_channel;
-  output: Lwt_io.output_channel;
-  mutable seq_no: int32;
+  input : Lwt_io.input_channel;
+  output : Lwt_io.output_channel;
+  mutable seq_no_send : int;
+  mutable seq_no_receive : int;
 }
+
+let invalid_checksum ~exp ~got =
+  Printf.sprintf "Invalid checksum: expected %ld, got %ld" exp got
+
+let incorrect_seq_no ~exp ~got =
+  Printf.sprintf "Received incorrect seqno: expected %d, got %d" exp got
 
 exception Error of string
 
-let create (address, port): t Lwt.t =
+(* tcp_full packet structure:
+ * +----+----+----...----+----+
+ * |len.|seq.|  payload  |crc.|
+ * +----+----+----...----+----+
+ *)
+
+let create (address, port) =
   let%lwt addresses = Lwt_unix.getaddrinfo address port [] in
   let addr = (List.hd_exn addresses).ai_addr in
-  Log.info (fun m -> m "tcp_full: Connecting to %s:%s" address port);
-  let%lwt (input, output) = Lwt_io.open_connection addr in
-  Lwt.return { input; output; seq_no = 0l }
+  Log.info (fun m -> m "Connecting to %s:%s" address port);
+  let%lwt input, output = Lwt_io.open_connection addr in
+  Lwt.return { input; output; seq_no_send = 0; seq_no_receive = 0 }
 
-let send t packet =
-  Log.debug (fun m -> m "tcp_full send [seq_no %ld]" t.seq_no);
-  (* Cstruct.hexdump packet; *)
+let send t payload =
+  let payload_len = Cstruct.length payload in
+  Log.debug (fun m ->
+    m "tcp_full send (len %d) [seq_no %d]" payload_len t.seq_no_send);
 
-  let len = 4 * 3 + Cstruct.length packet in
+  let len = 12 + payload_len in
+  (* TODO: Reuse cstruct or use bytes? *)
   let buf = Cstruct.create_unsafe len in
-  Cstruct.LE.set_uint32 buf 0 (Int.to_int32_exn len);
-  Cstruct.LE.set_uint32 buf 4 t.seq_no;
-  Cstruct.blit packet 0 buf 8 (Cstruct.length packet);
-  let checksum = Crypto.crc32 (Cstruct.sub buf 0 (len - 4)) in
+  Cstruct.LE.set_uint32 buf 0 (Int.to_int32_trunc len);
+  Cstruct.LE.set_uint32 buf 4 (Int.to_int32_trunc t.seq_no_send);
+  Cstruct.blit payload 0 buf 8 payload_len;
+  let checksum = Crypto.crc32 @@ Cstruct.sub buf 0 (len - 4) in
   Cstruct.LE.set_uint32 buf (len - 4) checksum;
 
-  (* Caml.print_endline "To server:";
-  Cstruct.hexdump buf; *)
+  (* Caml.print_endline "To server:"; Cstruct.hexdump buf; *)
 
-  let%lwt _ =
-    Lwt_io.write_from t.output (Cstruct.to_bytes buf) 0 (Cstruct.length buf) in
+  let buf_bigstring = Cstruct.to_bigarray buf in
+  let%lwt written = Lwt_io.write_from_bigstring t.output buf_bigstring 0 len in
+  Log.debug (fun m -> m "tcp_full written %d bytes" written);
 
-  Int32.(t.seq_no <- t.seq_no + 1l);
+  t.seq_no_send <- t.seq_no_send + 1;
 
-  Lwt.return ()
+  Lwt.return_unit
 
 let receive t =
-  let%lwt len_int32 = Lwt_io.LE.read_int32 t.input in
-  Log.debug (fun m -> m "tcp_full received [len %ld]" len_int32);
-  let len = Int.of_int32_exn len_int32 in
-  let%lwt seq_no = Lwt_io.LE.read_int32 t.input in
+  let%lwt len = Lwt_io.LE.read_int t.input in
+  let%lwt seq_no = Lwt_io.LE.read_int t.input in
 
+  Log.debug (fun m -> m "tcp_full received [len %d] [seq_no %d]" len seq_no);
+
+  if t.seq_no_receive <> seq_no then
+    raise @@ Error (incorrect_seq_no ~exp:t.seq_no_receive ~got:seq_no);
+
+  let buf = Cstruct.create_unsafe (len - 4) (* without checksum *) in
+  Cstruct.LE.set_uint32 buf 0 (Int.to_int32_trunc len);
+  Cstruct.LE.set_uint32 buf 4 (Int.to_int32_trunc seq_no);
+  let body = Cstruct.shift buf 8 in
+  let body_bigstring = Cstruct.to_bigarray body in
   let given_body_len = len - 12 in
-  let body_bytes = Bytes.create given_body_len in
-  let%lwt () = Lwt_io.read_into_exactly t.input body_bytes 0 given_body_len in
-  let body = Cstruct.of_bytes body_bytes in (* TODO: inefficient *)
-  let body_len = Cstruct.length body in
+  let%lwt () =
+    Lwt_io.read_into_exactly_bigstring t.input body_bigstring 0 given_body_len
+  in
 
-  (* if body_len < given_body_len then begin
-    Cstruct.hexdump body;
-    raise @@ Error (Printf.sprintf
-      "Invalid len: actual %d | given %d" body_len given_body_len)
-  end; *)
-
-  let checksum_bytes = Cstruct.create_unsafe (8 + body_len) in
-  Cstruct.LE.set_uint32 checksum_bytes 0 len_int32;
-  Cstruct.LE.set_uint32 checksum_bytes 4 seq_no;
-  Cstruct.blit body 0 checksum_bytes 8 body_len;
-  let calc_checksum = Crypto.crc32 checksum_bytes in
+  let calc_checksum = Crypto.crc32 buf in
 
   let%lwt given_checksum = Lwt_io.LE.read_int32 t.input in
 
   if Int32.(calc_checksum <> given_checksum) then
-    raise @@ Error "checksums are not equal";
+    raise @@ Error (invalid_checksum ~exp:calc_checksum ~got:given_checksum);
 
-  (* if Int32.(seq_no + 1l <> t.seq_no) then
-    raise @@ Error (Printf.sprintf
-      "Incorrect sequence number: cl %ld | sv %ld" t.seq_no seq_no); *)
+  t.seq_no_receive <- t.seq_no_receive + 1;
 
   Lwt.return body

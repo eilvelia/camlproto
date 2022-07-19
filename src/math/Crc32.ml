@@ -1,6 +1,6 @@
 open! Base
 
-let crc32_tab: int32 array = [|
+let crc32_tab = [|
   0x00000000l; 0x77073096l; 0xee0e612cl; 0x990951bal; 0x076dc419l; 0x706af48fl;
   0xe963a535l; 0x9e6495a3l; 0x0edb8832l; 0x79dcb8a4l; 0xe0d5e91el; 0x97d2d988l;
   0x09b64c2bl; 0x7eb17cbdl; 0xe7b82d07l; 0x90bf1d91l; 0x1db71064l; 0x6ab020f2l;
@@ -46,19 +46,18 @@ let crc32_tab: int32 array = [|
   0xb40bbe37l; 0xc30c8ea1l; 0x5a05df1bl; 0x2d02ef8dl
 |]
 
-let crc32 (cs: Cstruct.t) =
+(* TODO: Accept bytes as well? *)
+
+let crc32 (buf : Cstruct.t) =
   let crc = ref 0xFF_FF_FF_FFl in
-  let i = ref 0 in
-  for _ = Cstruct.length cs - 1 downto 0 do
-    let ch = Cstruct.get_uint8 cs !i |> Int32.of_int_trunc in
-    Int32.(
-      let n = (!crc lxor ch) land 0xFFl in
-      crc := crc32_tab.(Int.of_int32_trunc n) lxor (!crc lsr 8)
-    );
-    i := !i + 1
+  for i = 0 to Cstruct.length buf - 1 do
+    let open Int32 in
+    let byte = Cstruct.get_uint8 buf i |> of_int_trunc in
+    let n = (!crc lxor byte) land 0xFFl |> to_int_trunc in
+    crc := (Array.unsafe_get crc32_tab n) lxor (!crc lsr 8)
   done;
   Int32.bit_not !crc
 
-let%expect_test "match/crc32" =
+let%expect_test "math/crc32" =
   Caml.Printf.printf "%lX" @@ crc32 @@ Cstruct.of_hex "1c b5 c4 15";
   [%expect {| 3A55FD61 |}]
