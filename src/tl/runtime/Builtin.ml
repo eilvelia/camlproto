@@ -3,6 +3,7 @@ open Types
 module TL_int = struct
   type t = int
   let magic () = 0xa8509bdal
+  (* Does not work on 32-bit platforms *)
   let [@inline] encode enc t = Encoder.add_int32_le enc (Int32.of_int t)
   let [@inline] decode dec = Decoder.read_int32_le dec |> Int32.to_int
   include MakeConstr(struct

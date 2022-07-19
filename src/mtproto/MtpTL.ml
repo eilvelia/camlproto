@@ -3,6 +3,9 @@ open! Base
 open TLRuntime.Builtin
 open TLSchema.MTProto
 
+(* This file contains hacky definitions of types in mtproto.tl that cannot be
+ * parsed automatically *)
+
 module Decoder = TLRuntime.Decoder
 (* module Encoder = TLRuntime.Encoder *)
 
