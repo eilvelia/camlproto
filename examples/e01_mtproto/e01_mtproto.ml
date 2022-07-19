@@ -7,16 +7,16 @@ let main () =
   let module MTP = MakeMTProtoV2Client(PlatformCaml)(TransportTcpFullCaml) in
   let%lwt t = MTP.create () in
   let%lwt _ = MTP.do_authentication t in
-  let send_pings () =
-    let%lwt (TL_pong a) = MTP.invoke t (module M.TL_ping) { ping_id = 1L } in
-    Printf.printf "<-- Pong 1 [ping_id %Ld]\n" a.ping_id;
-    let%lwt () = Lwt_unix.sleep 1. in
-    let%lwt (TL_pong b) = MTP.invoke t (module M.TL_ping) { ping_id = 2L } in
-    Printf.printf "<-- Pong 2 [ping_id %Ld]\n" b.ping_id;
-    Lwt.return_unit
-  in
   MTP.loop t;
-  let%lwt () = send_pings () in
+
+  Logs.app (fun m -> m "---> Ping 1");
+  let%lwt (TL_pong a) = MTP.invoke t (module M.TL_ping) { ping_id = 1L } in
+  Logs.app (fun m -> m "<--- Pong 1 [ping_id %Ld]" a.ping_id);
+  let%lwt () = Lwt_unix.sleep 1. in
+  Logs.app (fun m -> m "---> Ping 2");
+  let%lwt (TL_pong b) = MTP.invoke t (module M.TL_ping) { ping_id = 2L } in
+  Logs.app (fun m -> m "<--- Pong 2 [ping_id %Ld]" b.ping_id);
+
   Lwt.return_unit
 
 let () =
