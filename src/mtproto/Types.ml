@@ -1,5 +1,4 @@
 open! Base
-open MTProtoMisc
 
 (* module type MTProtoStorage = sig
   type t
@@ -43,7 +42,7 @@ module type MTProtoClient = sig
   val create
     :  ?auth_key:Cstruct.t
     -> ?rsa:rsa_manager
-    -> ?dc:DcList.dc
+    -> ?dc:TransportTypes.server
     -> unit
     -> t Lwt.t
 

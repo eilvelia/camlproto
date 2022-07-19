@@ -1,5 +1,0 @@
-(library
-  (name MTProtoMisc)
-  (public_name camlproto.mtproto_misc)
-  (libraries base cstruct)
-)

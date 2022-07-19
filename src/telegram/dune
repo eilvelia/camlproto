@@ -3,7 +3,6 @@
   (public_name camlproto.telegram)
   (libraries
     base cstruct lwt
-    camlproto.mtproto camlproto.mtproto_misc
-    camlproto.transport_types camlproto.tlschema)
+    camlproto.mtproto camlproto.transport_types camlproto.tlschema)
   (preprocess (pps lwt_ppx))
 )

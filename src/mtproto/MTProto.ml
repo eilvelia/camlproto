@@ -1,5 +1,4 @@
 open! Base
-open MTProtoMisc
 open MtpTL
 
 module TLM = TLSchema.MTProto
@@ -81,7 +80,7 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   let create
     ?(auth_key: Cstruct.t option)
     ?(rsa = RsaManager.default)
-    ?(dc: DcList.dc = ("149.154.167.51", "443"))
+    ?(dc = ("149.154.167.51", "443") (* dc2 as the default for now *))
     ()
   =
     let open Option.Monad_infix in
