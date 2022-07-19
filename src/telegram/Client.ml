@@ -8,18 +8,18 @@ module Tel = TLSchema.Telegram
 let src = Logs.Src.create "camlproto.telegram.client"
 module Log = (val Logs.src_log src : Logs.LOG)
 
-let layer_const = 108
+let layer_const = 143
 
 (* TODO: *)
 (* module type TelegramSession = sig
 end *)
 
-module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
+module Make (Platform : PlatformTypes.S) (T : TransportTypes.S) = struct
   module MTP = MakeMTProtoV2Client(Platform)(T)
 
-  type t = { mtp: MTP.t }
+  type t = { mtp : MTP.t }
 
-  let create ?(auth_key: Cstruct.t option) () =
+  let create ?(auth_key : Cstruct.t option) () =
     let%lwt mtp = MTP.create ?auth_key () in
 
     let%lwt () = match auth_key with
@@ -30,20 +30,18 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
         Lwt.return_unit
     in
 
-    let t = { mtp } in
+    MTP.loop mtp;
 
-    MTP.loop t.mtp;
-
-    Lwt.return t
+    Lwt.return { mtp }
 
   let invoke t = MTP.invoke t.mtp
 
   let init_with
-    (t: t)
-    (s: Settings.t)
+    (t : t)
+    (s : Settings.t)
     (type x result)
     (module X : TLFunc with type t = x and type ResultM.t = result)
-    (x: x)
+    (x : x)
     : result Lwt.t
   =
     MTP.invoke t.mtp (module Tel.TL_invokeWithLayer(Tel.TL_initConnection(X))) {
@@ -57,11 +55,12 @@ module Make (Platform: PlatformTypes.S) (T: TransportTypes.S) = struct
         lang_pack = s.lang_pack;
         lang_code = s.lang_code;
         proxy = s.proxy;
+        params = s.params;
         query = x;
       }
     }
 
-  let init (s: Settings.t) (t: t) =
+  let init t (s : Settings.t) =
     let%lwt (TL_config res) = init_with t s (module Tel.TL_help_getConfig) E in
     Log.info (fun m -> m "help.getConfig res. me_url_prefix: %s" res.me_url_prefix);
     Lwt.return_unit

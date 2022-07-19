@@ -11,7 +11,7 @@
   (target Telegram.ml)
   (deps
     %{project_root}/src/tl/cli/TLCli.exe
-    %{project_root}/schema/l108.tl
+    %{project_root}/schema/l143.tl
   )
   (action (run %{deps} %{target}))
 )

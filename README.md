@@ -27,7 +27,7 @@ let main () =
 
   let%lwt t = Client.create () in
 
-  let%lwt () = Client.init (Telegram.Settings.create ~api_id ()) t in
+  let%lwt () = Client.init t (Telegram.Settings.create ~api_id ()) in
   let%lwt TL_auth_sentCode { phone_code_hash; _ } =
     Client.invoke t (module T.TL_auth_sendCode) {
       phone_number;
@@ -37,6 +37,8 @@ let main () =
         allow_flashcall = None;
         current_number = None;
         allow_app_hash = None;
+        allow_missed_call = None;
+        logout_tokens = None;
       }
     } in
   let%lwt phone_code = prompt "Enter the code: " in
@@ -47,7 +49,7 @@ let main () =
       phone_code;
     } in
   let TL_user { id; _ } | TL_userEmpty { id } = user in
-  print_endline ("Signed as " ^ string_of_int id);
+  print_endline ("Signed as " ^ Int64.to_string id);
   Lwt.return_unit
 
 let _ = Lwt_main.run (main ())
