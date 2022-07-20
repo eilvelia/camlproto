@@ -10,11 +10,10 @@ open Err.Check
 (* Checker State *)
 module CState = struct
   type t = {
-    errors: Err.Check.t list;
-    store: Store.t;
-    args: tl_arg list;
-    var_ref: int;
-    constr_ref: int;
+    errors : Err.Check.t list;
+    store : Store.t;
+    args : tl_arg list;
+    var_ref : int;
   }
 
   let default = {
@@ -22,24 +21,23 @@ module CState = struct
     store = Store.default;
     args = [];
     var_ref = 0;
-    constr_ref = Store.default_constr_ref;
   }
 
   let add_error t e = { t with errors = e :: t.errors }
 end
 
-(* TODO: Use 'monads' from BAP *)
-module CheckerM: sig
-  [@warning "-32"] (* disable the 'unused' warning *)
+(* TODO: Use 'monads' from BAP? *)
+module CheckerM : sig
+  [@warning "-32"] (* Disable the 'unused' warning *)
   type state = CState.t
   type +'a t
-  val run_state: 'a t -> state -> ('a * state)
-  val eval_state: 'a t -> state -> 'a
-  val exec_state: 'a t -> state -> state
-  val get: state t
-  val put: state -> unit t
-  val modify: (state -> state) -> unit t
-  val default: unit t
+  val run_state  : 'a t -> state -> ('a * state)
+  val eval_state : 'a t -> state -> 'a
+  val exec_state : 'a t -> state -> state
+  val get : state t
+  val put : state -> unit t
+  val modify : (state -> state) -> unit t
+  val default : unit t
   include Monad.S with type 'a t := 'a t
 end = struct
   type state = CState.t
@@ -157,17 +155,20 @@ let check_type_constr (l, e': Ast.expr) =
     l, TypeIdBare (Name "invalid")
 
 let rec check_type_expr (l, e': Ast.expr) =
+  let op_invalid_args_num op exp got =
+    let%map () = add_error (l, WrongNumberOfOperands (op, exp, got)) in
+    l, TypeExpr (TypeRefUnd (l, TypeIdBare (Name "invalid")), [])
+  in
   match e' with
   | ENat n ->
     let%map () = add_error (l, NatIsNotTypeExpr n) in
     l, TypeExpr (ref_nat, [])
   | EIdent id -> check_ident id
   | EOperator ((_, OpBare), [e]) -> check_type_expr e >>| fun e' -> l, TypeBare e'
-  | EOperator ((_, OpBang), _) -> failwith "`!` modifier isn't allowed here"
-  | EOperator ((_, OpPlus), [_a; _b]) -> failwith "" (* TODO: *)
-  | EOperator (_, _) ->
-    let%map () = add_error (l, WrongNumberOfOperands) in
-    l, TypeExpr (TypeRefUnd (l, TypeIdBare (Name "invalid")), [])
+  | EOperator ((_, OpBare), xs) -> op_invalid_args_num "%" 1 (List.length xs)
+  | EOperator ((_, OpBang), _) -> failwith "`!` modifier is not allowed here"
+  | EOperator ((_, OpPlus), [_a; _b]) -> failwith "plus operator" (* TODO: *)
+  | EOperator ((_, OpPlus), xs) -> op_invalid_args_num "+" 2 (List.length xs)
   | EAppl (x, []) -> check_type_expr x
   | EAppl ((_, EOperator ((_, OpBare), [x])), xs) ->
     let%map e = check_type_expr (l, EAppl (x, xs)) in
@@ -334,9 +335,9 @@ let check_constr_result_type (loc, expr' as expr: Ast.expr) =
     let%map () = add_error (loc, InvalidResultType) in 0
 
 (** Checks that all optional arguments are used at least once
-  * in the result type not modified by `!` (implicit or explicit)
-  * or in arguments modified by `!`
-  * Reverses the [args] list. *)
+    in the result type _not modified_ by `!` (implicit or explicit)
+    or in arguments _modified_ by `!`.
+    Reverses the [args] list. *)
 let validate_opt_args (result_type: modified_type_expr') =
   let list_contains ls ~f =
     let rec go = function
@@ -427,26 +428,26 @@ let check_combinator_decl (loc, comb' as comb: Ast.combinator_decl) section buil
     let%bind result_ref_i = check_constr_result_type comb_result in
     let%bind result_expr = check_type_expr comb_result in
     let%bind () = validate_opt_args @@ Modified (None, result_expr) in
-    let%bind { args; _ } = get in
-    let%bind { constr_ref = c_ref; _ } = get in
-    let constr_ref = c_ref + 1 in
+    let%bind { args; store; _ } = get in
     let c = loc, {
       c_id = id;
       c_magic = magic;
       c_args = args;
-      c_ref;
+      c_ref = Store.fresh_constr_ref store;
       c_result_type = result_ref_i;
       c_builtin = builtin;
     } in
-    modify (fun s ->
-        match Store.insert_constructor s.store c with
-        | Some store -> { s with store; constr_ref }
-        | None -> CState.add_error s (id_loc, DuplicateConstr id_str)
-      )
+    begin match Store.insert_constructor store c with
+    | Some store -> modify (fun s -> { s with store })
+    | None ->
+      if Store.is_constr_defined_in_prelude c
+      then return ()
+      else add_error (id_loc, DuplicateConstr id_str)
+    end
   | Functions ->
     let%bind result_expr = check_func_result_type comb_result in
     let%bind () = validate_opt_args @@ Modified (Some ModBang, result_expr) in
-    let%bind { args; _ } = get in
+    let%bind { args; store; _ } = get in
     let f = loc, {
       f_id = id;
       f_magic = magic;
@@ -454,11 +455,10 @@ let check_combinator_decl (loc, comb' as comb: Ast.combinator_decl) section buil
       f_result_type = result_expr;
       f_builtin = builtin;
     } in
-    modify (fun s ->
-        match Store.insert_function s.store f with
-        | Some store -> { s with store }
-        | None -> CState.add_error s (id_loc, DuplicateFunc id_str)
-      )
+    begin match Store.insert_function store f with
+    | Some store -> modify (fun s -> { s with store })
+    | None -> add_error (id_loc, DuplicateFunc id_str)
+    end
 
 let check_builtin_combinator_decl (l, comb': Ast.builtin_combinator_decl) section =
   let c = l, { Ast.

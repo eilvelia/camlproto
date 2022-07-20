@@ -11,12 +11,13 @@ module ComparableConstrRef = struct
 end
 
 type t = {
-  types_by_ref: tl_type Map.M(Int).t;
-  types_by_name: (int * tl_type) Map.M(Ast.ComparableName).t;
-  constructors_by_ref: tl_constructor Map.M(ComparableConstrRef).t;
-  constructors_by_name: tl_constructor Map.M(Ast.ComparableName).t;
-  constructors_by_result: tl_constructor list Map.M(Int).t;
-  functions_by_name: tl_function Map.M(Ast.ComparableName).t;
+  types_by_ref : tl_type Map.M(Int).t;
+  types_by_name : (int * tl_type) Map.M(Ast.ComparableName).t;
+  constructors_by_ref : tl_constructor Map.M(ComparableConstrRef).t;
+  constructors_by_name : tl_constructor Map.M(Ast.ComparableName).t;
+  constructors_by_result : tl_constructor list Map.M(Int).t;
+  functions_by_name : tl_function Map.M(Ast.ComparableName).t;
+  fresh_constr_ref : int;
 }
 
 let show t =
@@ -52,17 +53,24 @@ let insert_constructor t (_, c' as c) =
   let f = function Some xs -> c :: xs | None -> [c] in
   match Map.add t.constructors_by_name ~key:(snd c'.c_id) ~data:c with
   | `Ok constructors_by_name ->
+    let fresh_constr_ref =
+      if c'.c_ref < t.fresh_constr_ref
+      then t.fresh_constr_ref
+      else t.fresh_constr_ref + 1
+    in
     Some { t with
       constructors_by_name;
       constructors_by_result =
         Map.update t.constructors_by_result c'.c_result_type ~f;
+      fresh_constr_ref
     }
   | `Duplicate -> None
 
 let insert_function t (_, f' as f) =
   let key = snd f'.f_id in
   match Map.add t.functions_by_name ~key ~data:f with
-  | `Ok v -> Some { t with functions_by_name = v }
+  | `Ok v ->
+    Some { t with functions_by_name = v }
   | `Duplicate -> None
 
 let insert_constructor_exn t f =
@@ -93,7 +101,10 @@ let get_function_by_name t name =
 let get_constructors_by_type_ref t tref =
   Option.value ~default:[] @@ Map.find t.constructors_by_result tref
 
-module MapM (M: Monad.S) = struct
+let fresh_constr_ref t =
+  t.fresh_constr_ref
+
+module MapM (M : Monad.S) = struct
   open M
   open Let_syntax
 
@@ -105,12 +116,13 @@ module MapM (M: Monad.S) = struct
     * tl_constructor Map.M(ComparableConstrRef).t
 
   let constructors t ~f =
-    let list_fold_fn : constr_tuple M.t -> tl_constructor -> constr_tuple M.t
-    = fun acc c ->
+    let list_fold_fn (acc : constr_tuple M.t) c : constr_tuple M.t =
       let%bind (cs, mname, mref) = acc in
-      let%bind c' = f c in
-      let mname' = Map.set mname ~key:(snd (snd c').c_id) ~data:c' in
-      let mref' = Map.set mref ~key:(ConstrRef (snd c').c_ref) ~data:c' in
+      let%bind (_, c'') as c' = f c in
+      assert ((snd c).c_ref = c''.c_ref);
+      assert ((snd c).c_result_type = c''.c_result_type);
+      let mname' = Map.set mname ~key:(snd c''.c_id) ~data:c' in
+      let mref' = Map.set mref ~key:(ConstrRef c''.c_ref) ~data:c' in
       let cs' = c' :: cs in
       return (cs', mname', mref')
     in
@@ -158,10 +170,11 @@ let empty = {
   constructors_by_name = Map.empty (module Ast.ComparableName);
   constructors_by_result = Map.empty (module Int);
   functions_by_name = Map.empty (module Ast.ComparableName);
+  fresh_constr_ref = 0;
 }
 
-let make ?(types = []) ?(constructors = []) ?(functions = []) () =
-  let t = empty in
+let make ?(init = empty) ?(types = []) ?(constructors = []) ?(functions = []) () =
+  let t = init in
   let t = List.fold types ~init:t ~f:(fun a b -> fst @@ insert_type a b) in
   let t = List.fold constructors ~init:t ~f:insert_constructor_exn in
   let t = List.fold functions ~init:t ~f:insert_function_exn in
@@ -222,11 +235,18 @@ let default =
   ~functions:[]
   ()
 
-let default_constr_ref = Map.length default.constructors_by_name
+let is_constr_defined_in_prelude (_, c1) =
+  match get_constructor_by_name default (snd c1.c_id) with
+  | Some (_, c2) -> Int32.(c1.c_magic = c2.c_magic)
+  | None -> false
 
-let%expect_test "show @@ make ()" =
+let%expect_test "show @@ make () outputs empty store" =
   Caml.print_endline @@ show @@ make ();
   [%expect {|
     Types:
     Constructors:
     Functions: |}]
+
+let%expect_test "value of fresh_constr_ref if only the prelude is in the store" =
+  Caml.Printf.printf "%d" (fresh_constr_ref default);
+  [%expect {| 8 |}]

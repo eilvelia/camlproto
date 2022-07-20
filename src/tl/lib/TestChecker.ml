@@ -62,14 +62,14 @@ let%expect_test "type parameters" =
     :19:31-19:32: Wrong type parameters
     :20:13-20:14: Wrong type parameters
     :39:18-39:19: Variable `X` is not defined
-    :41:14-41:15: Type parameters must be of type `#` or `Type`. `Type` is used instead
-    :5:18-5:15: The type constructor `A` expects 1 type parameter(s), but is applied to 2
-    :6:13-6:14: The type constructor `A` expects 1 type parameter(s), but is applied to 0
-    :7:14-7:15: The type constructor `A` expects 1 type parameter(s), but is applied to 0
-    :8:19-8:16: The type constructor `A` expects 1 type parameter(s), but is applied to 2
-    :9:18-9:15: The type constructor `a` expects 1 type parameter(s), but is applied to 2
-    :12:19-12:16: The type constructor `A` expects 1 type parameter(s), but is applied to 2
-    :13:14-13:15: The type constructor `A` expects 1 type parameter(s), but is applied to 0
+    :41:14-41:15: Type parameters must be of type `#` or `Type`, `Type` is used instead
+    :5:18-5:15: The type constructor `A` expects 1 type parameters, but is applied to 2
+    :6:13-6:14: The type constructor `A` expects 1 type parameters, but is applied to 0
+    :7:14-7:15: The type constructor `A` expects 1 type parameters, but is applied to 0
+    :8:19-8:16: The type constructor `A` expects 1 type parameters, but is applied to 2
+    :9:18-9:15: The type constructor `a` expects 1 type parameters, but is applied to 2
+    :12:19-12:16: The type constructor `A` expects 1 type parameters, but is applied to 2
+    :13:14-13:15: The type constructor `A` expects 1 type parameters, but is applied to 0
     :23:12-23:17: Type `(:23:16-23:17,
      (Modified (None,
         (:23:16-23:17,
@@ -119,7 +119,7 @@ let%expect_test "type parameters" =
                (:3:13-3:17, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:15:5-15:26,
      { c_id = (:15:5-15:10, (Name "b1")); c_magic = 0x11l;
        c_args =
@@ -131,7 +131,7 @@ let%expect_test "type parameters" =
                (:15:14-15:18, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 19; c_result_type = 11; c_builtin = false })
+       c_ref = 11; c_result_type = 11; c_builtin = false })
     (:16:5-16:23,
      { c_id = (:16:5-16:10, (Name "b2")); c_magic = 0x12l;
        c_args =
@@ -143,7 +143,7 @@ let%expect_test "type parameters" =
                (:16:14-16:15, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 20; c_result_type = 11; c_builtin = false })
+       c_ref = 12; c_result_type = 11; c_builtin = false })
     (:18:5-18:26,
      { c_id = (:18:5-18:10, (Name "c1")); c_magic = 0x13l;
        c_args =
@@ -155,7 +155,7 @@ let%expect_test "type parameters" =
                (:18:14-18:18, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 21; c_result_type = 12; c_builtin = false })
+       c_ref = 13; c_result_type = 12; c_builtin = false })
     (:19:5-19:37,
      { c_id = (:19:5-19:10, (Name "c2")); c_magic = 0x14l;
        c_args =
@@ -174,12 +174,12 @@ let%expect_test "type parameters" =
                 (:19:23-19:27, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
             arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 22; c_result_type = 12; c_builtin = false })
+       c_ref = 14; c_result_type = 12; c_builtin = false })
     (:20:5-20:15,
      { c_id = (:20:5-20:10, (Name "c3")); c_magic = 0x15l; c_args = [];
-       c_ref = 23; c_result_type = 12; c_builtin = false })
+       c_ref = 15; c_result_type = 12; c_builtin = false })
     (:2:5-2:14,
-     { c_id = (:2:5-2:9, (Name "e")); c_magic = 0x0l; c_args = []; c_ref = 8;
+     { c_id = (:2:5-2:9, (Name "e")); c_magic = 0x0l; c_args = []; c_ref = 0;
        c_result_type = 0; c_builtin = false })
     (:22:5-22:25,
      { c_id = (:22:5-22:9, (Name "f")); c_magic = 0x15l;
@@ -192,7 +192,7 @@ let%expect_test "type parameters" =
                (:22:13-22:17, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 24; c_result_type = 13; c_builtin = false })
+       c_ref = 16; c_result_type = 13; c_builtin = false })
     (:29:5-29:22,
      { c_id = (:29:5-29:9, (Name "g")); c_magic = 0x21l;
        c_args =
@@ -204,7 +204,7 @@ let%expect_test "type parameters" =
                (:29:13-29:14, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 30; c_result_type = 19; c_builtin = false })
+       c_ref = 22; c_result_type = 19; c_builtin = false })
     (:5:5-5:26,
      { c_id = (:5:5-5:10, (Name "t1")); c_magic = 0x2l;
        c_args =
@@ -226,7 +226,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:23:5-23:34,
      { c_id = (:23:5-23:11, (Name "t10")); c_magic = 0x16l;
        c_args =
@@ -253,7 +253,7 @@ let%expect_test "type parameters" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 25; c_result_type = 14; c_builtin = false })
+       c_ref = 17; c_result_type = 14; c_builtin = false })
     (:24:5-24:26,
      { c_id = (:24:5-24:11, (Name "t11")); c_magic = 0x17l;
        c_args =
@@ -268,7 +268,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 26; c_result_type = 15; c_builtin = false })
+       c_ref = 18; c_result_type = 15; c_builtin = false })
     (:25:5-25:26,
      { c_id = (:25:5-25:11, (Name "t12")); c_magic = 0x18l;
        c_args =
@@ -287,7 +287,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 27; c_result_type = 16; c_builtin = false })
+       c_ref = 19; c_result_type = 16; c_builtin = false })
     (:26:5-26:27,
      { c_id = (:26:5-26:11, (Name "t13")); c_magic = 0x19l;
        c_args =
@@ -301,14 +301,14 @@ let%expect_test "type parameters" =
                    [(ExprType
                        (:26:18-26:19,
                         (TypeExpr (
-                           (TypeRef (:26:18-26:19, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:26:18-26:19, (0, (Some (ConstrRef 0))))),
                            []))))
                      ]
                    )))
                )));
            arg_opt = None })
          ];
-       c_ref = 28; c_result_type = 17; c_builtin = false })
+       c_ref = 20; c_result_type = 17; c_builtin = false })
     (:27:5-27:26,
      { c_id = (:27:5-27:11, (Name "t14")); c_magic = 0x20l;
        c_args =
@@ -322,14 +322,14 @@ let%expect_test "type parameters" =
                    [(ExprType
                        (:27:17-27:18,
                         (TypeExpr (
-                           (TypeRef (:27:17-27:18, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:27:17-27:18, (0, (Some (ConstrRef 0))))),
                            []))))
                      ]
                    )))
                )));
            arg_opt = None })
          ];
-       c_ref = 29; c_result_type = 18; c_builtin = false })
+       c_ref = 21; c_result_type = 18; c_builtin = false })
     (:30:5-30:26,
      { c_id = (:30:5-30:11, (Name "t15")); c_magic = 0x22l;
        c_args =
@@ -344,7 +344,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 31; c_result_type = 20; c_builtin = false })
+       c_ref = 23; c_result_type = 20; c_builtin = false })
     (:31:5-31:26,
      { c_id = (:31:5-31:11, (Name "t16")); c_magic = 0x22l;
        c_args =
@@ -358,14 +358,14 @@ let%expect_test "type parameters" =
                    [(ExprType
                        (:31:17-31:18,
                         (TypeExpr (
-                           (TypeRef (:31:17-31:18, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:31:17-31:18, (0, (Some (ConstrRef 0))))),
                            []))))
                      ]
                    )))
                )));
            arg_opt = None })
          ];
-       c_ref = 32; c_result_type = 21; c_builtin = false })
+       c_ref = 24; c_result_type = 21; c_builtin = false })
     (:32:5-32:32,
      { c_id = (:32:5-32:9, (Name "t161")); c_magic = 0x87055319l;
        c_args =
@@ -388,7 +388,7 @@ let%expect_test "type parameters" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 33; c_result_type = 22; c_builtin = false })
+       c_ref = 25; c_result_type = 22; c_builtin = false })
     (:34:5-34:36,
      { c_id = (:34:5-34:11, (Name "t17")); c_magic = 0x23l;
        c_args =
@@ -412,7 +412,7 @@ let%expect_test "type parameters" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 34; c_result_type = 23; c_builtin = false })
+       c_ref = 26; c_result_type = 23; c_builtin = false })
     (:37:5-37:40,
      { c_id = (:37:5-37:11, (Name "t19")); c_magic = 0x25l;
        c_args =
@@ -436,7 +436,7 @@ let%expect_test "type parameters" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 36; c_result_type = 25; c_builtin = false })
+       c_ref = 28; c_result_type = 25; c_builtin = false })
     (:6:5-6:20,
      { c_id = (:6:5-6:10, (Name "t2")); c_magic = 0x3l;
        c_args =
@@ -448,10 +448,10 @@ let%expect_test "type parameters" =
                (:6:13-6:14, (TypeExpr ((TypeRef (:6:13-6:14, (1, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:39:5-39:20,
      { c_id = (:39:5-39:11, (Name "t20")); c_magic = 0x26l; c_args = [];
-       c_ref = 37; c_result_type = 26; c_builtin = false })
+       c_ref = 29; c_result_type = 26; c_builtin = false })
     (:41:5-41:24,
      { c_id = (:41:5-41:11, (Name "t21")); c_magic = 0x27l;
        c_args =
@@ -465,7 +465,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 38; c_result_type = 27; c_builtin = false })
+       c_ref = 30; c_result_type = 27; c_builtin = false })
     (:43:5-43:31,
      { c_id = (:43:5-43:11, (Name "t22")); c_magic = 0x28l;
        c_args =
@@ -477,7 +477,7 @@ let%expect_test "type parameters" =
                (:43:15-43:19, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 39; c_result_type = 28; c_builtin = false })
+       c_ref = 31; c_result_type = 28; c_builtin = false })
     (:7:5-7:22,
      { c_id = (:7:5-7:10, (Name "t3")); c_magic = 0x4l;
        c_args =
@@ -489,7 +489,7 @@ let%expect_test "type parameters" =
                (:7:14-7:15, (TypeExpr ((TypeRef (:7:14-7:15, (1, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:8:5-8:27,
      { c_id = (:8:5-8:10, (Name "t4")); c_magic = 0x5l;
        c_args =
@@ -499,7 +499,7 @@ let%expect_test "type parameters" =
            (:8:14-8:20,
             (Modified (None,
                (:8:19-8:16,
-                (TypeExpr ((TypeRef (:8:15-8:16, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:8:15-8:16, (1, (Some (ConstrRef 1))))),
                    [(ExprType
                        (:8:17-8:18,
                         (TypeExpr ((TypeRef (:8:17-8:18, (0, None))), []))));
@@ -511,7 +511,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:9:5-9:26,
      { c_id = (:9:5-9:10, (Name "t5")); c_magic = 0x6l;
        c_args =
@@ -521,7 +521,7 @@ let%expect_test "type parameters" =
            (:9:14-9:19,
             (Modified (None,
                (:9:18-9:15,
-                (TypeExpr ((TypeRef (:9:14-9:15, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:9:14-9:15, (1, (Some (ConstrRef 1))))),
                    [(ExprType
                        (:9:16-9:17,
                         (TypeExpr ((TypeRef (:9:16-9:17, (0, None))), []))));
@@ -533,7 +533,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:10:5-10:24,
      { c_id = (:10:5-10:10, (Name "t6")); c_magic = 0x7l;
        c_args =
@@ -552,7 +552,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:11:5-11:24,
      { c_id = (:11:5-11:10, (Name "t7")); c_magic = 0x8l;
        c_args =
@@ -562,7 +562,7 @@ let%expect_test "type parameters" =
            (:11:14-11:17,
             (Modified (None,
                (:11:16-11:15,
-                (TypeExpr ((TypeRef (:11:14-11:15, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:11:14-11:15, (1, (Some (ConstrRef 1))))),
                    [(ExprType
                        (:11:16-11:17,
                         (TypeExpr ((TypeRef (:11:16-11:17, (0, None))), []))))
@@ -571,7 +571,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 16; c_result_type = 8; c_builtin = false })
+       c_ref = 8; c_result_type = 8; c_builtin = false })
     (:12:5-12:27,
      { c_id = (:12:5-12:10, (Name "t8")); c_magic = 0x9l;
        c_args =
@@ -581,7 +581,7 @@ let%expect_test "type parameters" =
            (:12:13-12:21,
             (Modified (None,
                (:12:19-12:16,
-                (TypeExpr ((TypeRef (:12:15-12:16, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:12:15-12:16, (1, (Some (ConstrRef 1))))),
                    [(ExprType
                        (:12:17-12:18,
                         (TypeExpr ((TypeRef (:12:17-12:18, (0, None))), []))));
@@ -593,7 +593,7 @@ let%expect_test "type parameters" =
                )));
            arg_opt = None })
          ];
-       c_ref = 17; c_result_type = 9; c_builtin = false })
+       c_ref = 9; c_result_type = 9; c_builtin = false })
     (:13:5-13:21,
      { c_id = (:13:5-13:10, (Name "t9")); c_magic = 0x10l;
        c_args =
@@ -603,12 +603,12 @@ let%expect_test "type parameters" =
            (:13:13-13:15,
             (Modified (None,
                (:13:14-13:15,
-                (TypeExpr ((TypeRef (:13:14-13:15, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:13:14-13:15, (1, (Some (ConstrRef 1))))),
                    [])))
                )));
            arg_opt = None })
          ];
-       c_ref = 18; c_result_type = 10; c_builtin = false })
+       c_ref = 10; c_result_type = 10; c_builtin = false })
     (:36:5-36:35,
      { c_id = (:36:5-36:14, (NameNs ("ns", "t18"))); c_magic = 0x24l;
        c_args =
@@ -620,7 +620,7 @@ let%expect_test "type parameters" =
                (:36:18-36:22, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 35; c_result_type = 24; c_builtin = false })
+       c_ref = 27; c_result_type = 24; c_builtin = false })
     Functions: |}]
 
 let%expect_test "optional arguments" =
@@ -642,7 +642,7 @@ let%expect_test "optional arguments" =
     :5:8-5:17: An optional argument must be used at least once in the result type *not modified* by `!` or in an argument *modified* by `!`
     :7:8-7:16: An optional argument must be used at least once in the result type *not modified* by `!` or in an argument *modified* by `!`
     :9:8-9:17: An optional argument must be used at least once in the result type *not modified* by `!` or in an argument *modified* by `!`
-    :12:13-12:15: The type constructor `C1` expects 2 type parameter(s), but is applied to 0
+    :12:13-12:15: The type constructor `C1` expects 2 type parameter, but is applied to 0
     :10:15-10:16: A type expression is incompatible with a parameter of type `nat`
     Types:
     (Type ((Name "C1"), [(ParamType "t1"); (ParamNat "t2")]))
@@ -670,7 +670,7 @@ let%expect_test "optional arguments" =
                 (:2:22-2:23, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
             arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:31,
      { c_id = (:3:5-3:7, (Name "c2")); c_magic = 0x88A1AE21l;
        c_args =
@@ -689,10 +689,10 @@ let%expect_test "optional arguments" =
                 (:3:8-3:17, (TypeVar (VarRef (0, (Some "t1"))))))));
             arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:4:5-4:21,
      { c_id = (:4:5-4:7, (Name "c3")); c_magic = 0x289BD8FDl; c_args = [];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:30,
      { c_id = (:5:5-5:7, (Name "c4")); c_magic = 0x1567326Dl;
        c_args =
@@ -710,7 +710,7 @@ let%expect_test "optional arguments" =
              (Modified (None, (:5:8-5:17, (TypeVar (VarRef (0, (Some "t1"))))))));
             arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:24,
      { c_id = (:6:5-6:7, (Name "c5")); c_magic = 0x24DF6D02l;
        c_args =
@@ -722,7 +722,7 @@ let%expect_test "optional arguments" =
                (:6:11-6:15, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:12:5-12:22,
      { c_id = (:12:5-12:7, (Name "c7")); c_magic = 0x2E341782l;
        c_args =
@@ -736,7 +736,7 @@ let%expect_test "optional arguments" =
                )));
            arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     Functions:
     (:9:5-9:23,
      { f_id = (:9:5-9:7, (Name "f1")); f_magic = 0xC7CC9E6El;
@@ -819,7 +819,7 @@ let%expect_test "vector" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     Functions: |}]
 
 let%expect_test "use before define" =
@@ -843,9 +843,9 @@ let%expect_test "use before define" =
                (:2:12-2:13, (TypeExpr ((TypeRef (:2:12-2:13, (1, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:14,
-     { c_id = (:3:5-3:9, (Name "b")); c_magic = 0x1l; c_args = []; c_ref = 9;
+     { c_id = (:3:5-3:9, (Name "b")); c_magic = 0x1l; c_args = []; c_ref = 1;
        c_result_type = 1; c_builtin = false })
     Functions: |}]
 
@@ -873,7 +873,7 @@ let%expect_test "recursive types" =
                (:3:28-3:36, (TypeExpr ((TypeRef (:3:28-3:36, (0, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 0; c_builtin = false })
+       c_ref = 1; c_result_type = 0; c_builtin = false })
     (:5:5-5:45,
      { c_id = (:5:5-5:17, (Name "textBold2")); c_magic = 0x1l;
        c_args =
@@ -885,13 +885,13 @@ let%expect_test "recursive types" =
                (:5:23-5:32, (TypeExpr ((TypeRef (:5:23-5:32, (1, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 1; c_builtin = false })
+       c_ref = 2; c_result_type = 1; c_builtin = false })
     (:2:5-2:35,
      { c_id = (:2:5-2:23, (Name "textEmpty")); c_magic = 0xDC3D824Fl;
-       c_args = []; c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_args = []; c_ref = 0; c_result_type = 0; c_builtin = false })
     (:6:5-6:31,
      { c_id = (:6:5-6:18, (Name "textEmpty2")); c_magic = 0x0l; c_args = [];
-       c_ref = 11; c_result_type = 1; c_builtin = false })
+       c_ref = 3; c_result_type = 1; c_builtin = false })
     Functions: |}]
 
 let%expect_test "mutually recursive types" =
@@ -917,10 +917,10 @@ let%expect_test "mutually recursive types" =
                (:3:12-3:13, (TypeExpr ((TypeRef (:3:12-3:13, (1, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 0; c_builtin = false })
+       c_ref = 1; c_result_type = 0; c_builtin = false })
     (:2:5-2:19,
      { c_id = (:2:5-2:14, (Name "aEmpty")); c_magic = 0xA0l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:5:5-5:18,
      { c_id = (:5:5-5:9, (Name "b")); c_magic = 0xB1l;
        c_args =
@@ -932,10 +932,10 @@ let%expect_test "mutually recursive types" =
                (:5:12-5:13, (TypeExpr ((TypeRef (:5:12-5:13, (0, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 1; c_builtin = false })
+       c_ref = 3; c_result_type = 1; c_builtin = false })
     (:4:5-4:19,
      { c_id = (:4:5-4:14, (Name "bEmpty")); c_magic = 0xB0l; c_args = [];
-       c_ref = 10; c_result_type = 1; c_builtin = false })
+       c_ref = 2; c_result_type = 1; c_builtin = false })
     Functions: |}]
 
 let%expect_test "invokeAfterMsg" =
@@ -1083,7 +1083,7 @@ let%expect_test "% - bare modifier" =
     Constructors:
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "a")); c_magic = 0x7AAE25B9l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:22,
      { c_id = (:3:5-3:6, (Name "b")); c_magic = 0x1BE09547l;
        c_args =
@@ -1095,13 +1095,13 @@ let%expect_test "% - bare modifier" =
                (:3:10-3:14, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:12:5-12:12,
      { c_id = (:12:5-12:7, (Name "c1")); c_magic = 0x5533A014l; c_args = [];
-       c_ref = 16; c_result_type = 8; c_builtin = false })
+       c_ref = 8; c_result_type = 8; c_builtin = false })
     (:13:5-13:12,
      { c_id = (:13:5-13:7, (Name "c2")); c_magic = 0x1293DAC4l; c_args = [];
-       c_ref = 17; c_result_type = 8; c_builtin = false })
+       c_ref = 9; c_result_type = 8; c_builtin = false })
     (:5:5-5:18,
      { c_id = (:5:5-5:7, (Name "t0")); c_magic = 0xF658EF54l;
        c_args =
@@ -1111,12 +1111,12 @@ let%expect_test "% - bare modifier" =
            (:5:10-5:12,
             (Modified (None,
                (:5:11-5:12,
-                (TypeExpr ((TypeRef (:5:11-5:12, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:5:11-5:12, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:6:5-6:18,
      { c_id = (:6:5-6:7, (Name "t1")); c_magic = 0x477D0534l;
        c_args =
@@ -1126,12 +1126,12 @@ let%expect_test "% - bare modifier" =
            (:6:10-6:12,
             (Modified (None,
                (:6:11-6:12,
-                (TypeExpr ((TypeRef (:6:11-6:12, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:6:11-6:12, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:7:5-7:42,
      { c_id = (:7:5-7:7, (Name "t2")); c_magic = 0x81379F48l;
        c_args =
@@ -1141,7 +1141,7 @@ let%expect_test "% - bare modifier" =
            (:7:12-7:16,
             (Modified (None,
                (:7:15-7:14,
-                (TypeExpr ((TypeRef (:7:13-7:14, (1, (Some (ConstrRef 9))))),
+                (TypeExpr ((TypeRef (:7:13-7:14, (1, (Some (ConstrRef 1))))),
                    [(ExprType
                        (:7:15-7:16,
                         (TypeExpr ((TypeRef (:7:15-7:16, (0, None))), []))))
@@ -1155,7 +1155,7 @@ let%expect_test "% - bare modifier" =
             (:7:21-7:27,
              (Modified (None,
                 (:7:25-7:24,
-                 (TypeExpr ((TypeRef (:7:23-7:24, (1, (Some (ConstrRef 9))))),
+                 (TypeExpr ((TypeRef (:7:23-7:24, (1, (Some (ConstrRef 1))))),
                     [(ExprType
                         (:7:25-7:26,
                          (TypeExpr ((TypeRef (:7:25-7:26, (0, None))), []))))
@@ -1169,7 +1169,7 @@ let%expect_test "% - bare modifier" =
             (:7:31-7:36,
              (Modified (None,
                 (:7:34-7:33,
-                 (TypeExpr ((TypeRef (:7:32-7:33, (1, (Some (ConstrRef 9))))),
+                 (TypeExpr ((TypeRef (:7:32-7:33, (1, (Some (ConstrRef 1))))),
                     [(ExprType
                         (:7:34-7:35,
                          (TypeExpr ((TypeRef (:7:34-7:35, (0, None))), []))))
@@ -1178,7 +1178,7 @@ let%expect_test "% - bare modifier" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:8:5-8:29,
      { c_id = (:8:5-8:7, (Name "t3")); c_magic = 0xE4F5C12l;
        c_args =
@@ -1196,7 +1196,7 @@ let%expect_test "% - bare modifier" =
              (Modified (None, (:8:8-8:16, (TypeVar (VarRef (0, (Some "X"))))))));
             arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:9:5-9:37,
      { c_id = (:9:5-9:7, (Name "t4")); c_magic = 0xC403A38El;
        c_args =
@@ -1220,7 +1220,7 @@ let%expect_test "% - bare modifier" =
              (Modified (None, (:9:8-9:13, (TypeVar (VarRef (0, (Some "arg"))))))));
             arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:10:5-10:20,
      { c_id = (:10:5-10:7, (Name "t5")); c_magic = 0x1A813BDBl;
        c_args =
@@ -1230,12 +1230,12 @@ let%expect_test "% - bare modifier" =
            (:10:10-10:14,
             (Modified (None,
                (:10:13-10:14,
-                (TypeExpr ((TypeRef (:10:13-10:14, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:10:13-10:14, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:14:5-14:18,
      { c_id = (:14:5-14:7, (Name "t6")); c_magic = 0xBA462129l;
        c_args =
@@ -1249,7 +1249,7 @@ let%expect_test "% - bare modifier" =
                )));
            arg_opt = None })
          ];
-       c_ref = 18; c_result_type = 9; c_builtin = false })
+       c_ref = 10; c_result_type = 9; c_builtin = false })
     (:16:5-16:21,
      { c_id = (:16:5-16:7, (Name "t7")); c_magic = 0x3B074675l;
        c_args =
@@ -1261,7 +1261,7 @@ let%expect_test "% - bare modifier" =
                (:16:11-16:15, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = None })
          ];
-       c_ref = 19; c_result_type = 10; c_builtin = false })
+       c_ref = 11; c_result_type = 10; c_builtin = false })
     (:17:5-17:17,
      { c_id = (:17:5-17:7, (Name "t8")); c_magic = 0x36A5AC37l;
        c_args =
@@ -1273,7 +1273,7 @@ let%expect_test "% - bare modifier" =
                (:17:10-17:11, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 20; c_result_type = 11; c_builtin = false })
+       c_ref = 12; c_result_type = 11; c_builtin = false })
     Functions: |}]
 
 let%expect_test "magic calculation" =
@@ -1305,10 +1305,10 @@ let%expect_test "magic calculation" =
     Constructors:
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "a")); c_magic = 0x7AAE25B9l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:25,
      { c_id = (:3:5-3:12, (Name "builtin")); c_magic = 0xD4BEEF60l; c_args = [];
-       c_ref = 9; c_result_type = 1; c_builtin = true })
+       c_ref = 1; c_result_type = 1; c_builtin = true })
     (:5:5-5:39,
      { c_id = (:5:5-5:7, (Name "t0")); c_magic = 0xD4193219l;
        c_args =
@@ -1337,7 +1337,7 @@ let%expect_test "magic calculation" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:29,
      { c_id = (:6:5-6:7, (Name "t1")); c_magic = 0x44676141l;
        c_args =
@@ -1356,7 +1356,7 @@ let%expect_test "magic calculation" =
                 (:6:8-6:16, (TypeVar (VarRef (0, (Some "t"))))))));
             arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:7:5-7:27,
      { c_id = (:7:5-7:7, (Name "t2")); c_magic = 0xD975568Fl;
        c_args =
@@ -1366,7 +1366,7 @@ let%expect_test "magic calculation" =
            (:7:11-7:20,
             (Modified (None,
                (:7:19-7:18,
-                (TypeExpr ((TypeRef (:7:12-7:18, (2, (Some (ConstrRef 10))))),
+                (TypeExpr ((TypeRef (:7:12-7:18, (2, (Some (ConstrRef 2))))),
                    [(ExprType
                        (:7:19-7:20,
                         (TypeExpr ((TypeRef (:7:19-7:20, (0, None))), []))))
@@ -1375,7 +1375,7 @@ let%expect_test "magic calculation" =
                )));
            arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:8:5-8:38,
      { c_id = (:8:5-8:7, (Name "t3")); c_magic = 0x5F341E04l;
        c_args =
@@ -1398,7 +1398,7 @@ let%expect_test "magic calculation" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:9:5-9:93,
      { c_id = (:9:5-9:9, (Name "user")); c_magic = 0xB376C2CBl;
        c_args =
@@ -1435,7 +1435,7 @@ let%expect_test "magic calculation" =
             (:9:66-9:77,
              (Modified (None,
                 (:9:75-9:74,
-                 (TypeExpr ((TypeRef (:9:68-9:74, (2, (Some (ConstrRef 10))))),
+                 (TypeExpr ((TypeRef (:9:68-9:74, (2, (Some (ConstrRef 2))))),
                     [(ExprType
                         (:9:75-9:76,
                          (TypeExpr ((TypeRef (:9:75-9:76, (0, None))), []))))
@@ -1444,7 +1444,7 @@ let%expect_test "magic calculation" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:4:5-4:43,
      { c_id = (:4:5-4:11, (Name "vector")); c_magic = 0x1CB5C415l;
        c_args =
@@ -1478,7 +1478,7 @@ let%expect_test "magic calculation" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     Functions:
     (:14:5-14:72,
      { f_id = (:14:5-14:14, (Name "get_users")); f_magic = 0x7D2C49BDl;
@@ -1497,7 +1497,7 @@ let%expect_test "magic calculation" =
             (:14:32-14:43,
              (Modified (None,
                 (:14:41-14:40,
-                 (TypeExpr ((TypeRef (:14:34-14:40, (2, (Some (ConstrRef 10))))),
+                 (TypeExpr ((TypeRef (:14:34-14:40, (2, (Some (ConstrRef 2))))),
                     [(ExprType
                         (:14:41-14:42,
                          (TypeExpr ((TypeRef (:14:41-14:42, (0, None))), []))))
@@ -1511,7 +1511,7 @@ let%expect_test "magic calculation" =
         (TypeExpr ((TypeRef (:14:46-14:52, (2, None))),
            [(ExprType
                (:14:60-14:59,
-                (TypeExpr ((TypeRef (:14:55-14:59, (7, (Some (ConstrRef 15))))),
+                (TypeExpr ((TypeRef (:14:55-14:59, (7, (Some (ConstrRef 7))))),
                    [(ExprNat
                        (:14:60-14:70, (NatVar (VarRef (0, (Some "req_fields"))))))
                      ]
@@ -1588,7 +1588,7 @@ let%expect_test "example from the site" =
             (:10:28-10:31,
              (Modified (None,
                 (:10:28-10:31,
-                 (TypeExpr ((TypeRef (:10:28-10:31, (0, (Some (ConstrRef 8))))),
+                 (TypeExpr ((TypeRef (:10:28-10:31, (0, (Some (ConstrRef 0))))),
                     [])))
                 )));
             arg_opt = None });
@@ -1600,7 +1600,7 @@ let%expect_test "example from the site" =
                 (:10:15-10:27, (TypeVar (VarRef (0, (Some "alpha"))))))));
             arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:11:5-11:59,
      { c_id = (:11:5-11:14, (Name "coupleStr")); c_magic = 0xE6340DCFl;
        c_args =
@@ -1617,7 +1617,7 @@ let%expect_test "example from the site" =
             (:11:28-11:34,
              (Modified (None,
                 (:11:28-11:34,
-                 (TypeExpr ((TypeRef (:11:28-11:34, (3, (Some (ConstrRef 11))))),
+                 (TypeExpr ((TypeRef (:11:28-11:34, (3, (Some (ConstrRef 3))))),
                     [])))
                 )));
             arg_opt = None });
@@ -1629,10 +1629,10 @@ let%expect_test "example from the site" =
                 (:11:15-11:27, (TypeVar (VarRef (0, (Some "gamma"))))))));
             arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:5:5-5:23,
      { c_id = (:5:5-5:11, (Name "double")); c_magic = 0x2210C154l; c_args = [];
-       c_ref = 10; c_result_type = 2; c_builtin = true })
+       c_ref = 2; c_result_type = 2; c_builtin = true })
     (:26:5-26:56,
      { c_id = (:26:5-26:10, (Name "group")); c_magic = 0x4387A1F4l;
        c_args =
@@ -1642,7 +1642,7 @@ let%expect_test "example from the site" =
            (:26:14-26:17,
             (Modified (None,
                (:26:14-26:17,
-                (TypeExpr ((TypeRef (:26:14-26:17, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:26:14-26:17, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None });
@@ -1653,7 +1653,7 @@ let%expect_test "example from the site" =
             (:26:24-26:30,
              (Modified (None,
                 (:26:24-26:30,
-                 (TypeExpr ((TypeRef (:26:24-26:30, (3, (Some (ConstrRef 11))))),
+                 (TypeExpr ((TypeRef (:26:24-26:30, (3, (Some (ConstrRef 3))))),
                     [])))
                 )));
             arg_opt = None });
@@ -1664,15 +1664,15 @@ let%expect_test "example from the site" =
             (:26:41-26:47,
              (Modified (None,
                 (:26:41-26:47,
-                 (TypeExpr ((TypeRef (:26:41-26:47, (3, (Some (ConstrRef 11))))),
+                 (TypeExpr ((TypeRef (:26:41-26:47, (3, (Some (ConstrRef 3))))),
                     [])))
                 )));
             arg_opt = None })
          ];
-       c_ref = 22; c_result_type = 13; c_builtin = false })
+       c_ref = 14; c_result_type = 13; c_builtin = false })
     (:3:5-3:26,
      { c_id = (:3:5-3:17, (Name "int")); c_magic = 0xA8509BDAl; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = true })
+       c_ref = 0; c_result_type = 0; c_builtin = true })
     (:15:5-15:68,
      { c_id = (:15:5-15:12, (Name "intHash")); c_magic = 0x658A29E1l;
        c_args =
@@ -1689,11 +1689,11 @@ let%expect_test "example from the site" =
             (:15:26-15:50,
              (Modified (None,
                 (:15:33-15:25,
-                 (TypeExpr ((TypeRef (:15:26-15:32, (5, (Some (ConstrRef 13))))),
+                 (TypeExpr ((TypeRef (:15:26-15:32, (5, (Some (ConstrRef 5))))),
                     [(ExprType
                         (:15:33-15:25,
                          (TypeExpr (
-                            (TypeRef (:15:33-15:42, (6, (Some (ConstrRef 14))))),
+                            (TypeRef (:15:33-15:42, (6, (Some (ConstrRef 6))))),
                             [(ExprType
                                 (:15:13-15:25,
                                  (TypeVar (VarRef (0, (Some "alpha"))))))
@@ -1704,7 +1704,7 @@ let%expect_test "example from the site" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 16; c_result_type = 8; c_builtin = false })
+       c_ref = 8; c_result_type = 8; c_builtin = false })
     (:17:5-17:70,
      { c_id = (:17:5-17:18, (Name "intSortedHash")); c_magic = 0xF5736F5El;
        c_args =
@@ -1721,7 +1721,7 @@ let%expect_test "example from the site" =
             (:17:32-17:46,
              (Modified (None,
                 (:17:32-17:31,
-                 (TypeExpr ((TypeRef (:17:32-17:39, (8, (Some (ConstrRef 16))))),
+                 (TypeExpr ((TypeRef (:17:32-17:39, (8, (Some (ConstrRef 8))))),
                     [(ExprType
                         (:17:19-17:31, (TypeVar (VarRef (0, (Some "alpha"))))))
                       ]
@@ -1729,13 +1729,13 @@ let%expect_test "example from the site" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 18; c_result_type = 10; c_builtin = false })
+       c_ref = 10; c_result_type = 10; c_builtin = false })
     (:4:5-4:19,
      { c_id = (:4:5-4:9, (Name "long")); c_magic = 0x22076CBAl; c_args = [];
-       c_ref = 9; c_result_type = 1; c_builtin = true })
+       c_ref = 1; c_result_type = 1; c_builtin = true })
     (:27:5-27:22,
      { c_id = (:27:5-27:13, (Name "no_group")); c_magic = 0x5702DAD8l;
-       c_args = []; c_ref = 23; c_result_type = 13; c_builtin = false })
+       c_args = []; c_ref = 15; c_result_type = 13; c_builtin = false })
     (:25:5-25:36,
      { c_id = (:25:5-25:21, (Name "no_user")); c_magic = 0xC67599D1l;
        c_args =
@@ -1745,15 +1745,15 @@ let%expect_test "example from the site" =
            (:25:25-25:28,
             (Modified (None,
                (:25:25-25:28,
-                (TypeExpr ((TypeRef (:25:25-25:28, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:25:25-25:28, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None })
          ];
-       c_ref = 21; c_result_type = 12; c_builtin = false })
+       c_ref = 13; c_result_type = 12; c_builtin = false })
     (:7:5-7:17,
      { c_id = (:7:5-7:9, (Name "null")); c_magic = 0x56730BCCl; c_args = [];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:16:5-16:69,
      { c_id = (:16:5-16:12, (Name "strHash")); c_magic = 0x24D1761Fl;
        c_args =
@@ -1770,11 +1770,11 @@ let%expect_test "example from the site" =
             (:16:27-16:51,
              (Modified (None,
                 (:16:35-16:25,
-                 (TypeExpr ((TypeRef (:16:27-16:33, (5, (Some (ConstrRef 13))))),
+                 (TypeExpr ((TypeRef (:16:27-16:33, (5, (Some (ConstrRef 5))))),
                     [(ExprType
                         (:16:35-16:25,
                          (TypeExpr (
-                            (TypeRef (:16:35-16:44, (7, (Some (ConstrRef 15))))),
+                            (TypeRef (:16:35-16:44, (7, (Some (ConstrRef 7))))),
                             [(ExprType
                                 (:16:13-16:25,
                                  (TypeVar (VarRef (0, (Some "alpha"))))))
@@ -1785,7 +1785,7 @@ let%expect_test "example from the site" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 17; c_result_type = 9; c_builtin = false })
+       c_ref = 9; c_result_type = 9; c_builtin = false })
     (:18:5-18:70,
      { c_id = (:18:5-18:18, (Name "strSortedHash")); c_magic = 0x386A14FBl;
        c_args =
@@ -1802,7 +1802,7 @@ let%expect_test "example from the site" =
             (:18:33-18:46,
              (Modified (None,
                 (:18:33-18:31,
-                 (TypeExpr ((TypeRef (:18:33-18:40, (9, (Some (ConstrRef 17))))),
+                 (TypeExpr ((TypeRef (:18:33-18:40, (9, (Some (ConstrRef 9))))),
                     [(ExprType
                         (:18:19-18:31, (TypeVar (VarRef (0, (Some "alpha"))))))
                       ]
@@ -1810,10 +1810,10 @@ let%expect_test "example from the site" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 19; c_result_type = 11; c_builtin = false })
+       c_ref = 11; c_result_type = 11; c_builtin = false })
     (:6:5-6:23,
      { c_id = (:6:5-6:11, (Name "string")); c_magic = 0xB5286E24l; c_args = [];
-       c_ref = 11; c_result_type = 3; c_builtin = true })
+       c_ref = 3; c_result_type = 3; c_builtin = true })
     (:24:5-24:68,
      { c_id = (:24:5-24:18, (Name "user")); c_magic = 0xD23C81A3l;
        c_args =
@@ -1823,7 +1823,7 @@ let%expect_test "example from the site" =
            (:24:22-24:25,
             (Modified (None,
                (:24:22-24:25,
-                (TypeExpr ((TypeRef (:24:22-24:25, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:24:22-24:25, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None });
@@ -1834,7 +1834,7 @@ let%expect_test "example from the site" =
             (:24:37-24:43,
              (Modified (None,
                 (:24:37-24:43,
-                 (TypeExpr ((TypeRef (:24:37-24:43, (3, (Some (ConstrRef 11))))),
+                 (TypeExpr ((TypeRef (:24:37-24:43, (3, (Some (ConstrRef 3))))),
                     [])))
                 )));
             arg_opt = None });
@@ -1845,12 +1845,12 @@ let%expect_test "example from the site" =
             (:24:54-24:60,
              (Modified (None,
                 (:24:54-24:60,
-                 (TypeExpr ((TypeRef (:24:54-24:60, (3, (Some (ConstrRef 11))))),
+                 (TypeExpr ((TypeRef (:24:54-24:60, (3, (Some (ConstrRef 3))))),
                     [])))
                 )));
             arg_opt = None })
          ];
-       c_ref = 20; c_result_type = 12; c_builtin = false })
+       c_ref = 12; c_result_type = 12; c_builtin = false })
     (:9:5-9:40,
      { c_id = (:9:5-9:11, (Name "vector")); c_magic = 0x1CB5C415l;
        c_args =
@@ -1884,7 +1884,7 @@ let%expect_test "example from the site" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     Functions:
     (:32:5-32:33,
      { f_id = (:32:5-32:21, (Name "getUser")); f_magic = 0xB0F732D5l;
@@ -1895,7 +1895,7 @@ let%expect_test "example from the site" =
            (:32:22-32:25,
             (Modified (None,
                (:32:22-32:25,
-                (TypeExpr ((TypeRef (:32:22-32:25, (0, (Some (ConstrRef 8))))),
+                (TypeExpr ((TypeRef (:32:22-32:25, (0, (Some (ConstrRef 0))))),
                    [])))
                )));
            arg_opt = None })
@@ -1916,7 +1916,7 @@ let%expect_test "example from the site" =
                    [(ExprType
                        (:33:31-33:34,
                         (TypeExpr (
-                           (TypeRef (:33:31-33:34, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:33:31-33:34, (0, (Some (ConstrRef 0))))),
                            []))))
                      ]
                    )))
@@ -1944,8 +1944,8 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
     t6 v:# = T6;
   ";
   [%expect {|
-    :3:15-3:14: The type constructor `nat` expects 0 type parameter(s), but is applied to 1
-    :4:16-4:15: The type constructor `Type` expects 0 type parameter(s), but is applied to 1
+    :3:15-3:14: The type constructor `nat` expects 0 type parameter, but is applied to 1
+    :4:16-4:15: The type constructor `Type` expects 0 type parameter, but is applied to 1
     Types:
     (Type ((Name "E"), []))
     (Type ((Name "T0"), []))
@@ -1956,7 +1956,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
     (Type ((Name "T6"), []))
     Constructors:
     (:2:5-2:13,
-     { c_id = (:2:5-2:8, (Name "e")); c_magic = 0x0l; c_args = []; c_ref = 8;
+     { c_id = (:2:5-2:8, (Name "e")); c_magic = 0x0l; c_args = []; c_ref = 0;
        c_result_type = 0; c_builtin = false })
     (:3:5-3:23,
      { c_id = (:3:5-3:7, (Name "t0")); c_magic = 0x43D67042l;
@@ -1969,7 +1969,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:3:11-3:14, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:4:5-4:24,
      { c_id = (:4:5-4:7, (Name "t1")); c_magic = 0xF5A4D559l;
        c_args =
@@ -1981,7 +1981,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:4:11-4:15, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:21,
      { c_id = (:5:5-5:7, (Name "t3")); c_magic = 0x59978E48l;
        c_args =
@@ -1993,7 +1993,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:5:11-5:14, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:22,
      { c_id = (:6:5-6:7, (Name "t4")); c_magic = 0xB89162E7l;
        c_args =
@@ -2005,7 +2005,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:6:11-6:15, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:7:5-7:20,
      { c_id = (:7:5-7:7, (Name "t5")); c_magic = 0x12008BF4l;
        c_args =
@@ -2017,7 +2017,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:7:10-7:14, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:8:5-8:17,
      { c_id = (:8:5-8:7, (Name "t6")); c_magic = 0xCFD4B183l;
        c_args =
@@ -2029,7 +2029,7 @@ let%expect_test "nullary type constrs `nat` and `Type` shouldn't accept params" 
                (:8:10-8:11, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     Functions: |}]
 
 let%expect_test "duplicate argument names" =
@@ -2040,8 +2040,8 @@ let%expect_test "duplicate argument names" =
     t1 v1:A v1:B v2:v1 = T1; // error
   ";
   [%expect {|
-    :4:13-4:15: Argument `v1` is already defined. Skipping
-    :5:13-5:15: Argument `v1` is already defined. Skipping
+    :4:13-4:15: Argument `v1` is already defined, skipping
+    :5:13-5:15: Argument `v1` is already defined, skipping
     Types:
     (Type ((Name "A"), []))
     (Type ((Name "B"), []))
@@ -2049,10 +2049,10 @@ let%expect_test "duplicate argument names" =
     (Type ((Name "T1"), []))
     Constructors:
     (:2:5-2:13,
-     { c_id = (:2:5-2:8, (Name "a")); c_magic = 0x0l; c_args = []; c_ref = 8;
+     { c_id = (:2:5-2:8, (Name "a")); c_magic = 0x0l; c_args = []; c_ref = 0;
        c_result_type = 0; c_builtin = false })
     (:3:5-3:13,
-     { c_id = (:3:5-3:8, (Name "b")); c_magic = 0x1l; c_args = []; c_ref = 9;
+     { c_id = (:3:5-3:8, (Name "b")); c_magic = 0x1l; c_args = []; c_ref = 1;
        c_result_type = 1; c_builtin = false })
     (:4:5-4:30,
      { c_id = (:4:5-4:7, (Name "t0")); c_magic = 0xAB27C0ADl;
@@ -2071,7 +2071,7 @@ let%expect_test "duplicate argument names" =
              (Modified (None, (:4:8-4:12, (TypeVar (VarRef (0, (Some "v1"))))))));
             arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:29,
      { c_id = (:5:5-5:7, (Name "t1")); c_magic = 0x7E094497l;
        c_args =
@@ -2089,7 +2089,7 @@ let%expect_test "duplicate argument names" =
              (Modified (None, (:5:8-5:12, (TypeVar (VarRef (0, (Some "v1"))))))));
             arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     Functions: |}]
 
 let%expect_test "references to undefined types" =
@@ -2131,7 +2131,7 @@ let%expect_test "references to undefined types" =
     (Type ((Name "T8"), []))
     Constructors:
     (:2:5-2:13,
-     { c_id = (:2:5-2:8, (Name "e")); c_magic = 0xEl; c_args = []; c_ref = 8;
+     { c_id = (:2:5-2:8, (Name "e")); c_magic = 0xEl; c_args = []; c_ref = 0;
        c_result_type = 0; c_builtin = false })
     (:3:5-3:18,
      { c_id = (:3:5-3:7, (Name "t0")); c_magic = 0xDA4EE11Bl;
@@ -2147,7 +2147,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:4:5-4:18,
      { c_id = (:4:5-4:7, (Name "t1")); c_magic = 0x6826E474l;
        c_args =
@@ -2162,7 +2162,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:19,
      { c_id = (:5:5-5:7, (Name "t2")); c_magic = 0x2FFB4483l;
        c_args =
@@ -2177,7 +2177,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:25,
      { c_id = (:6:5-6:7, (Name "t3")); c_magic = 0x625EFD8El;
        c_args =
@@ -2191,7 +2191,7 @@ let%expect_test "references to undefined types" =
                    [(ExprType
                        (:6:15-6:16,
                         (TypeExpr (
-                           (TypeRef (:6:15-6:16, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:6:15-6:16, (0, (Some (ConstrRef 0))))),
                            []))));
                      (ExprType
                         (:6:17-6:18,
@@ -2201,7 +2201,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:7:5-7:25,
      { c_id = (:7:5-7:7, (Name "t4")); c_magic = 0x3A2B088Fl;
        c_args =
@@ -2215,7 +2215,7 @@ let%expect_test "references to undefined types" =
                    [(ExprType
                        (:7:15-7:16,
                         (TypeExpr (
-                           (TypeRef (:7:15-7:16, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:7:15-7:16, (0, (Some (ConstrRef 0))))),
                            []))));
                      (ExprType
                         (:7:17-7:18,
@@ -2225,7 +2225,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:8:5-8:24,
      { c_id = (:8:5-8:7, (Name "t5")); c_magic = 0x37A9E50Cl;
        c_args =
@@ -2242,14 +2242,14 @@ let%expect_test "references to undefined types" =
                      (ExprType
                         (:8:16-8:17,
                          (TypeExpr (
-                            (TypeRef (:8:16-8:17, (0, (Some (ConstrRef 8))))),
+                            (TypeRef (:8:16-8:17, (0, (Some (ConstrRef 0))))),
                             []))))
                      ]
                    )))
                )));
            arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:9:5-9:24,
      { c_id = (:9:5-9:7, (Name "t6")); c_magic = 0xD276EA1Bl;
        c_args =
@@ -2266,14 +2266,14 @@ let%expect_test "references to undefined types" =
                      (ExprType
                         (:9:16-9:17,
                          (TypeExpr (
-                            (TypeRef (:9:16-9:17, (0, (Some (ConstrRef 8))))),
+                            (TypeRef (:9:16-9:17, (0, (Some (ConstrRef 0))))),
                             []))))
                      ]
                    )))
                )));
            arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:10:5-10:22,
      { c_id = (:10:5-10:7, (Name "t7")); c_magic = 0xF3D280A7l;
        c_args =
@@ -2289,7 +2289,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 16; c_result_type = 8; c_builtin = false })
+       c_ref = 8; c_result_type = 8; c_builtin = false })
     (:11:5-11:21,
      { c_id = (:11:5-11:7, (Name "t8")); c_magic = 0xF900BE2l;
        c_args =
@@ -2306,7 +2306,7 @@ let%expect_test "references to undefined types" =
                )));
            arg_opt = None })
          ];
-       c_ref = 17; c_result_type = 9; c_builtin = false })
+       c_ref = 9; c_result_type = 9; c_builtin = false })
     Functions:
     (:13:5-13:17,
      { f_id = (:13:5-13:7, (Name "f0")); f_magic = 0xCEA12153l;
@@ -2340,10 +2340,10 @@ let%expect_test "constructors with the !-modified result type" =
     Constructors:
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "a")); c_magic = 0x7AAE25B9l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:11,
      { c_id = (:3:5-3:6, (Name "b")); c_magic = 0xA4070ED3l; c_args = [];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     Functions:
     (:5:5-5:16,
      { f_id = (:5:5-5:6, (Name "f")); f_magic = 0xE5A04BD5l;
@@ -2372,7 +2372,7 @@ let%expect_test "`!` must not matter in a function's result type" =
     Constructors:
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "e")); c_magic = 0x88434760l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     Functions:
     (:4:5-4:27,
      { f_id = (:4:5-4:7, (Name "f0")); f_magic = 0x47E92BF6l;
@@ -2416,7 +2416,7 @@ let%expect_test "combinators with `_` name" =
                (:2:9-2:10, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     Functions: |}]
 
 let%expect_test "conditional definitions" =
@@ -2428,8 +2428,8 @@ let%expect_test "conditional definitions" =
     t3 flags:# v:flags.8?E = T3;
   ";
   [%expect {|
-    :3:20-3:26: Conditionals without bit are not supported. 0 is used instead
-    :4:18-4:20: Cannot use more than 32 bits for conditional
+    :3:20-3:26: Conditionals without bit are not supported, 0 is used instead
+    :4:18-4:20: Cannot use more than 32 bits for a conditional
     :5:12-5:14: Variable `vv` is not defined
     Types:
     (Type ((Name "E"), []))
@@ -2440,7 +2440,7 @@ let%expect_test "conditional definitions" =
     Constructors:
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "e")); c_magic = 0x88434760l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:3:5-3:33,
      { c_id = (:3:5-3:7, (Name "t0")); c_magic = 0x1BF75951l;
        c_args =
@@ -2462,7 +2462,7 @@ let%expect_test "conditional definitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:4:5-4:28,
      { c_id = (:4:5-4:7, (Name "t1")); c_magic = 0xF8367DA8l;
        c_args =
@@ -2483,7 +2483,7 @@ let%expect_test "conditional definitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:24,
      { c_id = (:5:5-5:7, (Name "t2")); c_magic = 0x302EA0CFl;
        c_args =
@@ -2496,7 +2496,7 @@ let%expect_test "conditional definitions" =
                (:5:17-5:18, (TypeExpr ((TypeRef (:5:17-5:18, (0, None))), []))))));
            arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:33,
      { c_id = (:6:5-6:7, (Name "t3")); c_magic = 0x2E428CD5l;
        c_args =
@@ -2518,7 +2518,7 @@ let%expect_test "conditional definitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     Functions: |}]
 
 let%expect_test "repetitions" =
@@ -2560,10 +2560,10 @@ let%expect_test "repetitions" =
                (:3:10-3:14, (TypeExpr ((TypeRefBuiltin BuiltinType), []))))));
            arg_opt = (Some `ResultBang) })
          ];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:2:5-2:11,
      { c_id = (:2:5-2:6, (Name "e")); c_magic = 0x88434760l; c_args = [];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:4:5-4:26,
      { c_id = (:4:5-4:7, (Name "t0")); c_magic = 0x3AD1C2E4l;
        c_args =
@@ -2579,7 +2579,7 @@ let%expect_test "repetitions" =
                        r_arg_type =
                        (:4:11-4:12,
                         (TypeExpr (
-                           (TypeRef (:4:11-4:12, (0, (Some (ConstrRef 8))))),
+                           (TypeRef (:4:11-4:12, (0, (Some (ConstrRef 0))))),
                            [])))
                        });
                      (:4:13-4:14,
@@ -2599,7 +2599,7 @@ let%expect_test "repetitions" =
                )));
            arg_opt = None })
          ];
-       c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_ref = 2; c_result_type = 2; c_builtin = false })
     (:5:5-5:32,
      { c_id = (:5:5-5:7, (Name "t1")); c_magic = 0xCC9E222Dl;
        c_args =
@@ -2628,7 +2628,7 @@ let%expect_test "repetitions" =
                          r_arg_type =
                          (:5:18-5:19,
                           (TypeExpr (
-                             (TypeRef (:5:18-5:19, (0, (Some (ConstrRef 8))))),
+                             (TypeRef (:5:18-5:19, (0, (Some (ConstrRef 0))))),
                              [])))
                          });
                       (:5:20-5:25,
@@ -2648,7 +2648,7 @@ let%expect_test "repetitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_ref = 3; c_result_type = 3; c_builtin = false })
     (:6:5-6:30,
      { c_id = (:6:5-6:7, (Name "t2")); c_magic = 0xE6D79A98l;
        c_args =
@@ -2685,7 +2685,7 @@ let%expect_test "repetitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_ref = 4; c_result_type = 4; c_builtin = false })
     (:7:5-7:27,
      { c_id = (:7:5-7:7, (Name "t3")); c_magic = 0xDF8F5DE5l;
        c_args =
@@ -2706,7 +2706,7 @@ let%expect_test "repetitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_ref = 5; c_result_type = 5; c_builtin = false })
     (:8:5-8:35,
      { c_id = (:8:5-8:7, (Name "t4")); c_magic = 0x5D711663l;
        c_args =
@@ -2743,7 +2743,7 @@ let%expect_test "repetitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_ref = 6; c_result_type = 6; c_builtin = false })
     (:9:5-9:17,
      { c_id = (:9:5-9:7, (Name "t5")); c_magic = 0xD1539A98l;
        c_args =
@@ -2765,7 +2765,7 @@ let%expect_test "repetitions" =
                )));
            arg_opt = None })
          ];
-       c_ref = 15; c_result_type = 7; c_builtin = false })
+       c_ref = 7; c_result_type = 7; c_builtin = false })
     (:10:5-10:37,
      { c_id = (:10:5-10:7, (Name "t6")); c_magic = 0x2225D109l;
        c_args =
@@ -2794,7 +2794,7 @@ let%expect_test "repetitions" =
                 )));
             arg_opt = None })
          ];
-       c_ref = 16; c_result_type = 8; c_builtin = false })
+       c_ref = 8; c_result_type = 8; c_builtin = false })
     Functions: |}]
 
 let%expect_test "duplicate combinator names" =
@@ -2815,9 +2815,9 @@ let%expect_test "duplicate combinator names" =
     ns3.f = F; // error
   ";
   [%expect {|
-    :3:5-3:6: Constructor `a` is already defined. Skipping
-    :15:5-15:10: Constructor `ns3.f` is already defined. Skipping
-    :8:5-8:6: Function `c` is already defined. Skipping
+    :3:5-3:6: Constructor `a` is already defined, skipping
+    :15:5-15:10: Constructor `ns3.f` is already defined, skipping
+    :8:5-8:6: Function `c` is already defined, skipping
     Types:
     (Type ((Name "A"), []))
     (Type ((Name "B"), []))
@@ -2838,25 +2838,25 @@ let%expect_test "duplicate combinator names" =
                (:2:9-2:10, (TypeExpr ((TypeRefBuiltin BuiltinNat), []))))));
            arg_opt = None })
          ];
-       c_ref = 8; c_result_type = 0; c_builtin = false })
+       c_ref = 0; c_result_type = 0; c_builtin = false })
     (:4:5-4:11,
      { c_id = (:4:5-4:6, (Name "b")); c_magic = 0xA4070ED3l; c_args = [];
-       c_ref = 9; c_result_type = 1; c_builtin = false })
+       c_ref = 1; c_result_type = 1; c_builtin = false })
     (:10:5-10:16,
      { c_id = (:10:5-10:10, (NameNs ("ns", "d1"))); c_magic = 0x87AFAC9Cl;
-       c_args = []; c_ref = 10; c_result_type = 2; c_builtin = false })
+       c_args = []; c_ref = 2; c_result_type = 2; c_builtin = false })
     (:11:5-11:16,
      { c_id = (:11:5-11:10, (NameNs ("ns", "d2"))); c_magic = 0x98328F88l;
-       c_args = []; c_ref = 11; c_result_type = 3; c_builtin = false })
+       c_args = []; c_ref = 3; c_result_type = 3; c_builtin = false })
     (:12:5-12:19,
      { c_id = (:12:5-12:10, (NameNs ("ns1", "e"))); c_magic = 0x46CFF604l;
-       c_args = []; c_ref = 12; c_result_type = 4; c_builtin = false })
+       c_args = []; c_ref = 4; c_result_type = 4; c_builtin = false })
     (:13:5-13:19,
      { c_id = (:13:5-13:10, (NameNs ("ns2", "e"))); c_magic = 0xDD6B2E5Cl;
-       c_args = []; c_ref = 13; c_result_type = 5; c_builtin = false })
+       c_args = []; c_ref = 5; c_result_type = 5; c_builtin = false })
     (:14:5-14:15,
      { c_id = (:14:5-14:10, (NameNs ("ns3", "f"))); c_magic = 0x64929875l;
-       c_args = []; c_ref = 14; c_result_type = 6; c_builtin = false })
+       c_args = []; c_ref = 6; c_result_type = 6; c_builtin = false })
     Functions:
     (:6:5-6:11,
      { f_id = (:6:5-6:6, (Name "b")); f_magic = 0x3D0E5F69l; f_args = [];

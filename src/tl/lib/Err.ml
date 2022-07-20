@@ -16,14 +16,14 @@ module Parse = struct
   let err ltuple t = raise (Err (Loc.make ltuple, t))
 
   let show_t' = function
-    | BangInPartAppl -> "`!` isn't allowed in partial combinator application"
-    | UnderscoreInConstrAppl -> "`_` isn't allowed in application"
+    | BangInPartAppl -> "`!` is not allowed in partial combinator application"
+    | UnderscoreInConstrAppl -> "`_` is not allowed in application"
     | UnterminatedComment -> "Unterminated comment"
-    | OcamllexError s -> "Ocamllex: " ^ s
-    | MenhirError -> "Menhir Error"
+    | OcamllexError s -> "Lexing error: " ^ s
+    | MenhirError -> "Syntax error"
 
   let show (loc, t' : t) =
-    Printf.sprintf "%s: %s" (Loc.show loc) (show_t' t')
+    sprintf "%s: %s" (Loc.show loc) (show_t' t')
 end
 
 module Check = struct
@@ -51,7 +51,7 @@ module Check = struct
     | RepeatConditional
     | RepeatMultIsNotNatExpr
     | InvalidTypeConstr
-    | WrongNumberOfOperands
+    | WrongNumberOfOperands of string * int * int
     | WrongNumberOfParams of string * int * int
     | IncompatParamNat
     | IncompatParamType
@@ -68,14 +68,14 @@ module Check = struct
     | UndefinedVar n -> sprintf "Variable `%s` is not defined" n
     | UndefinedConstr n -> sprintf "Constructor `%s` is not defined" n
     | UndefinedType n -> sprintf "Type `%s` is not defined" n
-    | CondMoreThan32 -> "Cannot use more than 32 bits for conditional"
+    | CondMoreThan32 -> "Cannot use more than 32 bits for a conditional"
     | UnsupportedEmptyBit ->
-      "Conditionals without bit are not supported. 0 is used instead"
+      "Conditionals without bit are not supported, 0 is used instead"
     | Unsupported msg -> "Not supported: " ^ msg
     | DuplicateConstr n -> sprintf
-      "Constructor `%s` is already defined. Skipping" n
-    | DuplicateFunc n -> sprintf "Function `%s` is already defined. Skipping" n
-    | DuplicateArg n -> sprintf "Argument `%s` is already defined. Skipping" n
+      "Constructor `%s` is already defined, skipping" n
+    | DuplicateFunc n -> sprintf "Function `%s` is already defined, skipping" n
+    | DuplicateArg n -> sprintf "Argument `%s` is already defined, skipping" n
     | InvalidOptArgType -> "Optional arguments must be of type `#` or `Type`"
     | AmbiguousOptArg ->
       "An optional argument must be used at least once"
@@ -89,17 +89,19 @@ module Check = struct
     | InvalidResultType -> "Invalid result type"
     | InvalidTypeParam -> "Invalid type parameter"
     | InvalidTypeParamType ->
-      "Type parameters must be of type `#` or `Type`. `Type` is used instead"
+      "Type parameters must be of type `#` or `Type`, `Type` is used instead"
     | WrongTypeParams -> "Wrong type parameters"
     | RepeatWithoutMultAsFirstArg ->
       "A repetition without multiplicity cannot be the first argument"
     | RepeatConditional -> "Conditionals are not allowed inside repetitions"
     | RepeatMultIsNotNatExpr -> "The multiplicity is not a valid nat expression"
     | InvalidTypeConstr -> "Invalid type constructor"
-    | WrongNumberOfOperands -> "Wrong number of operands"
-    | WrongNumberOfParams (t, exp, got) -> sprintf
-      "The type constructor `%s` expects %d type parameter(s), but is applied to %d"
-      t exp got
+    | WrongNumberOfOperands (op, exp, got) -> sprintf
+      "The operator `%s` expects %d operand%s, but is applied to %d"
+      op exp (if exp = 1 then "s" else "") got
+    | WrongNumberOfParams (tc, exp, got) -> sprintf
+      "The type constructor `%s` expects %d type parameter%s, but is applied to %d"
+      tc exp (if exp = 1 then "s" else "") got
     | IncompatParamNat ->
       "A type expression is incompatible with a parameter of type `nat`"
     | IncompatParamType ->
@@ -116,7 +118,7 @@ module Check = struct
     | BareBuiltin -> "Cannot apply the `%` modifier to a builtin type"
 
   let show (loc, t')
-    = Printf.sprintf "%s: %s" (Loc.show loc) (show_t' t')
+    = sprintf "%s: %s" (Loc.show loc) (show_t' t')
 end
 
 type t = [
@@ -124,6 +126,6 @@ type t = [
   | `CheckError of Check.t
 ]
 
-let show: t -> string = function
+let show : t -> string = function
   | `ParseError e -> "ParseError: " ^ Parse.show e
   | `CheckError e -> "CheckError: " ^ Check.show e

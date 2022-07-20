@@ -639,11 +639,11 @@ let%test_module "arguments" = (module struct
   let%expect_test "multiple arguments with same type" =
     p "
 a (a b _ d : string) = A;"; (* TODO: *)
-    [%expect {| :2:8-2:9: Menhir Error |}]
+    [%expect {| :2:8-2:9: Syntax error |}]
 
   let%expect_test "shouldn't accept `_` as the type of an unnamed argument" =
     p "a (_) = A;";
-    [%expect {| :1:4-1:5: `_` isn't allowed in application |}]
+    [%expect {| :1:4-1:5: `_` is not allowed in application |}]
 
   let%expect_test "repetition (`[ ]`) with multiplicity" =
     p "a arg:2*[(A b) arg2:%C d] = A;";
@@ -864,7 +864,7 @@ a (a b _ d : string) = A;"; (* TODO: *)
 
   let%expect_test "unnamed repetition with multiplicity in full combinator" =
     p "a#abc = (T t)*[] = A;"; (* TODO: *)
-    [%expect {| :1:9-1:10: Menhir Error |}]
+    [%expect {| :1:9-1:10: Syntax error |}]
 
   let%expect_test "arguments with _ as arg name" =
     p "a _:string _:(T t) = A;";
@@ -930,7 +930,7 @@ let%test_module "finalization declaration" = (module struct
 
   let%expect_test "shouldn't parse identifiers begin with lowercase" =
     p "New x;";
-    [%expect {| :1:5-1:6: Menhir Error |}]
+    [%expect {| :1:5-1:6: Syntax error |}]
 end)
 
 let%expect_test "builtin combinator declaration" =
@@ -1038,7 +1038,7 @@ let%test_module "partial application declaration" = (module struct
 
       let%expect_test "shouldn't parse without params" =
         p "Vector;";
-        [%expect {| :1:7-1:8: Menhir Error |}]
+        [%expect {| :1:7-1:8: Syntax error |}]
   end)
 
   let%test_module "partial combinator application" = (module struct
@@ -1103,11 +1103,11 @@ let%test_module "partial application declaration" = (module struct
 
     let%expect_test "shouldn't accept combinator with magic" =
       p "c#abcde a;";
-      [%expect {| :1:10-1:11: Menhir Error |}]
+      [%expect {| :1:10-1:11: Syntax error |}]
 
     let%expect_test "shouldn't accept '!'" =
       p "c !t;";
-      [%expect {| :1:3-1:6: `!` isn't allowed in partial combinator application |}]
+      [%expect {| :1:3-1:6: `!` is not allowed in partial combinator application |}]
   end)
 end)
 
