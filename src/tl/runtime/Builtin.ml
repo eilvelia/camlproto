@@ -2,22 +2,20 @@ open Types
 
 module TL_int = struct
   type t = int
-  let magic () = 0xa8509bdal
+  type tl_constr
+  let [@inline] magic () = 0xa8509bdal
   (* Does not work on 32-bit platforms *)
   let [@inline] encode enc t = Encoder.add_int32_le enc (Int32.of_int t)
   let [@inline] decode dec = Decoder.read_int32_le dec |> Int32.to_int
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TLT_Int = struct
-  type t =
+  type [@unboxed] t =
     | TL_int of TL_int.t
-    [@@unboxed]
+  type tl_type
   let encode enc t = match t with
     | TL_int x -> TL_int.encode_boxed enc x
   let decode dec =
@@ -25,102 +23,83 @@ module TLT_Int = struct
     match magic with
     | x when x = TL_int.magic () -> TL_int (TL_int.decode dec)
     | x -> raise @@ DeserializationError x
-  include MakeType(struct
-    type nonrec t = t
-    let encode = encode
-    let decode = decode
-  end)
 end
 
 module TL_nat = struct
   type t = int32
+  type tl_constr
   let magic () = 0xf2b7df9el (* crc32 of `nat ? = Nat` *)
   let [@inline] encode enc t = Encoder.add_int32_le enc t
   let [@inline] decode dec = Decoder.read_int32_le dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_long = struct
   type t = int64
-  let magic () = 0x22076cbal
+  type tl_constr
+  let [@inline] magic () = 0x22076cbal
   let [@inline] encode enc t = Encoder.add_int64_le enc t
   let [@inline] decode dec = Decoder.read_int64_le dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_double = struct
   type t = float
-  let magic () = 0x2210c154l
+  type tl_constr
+  let [@inline] magic () = 0x2210c154l
   let [@inline] encode enc t = Encoder.add_float enc t
   let [@inline] decode dec = Decoder.read_float dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_string = struct
   type t = string
-  let magic () = 0xb5286e24l
+  type tl_constr
+  let [@inline] magic () = 0xb5286e24l
   let [@inline] encode enc t = Encoder.add_tl_string enc t
   let [@inline] decode dec = Decoder.read_tl_string dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_bytes = struct
   type t = Cstruct.t
-  let magic () = 0xe937bb82l (* crc32 of `bytes = Bytes` *)
+  type tl_constr
+  let [@inline] magic () = 0xe937bb82l (* crc32 of `bytes = Bytes` *)
   let [@inline] encode enc t = Encoder.add_tl_bytes enc t
   let [@inline] decode dec = Decoder.read_tl_bytes dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_int128 = struct
   type t = Cstruct.t
-  let magic () = 0x84ccf7b7l (* crc32 of `int128 4*[ int ] = Int128` *)
+  type tl_constr
+  let [@inline] magic () = 0x84ccf7b7l (* crc32 of `int128 4*[ int ] = Int128` *)
   let [@inline] encode enc t = Encoder.add_int128 enc t
   let [@inline] decode dec = Decoder.read_int128 dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TL_int256 = struct
   type t = Cstruct.t
-  let magic () = 0x7bedeb5bl (* crc32 of `int256 8*[ int ] = Int256` *)
+  type tl_constr
+  let [@inline] magic () = 0x7bedeb5bl (* crc32 of `int256 8*[ int ] = Int256` *)
   let [@inline] encode enc t = Encoder.add_int256 enc t
   let [@inline] decode dec = Decoder.read_int256 dec
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
 module TLT_Bool = struct
@@ -137,15 +116,11 @@ module TLT_Bool = struct
     | 0x997275b5l -> true
     | 0xbc799737l -> false
     | x -> raise @@ DeserializationError x
-  include MakeType(struct
-    type nonrec t = t
-    let encode = encode
-    let decode = decode
-  end)
 end
 
-module TL_vector (A : TLObject) = struct
+module TL_vector (A : TLAnyType) = struct
   type t = A.t list
+  type tl_constr
   let magic () = 0x1cb5c415l
   let encode enc t =
     Encoder.add_int32_le enc (List.length t |> Int32.of_int);
@@ -158,24 +133,20 @@ module TL_vector (A : TLObject) = struct
       xs := x :: !xs
     done;
     !xs
-  include MakeConstr(struct
-    type nonrec t = t
-    let magic = magic
-    let encode = encode
-    let decode = decode
-  end)
+  let encode_boxed enc t =
+    Encoder.add_int32_le enc (magic ());
+    encode enc t
 end
 
-module TLT_Vector (A : TLObject) : sig
-  type t =
+module TLT_Vector (A : TLAnyType) : sig
+  type [@unboxed] t =
     | TL_vector of TL_vector(A).t
-    [@@unboxed]
   include TLType with type t := t
 end = struct
   module TL_vectorA = TL_vector(A)
-  type t =
+  type [@unboxed] t =
     | TL_vector of TL_vectorA.t
-    [@@unboxed]
+  type tl_type
   let encode enc t =
     match t with
     | TL_vector x -> TL_vectorA.encode_boxed enc x
@@ -184,9 +155,4 @@ end = struct
     match magic with
     | 0x1cb5c415l -> TL_vector (TL_vectorA.decode dec)
     | x -> raise @@ DeserializationError x
-  include MakeType(struct
-    type nonrec t = t
-    let encode = encode
-    let decode = decode
-  end)
 end

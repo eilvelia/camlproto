@@ -15,7 +15,7 @@ module type MTProtoPlainObjSender = sig
   val send_unencrypted_obj
     : t -> (module TLFunc with type t = 'a) -> 'a -> unit Lwt.t
   val receive_unencrypted_obj
-    : t -> (module TLObject with type t = 'a) -> 'a Lwt.t
+    : t -> (module TLAnyType with type t = 'a) -> 'a Lwt.t
   val invoke_unencrypted_obj
     : t -> (module TLFunc with type t = 'a and type ResultM.t = 'b) -> 'a -> 'b Lwt.t
 end

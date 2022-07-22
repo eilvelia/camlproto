@@ -61,7 +61,7 @@ let fix_keyword_conflict name =
   | "asr" -> name ^ "_"
   | _ -> name
 
-let is_predefined_constr : Ast.name -> bool = function
+let is_disallowed_constr : Ast.name -> bool = function
   | Name ( "nat"
          | "int"
          | "long"
@@ -75,7 +75,7 @@ let is_predefined_constr : Ast.name -> bool = function
          | "int256") -> true
   | _ -> false
 
-let is_predefined_type : Ast.name -> bool = function
+let is_disallowed_type : Ast.name -> bool = function
   | Name ( "Type"
          | "Int"
          | "Long"
@@ -152,23 +152,18 @@ let build_type store module_kind ppf (tref, ty) =
       type%s t =@,\
         @[<v>%a@]\
       @]@,\
+      type tl_type@,\
       @[<v 2>\
-      include MakeType(struct@,\
-        type nonrec t = t@,\
-        @[<v 2>\
-        let encode enc t = match t with@,\
-          @[<v>%a@]\
-        @]@,\
-        ;;@,\
-        @[<v 2>\
-        let decode dec =@,\
-          let magic = Decoder.read_int32_le dec in@,\
-          match magic with@,\
-          @[<v>%a@]@,\
-          | x -> raise (DeserializationError x)\
-        @]\
+      let encode enc t = match t with@,\
+        @[<v>%a@]\
       @]@,\
-      end)\
+      @[<v 2>\
+      let decode dec =@,\
+        let magic = Decoder.read_int32_le dec in@,\
+        match magic with@,\
+        @[<v>%a@]@,\
+        | x -> raise (DeserializationError x)\
+      @]\
     @]@,\
     end@]"
   in
@@ -186,6 +181,7 @@ let build_type store module_kind ppf (tref, ty) =
     fmt_encodes ()
     fmt_decodes ()
 ;;
+
 let build_var_ref ppf (vref : tl_var_ref) =
   match vref with
   | VarRef (_, Some name) -> Fmt.string ppf @@ fix_keyword_conflict name
@@ -216,7 +212,7 @@ and build_type_expr store ppf (_, texpr : tl_type_expr) =
   match texpr with
   | TypeExpr (tref, tparams) ->
     let fmt_tparams = Fmt.list ~sep:Fmt.nop (build_expr store) in
-    Fmt.pf ppf "%a@[<h>%a@]" (build_type_ref store) tref fmt_tparams tparams
+    Fmt.pf ppf "@[<h>%a%a@]" (build_type_ref store) tref fmt_tparams tparams
   | TypeVar vref -> build_var_ref ppf vref
   | TypeRepeat _ -> failwith "codegen: Type repetitions are not supported yet"
   | TypeBare _ -> failwith "codegen: Bare modifiers should be already resolved"
@@ -374,7 +370,7 @@ let build_comb store : _ -> comb Fmt.t =
   in
   let pp_functor_arg ppf (l, a') =
     let ty = function
-      | `ResultBang -> "TLObject"
+      | `ResultBang -> "TLAnyType"
       | `ArgBang -> "TLFunc"
     in
     let f opt =
@@ -393,12 +389,9 @@ let build_comb store : _ -> comb Fmt.t =
       | `ModuleRec -> "module rec"
       | `And -> "and"
     in
-    let name_of_make_functor = match comb with
-      | `Constr _ -> "MakeConstr"
-      | `Func _ -> "MakeFunc"
-    in
-    let magic = get_comb_magic comb in
     (* TODO: Add `[@inline]` to the `magic` function? *)
+    let magic = get_comb_magic comb in
+    (* TODO: Consider at least using ppx_string_interpolation? *)
     let pp = Fmt.pf ppf "@[\
       @[<v 2>\
       %s %s @[<h>%a@]: sig@,\
@@ -410,24 +403,20 @@ let build_comb store : _ -> comb Fmt.t =
         @[<v>%a@]\
         @[<v>type t = %t@]@,\
         %a\
+        type %s@,\
+        let magic () = 0x%08lxl@,\
         @[<v 2>\
-        include %s(struct@,\
-          type nonrec t = t@,\
-          %a\
-          let magic () = 0x%08lxl@,\
-          @[<v 2>\
-          let encode enc t =@,\
-            @[<v>%a@]\
-            ()\
-          @]@,\
-          ;;@,\
-          @[<v 2>\
-          let decode dec =@,\
-            @[<v>%a@]\
-            @[<h>%a@]\
-          @]\
+        let encode enc t =@,\
+          %t\
+          @[<v>%a@]\
+          ()\
         @]@,\
-        end)\
+        %t\
+        @[<v 2>\
+        let decode dec =@,\
+          @[<v>%a@]\
+          @[<h>%a@]\
+        @]\
       @]@,\
       end@]"
     in
@@ -454,9 +443,24 @@ let build_comb store : _ -> comb Fmt.t =
         Fmt.pf ppf "{@;<0 2>@[<v>%a@]@,}"
           (Fmt.list @@ pp_field ?is_sig) xs
     in
-    let include_module_name = match comb with
+    let include_module_type = match comb with
       | `Constr _ -> "TLConstr"
       | `Func _ -> "TLFunc"
+    in
+    let type_marker = match comb with
+      | `Constr _ -> "tl_constr"
+      | `Func _ -> "tl_func"
+    in
+    let encode_start ppf = match comb with
+      | `Constr _ -> ()
+      | `Func _ -> Fmt.pf ppf "Encoder.add_int32_le enc 0x%08lxl;@," magic
+    in
+    let encode_boxed ppf =
+      match comb with
+      | `Constr _ -> Fmt.pf ppf
+        "let encode_boxed enc t = Encoder.add_int32_le enc 0x%08lxl; encode enc t@,"
+        magic
+      | `Func _ -> ()
     in
     let result_module ?(trailer = Fmt.nop) ppf comb = (Fmt.using
         (function `Constr _ -> None | `Func f -> Some f)
@@ -468,7 +472,7 @@ let build_comb store : _ -> comb Fmt.t =
       cname
       (my_pp_list pp_functor_arg ~trailer:sp) optional_args
       (pp_t ~is_sig:true)
-      include_module_name
+      include_module_type
       (match comb with
        | `Constr _ -> Fmt.any ""
        | `Func f -> fun ppf _ -> Fmt.pf ppf " and %a"
@@ -476,12 +480,11 @@ let build_comb store : _ -> comb Fmt.t =
       pp_module_decls comb
       pp_t
       (result_module ~trailer:cut) comb
-      name_of_make_functor
-      (match comb with
-       | `Constr _ -> Fmt.any ""
-       | `Func _ -> Fmt.any "module ResultM = ResultM@,") ()
+      type_marker
       magic
+      encode_start
       pp_arg_encodes (required_args, cond_args_map)
+      encode_boxed
       (my_pp_list pp_arg_decode ~trailer:cut) required_args
       pp_decode_end noncond_args
 
@@ -496,10 +499,10 @@ let build_chain store ppf (trefs : tl_type_ref list) =
   let objs = List.filter_map trefs' ~f:(function
     | (refi, None) ->
         let Type (name, _) as ty = Store.get_type_by_ref store refi in
-        if is_predefined_type name then None else Some (`Type (refi, ty))
+        if is_disallowed_type name then None else Some (`Type (refi, ty))
     | (_, Some cref) ->
         let (_, c') as c = Store.get_constructor_by_ref store cref in
-        if is_predefined_constr (snd c'.c_id) then None else Some (`Constr c)
+        if is_disallowed_constr (snd c'.c_id) then None else Some (`Constr c)
   ) in
   let build k ppf = function
     | `Type pair -> build_type store k ppf pair
@@ -557,13 +560,13 @@ let build : Store.t Fmt.t = fun ppf store ->
   let map fold ~f = fold store ~init:[] ~f:(fun a x -> f x :: a) in
   (* let types = *)
   (*   let f (_ref, ty' as ty) = *)
-  (*     Option.some_if (not @@ is_predefined_type @@ convert_tl_type ty') ty in *)
+  (*     Option.some_if (not @@ is_disallowed_type @@ convert_tl_type ty') ty in *)
   (*   filter_map Store.fold_types ~f *)
   (* in *)
   let constrs =
     let f (_, c' as c) =
-      (* Option.some_if (not @@ is_predefined_constr @@ snd c'.c_id) (`Constr c) in *)
-      Option.some_if (not @@ is_predefined_constr @@ snd c'.c_id) c in
+      (* Option.some_if (not @@ is_disallowed_type @@ snd c'.c_id) (`Constr c) in *)
+      Option.some_if (not @@ is_disallowed_constr @@ snd c'.c_id) c in
     filter_map Store.fold_constructors ~f
   in
   let funcs = map Store.fold_functions ~f:(fun f -> `Func f) in

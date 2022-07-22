@@ -52,17 +52,15 @@ let%expect_test "basic" =
       type t = {
         b : TLT_RecB.t;
       }
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0xdd718d07l
-        let encode enc t =
-          TLT_RecB.encode enc t.b;
-          ()
-        ;;
-        let decode dec =
-          let b = TLT_RecB.decode dec in
-          { b }
-      end)
+      type tl_constr
+      let magic () = 0xdd718d07l
+      let encode enc t =
+        TLT_RecB.encode enc t.b;
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0xdd718d07l; encode enc t
+      let decode dec =
+        let b = TLT_RecB.decode dec in
+        { b }
     end
 
     and TLT_RecB : sig
@@ -72,17 +70,14 @@ let%expect_test "basic" =
     end = struct
       type [@unboxed] t =
         | TL_recB of TL_recB.t
-      include MakeType(struct
-        type nonrec t = t
-        let encode enc t = match t with
-          | TL_recB x -> TL_recB.encode_boxed enc x
-        ;;
-        let decode dec =
-          let magic = Decoder.read_int32_le dec in
-          match magic with
-          | 0x6640dde9l -> TL_recB (TL_recB.decode dec)
-          | x -> raise (DeserializationError x)
-      end)
+      type tl_type
+      let encode enc t = match t with
+        | TL_recB x -> TL_recB.encode_boxed enc x
+      let decode dec =
+        let magic = Decoder.read_int32_le dec in
+        match magic with
+        | 0x6640dde9l -> TL_recB (TL_recB.decode dec)
+        | x -> raise (DeserializationError x)
     end
 
     and TL_recB : sig
@@ -94,17 +89,15 @@ let%expect_test "basic" =
       type t = {
         a : TLT_RecA.t;
       }
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0x6640dde9l
-        let encode enc t =
-          TLT_RecA.encode enc t.a;
-          ()
-        ;;
-        let decode dec =
-          let a = TLT_RecA.decode dec in
-          { a }
-      end)
+      type tl_constr
+      let magic () = 0x6640dde9l
+      let encode enc t =
+        TLT_RecA.encode enc t.a;
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0x6640dde9l; encode enc t
+      let decode dec =
+        let a = TLT_RecA.decode dec in
+        { a }
     end
 
     and TLT_RecA : sig
@@ -114,17 +107,14 @@ let%expect_test "basic" =
     end = struct
       type [@unboxed] t =
         | TL_recA of TL_recA.t
-      include MakeType(struct
-        type nonrec t = t
-        let encode enc t = match t with
-          | TL_recA x -> TL_recA.encode_boxed enc x
-        ;;
-        let decode dec =
-          let magic = Decoder.read_int32_le dec in
-          match magic with
-          | 0xdd718d07l -> TL_recA (TL_recA.decode dec)
-          | x -> raise (DeserializationError x)
-      end)
+      type tl_type
+      let encode enc t = match t with
+        | TL_recA x -> TL_recA.encode_boxed enc x
+      let decode dec =
+        let magic = Decoder.read_int32_le dec in
+        match magic with
+        | 0xdd718d07l -> TL_recA (TL_recA.decode dec)
+        | x -> raise (DeserializationError x)
     end
 
     module TL_entityNull : sig
@@ -132,15 +122,13 @@ let%expect_test "basic" =
       include TLConstr with type t := t
     end = struct
       type t = E
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0x0d1534b3l
-        let encode enc t =
-          ()
-        ;;
-        let decode dec =
-          E
-      end)
+      type tl_constr
+      let magic () = 0x0d1534b3l
+      let encode enc t =
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0x0d1534b3l; encode enc t
+      let decode dec =
+        E
     end
 
     module rec TL_entityBoxed : sig
@@ -152,17 +140,15 @@ let%expect_test "basic" =
       type t = {
         ent2 : TLT_Ent.t;
       }
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0x4060119el
-        let encode enc t =
-          TLT_Ent.encode enc t.ent2;
-          ()
-        ;;
-        let decode dec =
-          let ent2 = TLT_Ent.decode dec in
-          { ent2 }
-      end)
+      type tl_constr
+      let magic () = 0x4060119el
+      let encode enc t =
+        TLT_Ent.encode enc t.ent2;
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0x4060119el; encode enc t
+      let decode dec =
+        let ent2 = TLT_Ent.decode dec in
+        { ent2 }
     end
 
     and TLT_Ent : sig
@@ -174,19 +160,16 @@ let%expect_test "basic" =
       type t =
         | TL_entityBoxed of TL_entityBoxed.t
         | TL_entityNull of TL_entityNull.t
-      include MakeType(struct
-        type nonrec t = t
-        let encode enc t = match t with
-          | TL_entityBoxed x -> TL_entityBoxed.encode_boxed enc x
-          | TL_entityNull x -> TL_entityNull.encode_boxed enc x
-        ;;
-        let decode dec =
-          let magic = Decoder.read_int32_le dec in
-          match magic with
-          | 0x4060119el -> TL_entityBoxed (TL_entityBoxed.decode dec)
-          | 0x0d1534b3l -> TL_entityNull (TL_entityNull.decode dec)
-          | x -> raise (DeserializationError x)
-      end)
+      type tl_type
+      let encode enc t = match t with
+        | TL_entityBoxed x -> TL_entityBoxed.encode_boxed enc x
+        | TL_entityNull x -> TL_entityNull.encode_boxed enc x
+      let decode dec =
+        let magic = Decoder.read_int32_le dec in
+        match magic with
+        | 0x4060119el -> TL_entityBoxed (TL_entityBoxed.decode dec)
+        | 0x0d1534b3l -> TL_entityNull (TL_entityNull.decode dec)
+        | x -> raise (DeserializationError x)
     end
 
     module TL_a3 : sig
@@ -194,15 +177,13 @@ let%expect_test "basic" =
       include TLConstr with type t := t
     end = struct
       type t = E
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0x00000050l
-        let encode enc t =
-          ()
-        ;;
-        let decode dec =
-          E
-      end)
+      type tl_constr
+      let magic () = 0x00000050l
+      let encode enc t =
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0x00000050l; encode enc t
+      let decode dec =
+        E
     end
 
     module TL_a2 : sig
@@ -210,15 +191,13 @@ let%expect_test "basic" =
       include TLConstr with type t := t
     end = struct
       type t = E
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0xb1551ae3l
-        let encode enc t =
-          ()
-        ;;
-        let decode dec =
-          E
-      end)
+      type tl_constr
+      let magic () = 0xb1551ae3l
+      let encode enc t =
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0xb1551ae3l; encode enc t
+      let decode dec =
+        E
     end
 
     module TL_a1 : sig
@@ -226,15 +205,13 @@ let%expect_test "basic" =
       include TLConstr with type t := t
     end = struct
       type t = E
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0xf6f56033l
-        let encode enc t =
-          ()
-        ;;
-        let decode dec =
-          E
-      end)
+      type tl_constr
+      let magic () = 0xf6f56033l
+      let encode enc t =
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0xf6f56033l; encode enc t
+      let decode dec =
+        E
     end
 
     module TLT_A : sig
@@ -248,21 +225,18 @@ let%expect_test "basic" =
         | TL_a1 of TL_a1.t
         | TL_a2 of TL_a2.t
         | TL_a3 of TL_a3.t
-      include MakeType(struct
-        type nonrec t = t
-        let encode enc t = match t with
-          | TL_a1 x -> TL_a1.encode_boxed enc x
-          | TL_a2 x -> TL_a2.encode_boxed enc x
-          | TL_a3 x -> TL_a3.encode_boxed enc x
-        ;;
-        let decode dec =
-          let magic = Decoder.read_int32_le dec in
-          match magic with
-          | 0xf6f56033l -> TL_a1 (TL_a1.decode dec)
-          | 0xb1551ae3l -> TL_a2 (TL_a2.decode dec)
-          | 0x00000050l -> TL_a3 (TL_a3.decode dec)
-          | x -> raise (DeserializationError x)
-      end)
+      type tl_type
+      let encode enc t = match t with
+        | TL_a1 x -> TL_a1.encode_boxed enc x
+        | TL_a2 x -> TL_a2.encode_boxed enc x
+        | TL_a3 x -> TL_a3.encode_boxed enc x
+      let decode dec =
+        let magic = Decoder.read_int32_le dec in
+        match magic with
+        | 0xf6f56033l -> TL_a1 (TL_a1.decode dec)
+        | 0xb1551ae3l -> TL_a2 (TL_a2.decode dec)
+        | 0x00000050l -> TL_a3 (TL_a3.decode dec)
+        | x -> raise (DeserializationError x)
     end
 
     module TL_b1 : sig
@@ -274,17 +248,15 @@ let%expect_test "basic" =
       type t = {
         v : TLT_A.t;
       }
-      include MakeConstr(struct
-        type nonrec t = t
-        let magic () = 0x38b9673cl
-        let encode enc t =
-          TLT_A.encode enc t.v;
-          ()
-        ;;
-        let decode dec =
-          let v = TLT_A.decode dec in
-          { v }
-      end)
+      type tl_constr
+      let magic () = 0x38b9673cl
+      let encode enc t =
+        TLT_A.encode enc t.v;
+        ()
+      let encode_boxed enc t = Encoder.add_int32_le enc 0x38b9673cl; encode enc t
+      let decode dec =
+        let v = TLT_A.decode dec in
+        { v }
     end
 
     module TLT_B : sig
@@ -294,17 +266,14 @@ let%expect_test "basic" =
     end = struct
       type [@unboxed] t =
         | TL_b1 of TL_b1.t
-      include MakeType(struct
-        type nonrec t = t
-        let encode enc t = match t with
-          | TL_b1 x -> TL_b1.encode_boxed enc x
-        ;;
-        let decode dec =
-          let magic = Decoder.read_int32_le dec in
-          match magic with
-          | 0x38b9673cl -> TL_b1 (TL_b1.decode dec)
-          | x -> raise (DeserializationError x)
-      end)
+      type tl_type
+      let encode enc t = match t with
+        | TL_b1 x -> TL_b1.encode_boxed enc x
+      let decode dec =
+        let magic = Decoder.read_int32_le dec in
+        match magic with
+        | 0x38b9673cl -> TL_b1 (TL_b1.decode dec)
+        | x -> raise (DeserializationError x)
     end
 
     (* -- Functions -- *)
@@ -320,18 +289,15 @@ let%expect_test "basic" =
         query3 : X.t;
       }
       module ResultM = TLT_VectorX
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0xae3ef4c4l
-        let encode enc t =
-          X.encode enc t.query3;
-          ()
-        ;;
-        let decode dec =
-          let query3 = X.decode dec in
-          { query3 }
-      end)
+      type tl_func
+      let magic () = 0xae3ef4c4l
+      let encode enc t =
+        Encoder.add_int32_le enc 0xae3ef4c4l;
+        X.encode enc t.query3;
+        ()
+      let decode dec =
+        let query3 = X.decode dec in
+        { query3 }
     end
 
     module TL_fnPoly2 (X : TLFunc) : sig
@@ -344,18 +310,15 @@ let%expect_test "basic" =
         query2 : X.t;
       }
       module ResultM = TLT_B
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0x7c29a776l
-        let encode enc t =
-          X.encode enc t.query2;
-          ()
-        ;;
-        let decode dec =
-          let query2 = X.decode dec in
-          { query2 }
-      end)
+      type tl_func
+      let magic () = 0x7c29a776l
+      let encode enc t =
+        Encoder.add_int32_le enc 0x7c29a776l;
+        X.encode enc t.query2;
+        ()
+      let decode dec =
+        let query2 = X.decode dec in
+        { query2 }
     end
 
     module TL_fnPoly1 (X : TLFunc) : sig
@@ -368,18 +331,15 @@ let%expect_test "basic" =
         query : X.t;
       }
       module ResultM = X.ResultM
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0x34c7208al
-        let encode enc t =
-          X.encode enc t.query;
-          ()
-        ;;
-        let decode dec =
-          let query = X.decode dec in
-          { query }
-      end)
+      type tl_func
+      let magic () = 0x34c7208al
+      let encode enc t =
+        Encoder.add_int32_le enc 0x34c7208al;
+        X.encode enc t.query;
+        ()
+      let decode dec =
+        let query = X.decode dec in
+        { query }
     end
 
     module TL_fnFlags : sig
@@ -397,38 +357,35 @@ let%expect_test "basic" =
         a2 : TLT_A.t;
       }
       module ResultM = TLT_A
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0xe3dcf7f8l
-        let encode enc t =
-          let flags = ref 0l in
-          match t.a with Some _ -> flags := !flags lor (1l lsl 3) | None -> ();
-          TL_nat.encode enc !flags;
-          match t.a with Some x -> TLT_A.encode enc x | None -> ();
-          let somevar = ref 0l in
-          match t.b with Some _ -> somevar := !somevar lor (1l lsl 5) | None -> ();
-          TL_nat.encode enc !somevar;
-          match t.b with Some x -> TL_vectorTLT_A.encode enc x | None -> ();
-          TLT_A.encode enc t.a2;
-          ()
-        ;;
-        let decode dec =
-          let flags = TL_nat.decode dec in
-          let a =
-            if flags land (1l lsl 3) <> 0l
-            then Some (TLT_A.decode dec)
-            else None
-          in
-          let somevar = TL_nat.decode dec in
-          let b =
-            if somevar land (1l lsl 5) <> 0l
-            then Some (TL_vectorTLT_A.decode dec)
-            else None
-          in
-          let a2 = TLT_A.decode dec in
-          { a; b; a2 }
-      end)
+      type tl_func
+      let magic () = 0xe3dcf7f8l
+      let encode enc t =
+        Encoder.add_int32_le enc 0xe3dcf7f8l;
+        let flags = ref 0l in
+        match t.a with Some _ -> flags := !flags lor (1l lsl 3) | None -> ();
+        TL_nat.encode enc !flags;
+        match t.a with Some x -> TLT_A.encode enc x | None -> ();
+        let somevar = ref 0l in
+        match t.b with Some _ -> somevar := !somevar lor (1l lsl 5) | None -> ();
+        TL_nat.encode enc !somevar;
+        match t.b with Some x -> TL_vectorTLT_A.encode enc x | None -> ();
+        TLT_A.encode enc t.a2;
+        ()
+      let decode dec =
+        let flags = TL_nat.decode dec in
+        let a =
+          if flags land (1l lsl 3) <> 0l
+          then Some (TLT_A.decode dec)
+          else None
+        in
+        let somevar = TL_nat.decode dec in
+        let b =
+          if somevar land (1l lsl 5) <> 0l
+          then Some (TL_vectorTLT_A.decode dec)
+          else None
+        in
+        let a2 = TLT_A.decode dec in
+        { a; b; a2 }
     end
 
     module TL_fn3_no_args : sig
@@ -437,16 +394,13 @@ let%expect_test "basic" =
     end = struct
       type t = E
       module ResultM = TLT_A
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0x5f432824l
-        let encode enc t =
-          ()
-        ;;
-        let decode dec =
-          E
-      end)
+      type tl_func
+      let magic () = 0x5f432824l
+      let encode enc t =
+        Encoder.add_int32_le enc 0x5f432824l;
+        ()
+      let decode dec =
+        E
     end
 
     module TL_fn2_vector_arg : sig
@@ -460,18 +414,15 @@ let%expect_test "basic" =
         a : TLT_VectorTL_b1.t;
       }
       module ResultM = TLT_A
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0x21fd7c7al
-        let encode enc t =
-          TLT_VectorTL_b1.encode enc t.a;
-          ()
-        ;;
-        let decode dec =
-          let a = TLT_VectorTL_b1.decode dec in
-          { a }
-      end)
+      type tl_func
+      let magic () = 0x21fd7c7al
+      let encode enc t =
+        Encoder.add_int32_le enc 0x21fd7c7al;
+        TLT_VectorTL_b1.encode enc t.a;
+        ()
+      let decode dec =
+        let a = TLT_VectorTL_b1.decode dec in
+        { a }
     end
 
     module TL_fn1 : sig
@@ -484,16 +435,13 @@ let%expect_test "basic" =
         a : TL_b1.t;
       }
       module ResultM = TLT_A
-      include MakeFunc(struct
-        type nonrec t = t
-        module ResultM = ResultM
-        let magic () = 0x6a29301bl
-        let encode enc t =
-          TL_b1.encode enc t.a;
-          ()
-        ;;
-        let decode dec =
-          let a = TL_b1.decode dec in
-          { a }
-      end)
+      type tl_func
+      let magic () = 0x6a29301bl
+      let encode enc t =
+        Encoder.add_int32_le enc 0x6a29301bl;
+        TL_b1.encode enc t.a;
+        ()
+      let decode dec =
+        let a = TL_b1.decode dec in
+        { a }
     end |}]

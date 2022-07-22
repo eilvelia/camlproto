@@ -196,12 +196,12 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
 
     Lwt.return data
 
-  let send_unencrypted_obj t (type a) (module O : TLFunc with type t = a) (o: a) =
-    let data = TLR.Encoder.encode O.encode_boxed o in
+  let send_unencrypted_obj t (type a) (module F : TLFunc with type t = a) (tlfunc : a) =
+    let data = TLR.Encoder.encode F.encode tlfunc in
     let data_cs = data |> TLR.Encoder.to_cstruct in
     send_unencrypted t data_cs
 
-  let receive_unencrypted_obj t (type a) (module O : TLObject with type t = a): a Lwt.t =
+  let receive_unencrypted_obj t (type a) (module O : TLAnyType with type t = a): a Lwt.t =
     let%lwt data = receive_unencrypted t in
     let o = O.decode (TLR.Decoder.of_cstruct data) in
     Lwt.return o
@@ -350,6 +350,8 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       "send_encrypted msg_id(%Ld) seq_no(%ld) data_len(%d)"
       msg.msg_id msg.msg_seq_no data_len);
 
+    (* Log.debug (fun m -> m "send_encrypted data:@.%a" hexdump_pp msg.data); *)
+
     let encrypted = encrypt_message t msg in
     (* Log.debug (fun m -> m "encrypted:@.%a" hexdump_pp encrypted); *)
     T.send t.transport encrypted
@@ -357,9 +359,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   let send_encrypted_obj
     t
     ?(msg_id = gen_msg_id t) ?(content_related = false)
-    (type a) (module O : TLFunc with type t = a) (o: a)
+    (type a) (module F : TLFunc with type t = a) (tlfunc : a)
   =
-    let data_encoder = TLR.Encoder.encode O.encode_boxed o in
+    let data_encoder = TLR.Encoder.encode F.encode tlfunc in
     let data = data_encoder |> TLR.Encoder.to_cstruct in
     let msg_seq_no = gen_seq_no t content_related in
     let msg = MTPMessage.{ msg_id; msg_seq_no; data } in
@@ -373,8 +375,8 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     Printf.sprintf "Message with msg_id %Ld not found" msg_id
   [@@inline]
 
-  let tl_encode (type a) (module O : TLObject with type t = a) (o: a): Cstruct.t =
-    let encoder = TLR.Encoder.encode O.encode_boxed o in
+  let tl_encode (type a) (module T : TLAnyType with type t = a) (o : a) =
+    let encoder = TLR.Encoder.encode T.encode o in
     TLR.Encoder.to_cstruct encoder
   [@@inline]
 
@@ -531,7 +533,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
   let create_ack t = MTPMessage.{
     msg_id = gen_msg_id t;
     msg_seq_no = gen_seq_no t false;
-    data = tl_encode (module TLM.TL_msgs_ack) { msg_ids = TL_vector t.pending_ack }
+    data = tl_encode
+      (module TLM.TLT_MsgsAck)
+      (TL_msgs_ack { msg_ids = TL_vector t.pending_ack })
   }
 
   let rec send_loop t =
@@ -559,10 +563,10 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
     let%lwt () = send_encrypted t msg in
     send_loop t
 
-    let loop t =
-      Lwt.async (fun () -> recv_loop t);
-      Lwt.async (fun () -> send_loop t);
-      ()
+  let loop t =
+    Lwt.async (fun () -> recv_loop t);
+    Lwt.async (fun () -> send_loop t);
+    ()
 
   let invoke
     t
