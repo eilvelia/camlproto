@@ -1,2 +1,6 @@
 (dirs src test examples)
 (data_only_dirs schema)
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
