@@ -44,9 +44,6 @@ module MakeRes (Platform: PlatformTypes.S): sig
 end
 
 module MTPObject: sig
-  exception NotFound of int32
-  (** [NotFound magic] *)
-
   type t =
     | RpcResult of TL_rpc_result.t
     | MessageContainer of tl_msg_container

@@ -1,5 +1,5 @@
 open! Base
-(* open TLRuntime.Types *)
+open TLRuntime.Types
 open TLRuntime.Builtin
 open TLSchema.MTProto
 
@@ -122,8 +122,6 @@ module MakeRes (Platform: PlatformTypes.S) = struct
 end
 
 module MTPObject = struct
-  exception NotFound of int32 (* magic *)
-
   type t =
     | RpcResult of TL_rpc_result.t
     | MessageContainer of tl_msg_container
@@ -185,5 +183,5 @@ module MTPObject = struct
     | x when x = TL_msgs_state_req.magic () -> MsgsStateReq (TL_msgs_state_req.decode dec)
     | x when x = TL_msg_resend_req.magic () -> MsgResendReq (TL_msg_resend_req.decode dec)
     | x when x = TL_msgs_all_info.magic () -> MsgsAllInfo (TL_msgs_all_info.decode dec)
-    | x -> raise @@ NotFound x
+    | x -> raise @@ DeserializationError x
 end

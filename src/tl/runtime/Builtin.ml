@@ -119,6 +119,8 @@ module TLT_Bool = struct
 end
 
 module TL_vector (A : TLAnyType) = struct
+  (* Note: TL vector is [vector#1cb5c415 {t:Type} # [ t ] = Vector t;], where
+     [#] is the length of the vector, but it is omitted in the OCaml type. *)
   type t = A.t list
   type tl_constr
   let magic () = 0x1cb5c415l

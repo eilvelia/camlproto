@@ -373,17 +373,9 @@ let%expect_test "basic" =
         ()
       let decode dec =
         let flags = TL_nat.decode dec in
-        let a =
-          if flags land (1l lsl 3) <> 0l
-          then Some (TLT_A.decode dec)
-          else None
-        in
+        let a = if flags land (1l lsl 3) <> 0l then Some (TLT_A.decode dec) else None in
         let somevar = TL_nat.decode dec in
-        let b =
-          if somevar land (1l lsl 5) <> 0l
-          then Some (TL_vectorTLT_A.decode dec)
-          else None
-        in
+        let b = if somevar land (1l lsl 5) <> 0l then Some (TL_vectorTLT_A.decode dec) else None in
         let a2 = TLT_A.decode dec in
         { a; b; a2 }
     end

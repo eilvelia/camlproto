@@ -317,17 +317,13 @@ let build_comb store : _ -> comb Fmt.t =
   let pp_arg_decode ppf (_, a') =
     match a'.arg_cond with
     | Some (_, Cond (vref, bit)) ->
-      Fmt.pf ppf "\
-        @[<v 2>\
-        let %a =@,\
-          if %a land (1l lsl %d) <> 0l@,\
-          then Some (%a.decode dec)@,\
-          else None\
-        @]@,\
-        in"
+      Fmt.pf ppf
+        "@[<h>let %a = if %a land (1l lsl %d) <> 0l \
+        then Some (%a.decode dec) \
+        else None in@]"
         pp_arg_name a' build_var_ref vref bit pp_module_name a'
     | None ->
-      Fmt.pf ppf "let %a = %a.decode dec in" pp_arg_name a' pp_module_name a'
+      Fmt.pf ppf "@[<h>let %a = %a.decode dec in@]" pp_arg_name a' pp_module_name a'
   in
   let pp_decode_end ppf args =
     match args with
