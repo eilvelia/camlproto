@@ -132,7 +132,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
         let (tmp_key, tmp_iv) = generate_tmp_aes server_nonce new_nonce in
 
         let decrypted_answer_with_hash =
-          Crypto.IGE.decrypt params.encrypted_answer tmp_key tmp_iv in
+          Crypto.IGE.decrypt ~key:tmp_key ~iv:tmp_iv params.encrypted_answer in
         let given_hash = Cstruct.sub decrypted_answer_with_hash 0 20 in
         let decrypted_answer = Cstruct.shift decrypted_answer_with_hash 20 in
         let (TL_server_DH_inner_data server_dh_inner) =
@@ -212,7 +212,7 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
         Cstruct.blit (Crypto.SHA1.digest client_dh_inner_data) 0 data_with_hash 0 20;
         Cstruct.blit client_dh_inner_data 0 data_with_hash 20 len;
         random_padding data_with_hash (20 + len);
-        let encrypted_data = Crypto.IGE.encrypt data_with_hash tmp_key tmp_iv in
+        let encrypted_data = Crypto.IGE.encrypt ~key:tmp_key ~iv:tmp_iv data_with_hash in
 
         (* Log.debug (fun m -> m
           "client_dh_inner_data:@.%a" hexdump_pp client_dh_inner_data); *)

@@ -279,9 +279,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
       let msg_key = Cstruct.sub msg_key_large 8 16 in
       (* Log.debug (fun m -> m "msg_key:@.%a" hexdump_pp msg_key); *)
 
-      let (aes_key, aes_iv) = calc_key_iv auth_key msg_key true in
+      let (key, iv) = calc_key_iv auth_key msg_key true in
 
-      let ige_encrypted = Crypto.IGE.encrypt data_with_padding aes_key aes_iv in
+      let ige_encrypted = Crypto.IGE.encrypt ~key ~iv data_with_padding in
 
       join [key_id; msg_key; ige_encrypted]
 
@@ -300,9 +300,9 @@ module MakeMTProtoV2Client (Platform: PlatformTypes.S) (T: TransportTypes.S) = s
 
       let msg_key = Cstruct.sub enc 8 16 in
 
-      let (aes_key, aes_iv) = calc_key_iv auth_key msg_key false in
+      let (key, iv) = calc_key_iv auth_key msg_key false in
 
-      let plain = Crypto.IGE.decrypt (Cstruct.shift enc 24) aes_key aes_iv in
+      let plain = Crypto.IGE.decrypt ~key ~iv (Cstruct.shift enc 24) in
 
       let our_msg_key = sha256 @@ (Cstruct.sub auth_key 96 32) ++ plain in
       let our_msg_key = Cstruct.sub our_msg_key 8 16 in
