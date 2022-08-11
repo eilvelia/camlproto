@@ -1,0 +1,12 @@
+(executable
+  (name bench)
+  (libraries benchmark camlproto.math camlproto.platform_caml)
+  (optional))
+
+(rule
+  (alias bench)
+  (deps bench.exe)
+  (action (run %{deps})))
+
+; Usage: dune build -f @bench
+; or     dune exec bench/bench.exe

@@ -1,4 +1,4 @@
-(dirs src test examples)
+(dirs src test examples bench)
 (data_only_dirs schema)
 
 (env

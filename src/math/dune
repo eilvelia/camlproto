@@ -2,7 +2,8 @@
   (name Math)
   (public_name camlproto.math)
   (libraries
-    base camlproto.platform_caml camlproto.tlschema camlproto.platform_types)
+    base camlproto.platform_caml camlproto.tlschema camlproto.platform_types
+    logs)
   (preprocess (pps ppx_expect))
   (inline_tests)
   (instrumentation (backend bisect_ppx))

@@ -28,6 +28,9 @@ let good_p = Cstruct.of_hex "
 
 let good_g = 3
 
+(* Note: The authenticator allocates many small bigarrays, but it's fine
+         since authentication is not a hot path *)
+
 module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
   module Math = Math.Make(Platform)
   module Crypto = Math.Crypto
@@ -78,23 +81,15 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
 
     Log.debug (fun m -> m "server_nonce:@.%a" hexdump_pp res_pq.server_nonce);
 
-    let pq = Cstruct.BE.get_uint64 res_pq.pq 0 in
-    let (p, q) = Math.Factorization.pq_prime pq in
-
-    Log.debug (fun m -> m "pq %Ld %LX" pq pq);
-
-    let p_bytes = Cstruct.create_unsafe 4 in
-    Cstruct.BE.set_uint32 p_bytes 0 (Int32.of_int64_exn p);
-    let q_bytes = Cstruct.create_unsafe 4 in
-    Cstruct.BE.set_uint32 q_bytes 0 (Int32.of_int64_exn q);
+    let (p, q) = Math.pq_factorize res_pq.pq in
 
     (* int256 (32 bytes) *)
     let new_nonce = Crypto.SecureRand.rand_cs 32 in
 
     let p_q_inner_data = TLR.Encoder.encode TLM.TL_p_q_inner_data.encode_boxed {
       pq = res_pq.pq;
-      p = p_bytes;
-      q = q_bytes;
+      p;
+      q;
       nonce;
       server_nonce;
       new_nonce;
@@ -117,8 +112,8 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
     let%lwt dh_params = invoke_unencrypted_obj t (module TLM.TL_req_DH_params) {
       nonce;
       server_nonce;
-      p = p_bytes;
-      q = q_bytes;
+      p;
+      q;
       public_key_fingerprint = finger;
       encrypted_data;
     } in
