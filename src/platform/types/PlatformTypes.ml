@@ -57,7 +57,7 @@ module type Bigint = sig
   val (>): t -> t -> bool
   val of_cstruct_be: Cstruct.t -> t
   (* val into_cstruct_be: t -> Cstruct.t -> unit *)
-  val to_cstruct_be: t -> Cstruct.t
+  val to_cstruct_be: ?size:int -> t -> Cstruct.t
 end
 
 module type Gzip = sig

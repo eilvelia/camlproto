@@ -180,10 +180,9 @@ module Make (Platform: PlatformTypes.S) (Sender: MTProtoPlainObjSender) = struct
         let g_b_cs = Bigint.to_cstruct_be g_b in
 
         let g_a_b = Bigint.powm g_a b dh_prime in
-        let auth_key = Bigint.to_cstruct_be g_a_b in
+        let auth_key = Bigint.to_cstruct_be ~size:256 g_a_b in
 
-        Log.info (fun m -> m
-          "Auth key created. Auth_key len: %d. Time_offset: %d."
+        Log.info (fun m -> m "Created auth_key (size: %d), time_offset: %d"
           (Cstruct.length auth_key) time_offset);
 
         (* TODO: Checks from https://core.telegram.org/mtproto/security_guidelines *)

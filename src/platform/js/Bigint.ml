@@ -21,8 +21,8 @@ let equals: bigint -> bigint -> bool = Js.Unsafe.pure_js_expr "equals"
 external arrayBufferToHex
   : Typed_array.arrayBuffer Js.t -> Js.js_string Js.t = "arrayBufferToHex" *)
 
-let bigInt2ArrayBuffer
-  : bigint -> Typed_array.arrayBuffer Js.t = Js.Unsafe.pure_js_expr "bigInt2ArrayBuffer"
+let bigInt2ArrayBuffer : bigint -> int -> Typed_array.arrayBuffer Js.t
+  = Js.Unsafe.pure_js_expr "bigInt2ArrayBuffer"
 
 (* let arrayBuffer2bigInt
   : Typed_array.arrayBuffer Js.t -> bigint = Js.Unsafe.pure_js_expr "arrayBuffer2bigInt" *)
@@ -50,7 +50,7 @@ module Bigint = struct
   let (>) = greater
   let (<) t1 t2 = Bool.(greater t1 t2 = false && equals t1 t2 = false)
   let of_cstruct_be cs = camlBigarray2bigInt (Cstruct.to_bigarray cs)
-  let to_cstruct_be t = bigInt2ArrayBuffer t
+  let to_cstruct_be ?(size = 0) t = bigInt2ArrayBuffer t size
     |> Typed_array.Bigstring.of_arrayBuffer
     |> Cstruct.of_bigarray
 end

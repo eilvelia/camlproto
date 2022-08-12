@@ -99,14 +99,11 @@ let into_cstruct_be n cs =
   in
   write n (length cs - 1)
 
-(* let to_cstruct_be ?size n =
-  let cs = Cstruct.create_unsafe @@ match size with
+let to_cstruct_be ?size n =
+  (* TODO: is create_unsafe safe here? *)
+  let cs = Cstruct.create @@ match size with
     | Some s -> imax 0 s
     | None   -> bits n // 8 in
-  (into_cstruct_be n cs ; cs) *)
-
-let to_cstruct_be n =
-  let cs = Cstruct.create_unsafe (bits n // 8) in
   (into_cstruct_be n cs ; cs)
 
 include Z_core

@@ -112,11 +112,13 @@ function arrayBufferToHex (buf) {
   return arr.join('')
 }
 
-function bigInt2ArrayBuffer (bigint) {
+function bigInt2ArrayBuffer (bigint, size) {
   // try {
   // console.log('!!! bigInt2ArrayBuffer - start')
   var str = bigInt2str(bigint, 16)
   var out = arrayBufferFromHex(str)
+  if (size > 0 && out.length !== size) // TODO:
+    throw new Error('bigInt2ArrayBuffer length mismatch: ' + out.length)
   // console.log('!!! bigInt2ArrayBuffer - end')
   return out
   // } catch (e) { console.error(e); throw e }
